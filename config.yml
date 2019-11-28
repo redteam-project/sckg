@@ -58,17 +58,17 @@ regimes:
     etl:
       module: sckg.etl.dod_cci
       class: DoDCCI
-  - nane: cnssi_1253_ci
+  - name: cnssi_1253_ci
     description: CNSSI 1253 Classified Information Overlay
     document:
       source: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
       parsable: data/regimes/cnssi_1253_classified_information.tsv
-  - nane: cnssi_1253_pii
+  - name: cnssi_1253_pii
     description: CNSSI 1253 Privacy Overlay
     document:
       source: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
       parsable: data/regimes/cnssi_1253_privacy.tsv
-  - nane: cis
+  - name: cis
     description: Center for Internet Security Benchmark
     document:
       source: https://learn.cisecurity.org/benchmarks
