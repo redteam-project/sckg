@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = configure
+# complexity = low
+# disruption = low
+
+
+
+- name: Find /etc/cni/net.d/ file(s) matching ^.*$
+  find:
+    paths: "/etc/cni/net.d/"
+    patterns: "^.*$"
+    use_regex: yes
+  register: files_found
+
+- name: Ensure group owner on /etc/cni/net.d/ file(s) matching ^.*$
+  file:
+    path: "{{ item.path }}"
+    owner: "0"
+  with_items:
+    - "{{ files_found.files }}"
+

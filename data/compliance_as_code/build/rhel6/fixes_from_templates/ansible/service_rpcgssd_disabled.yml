@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop rpcgssd
+  command: /sbin/service 'rpcgssd' stop
+- name: Switch off rpcgssd
+  command: /sbin/chkconfig --level 0123456 'rpcgssd' off

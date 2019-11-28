@@ -1,0 +1,23 @@
+description: "All events should be captured and not restricted as this helps in\n\
+  reconstucting the chain-of-events.\n\nTo prevent log creation limiting, edit the\
+  \ kubelet configuration\nfile <tt>/etc/origin/node/node-config.yaml</tt>\non the\
+  \ kubelet node(s) and set the below parameter:\n<pre>kubeletArguments:\n  event-qps:\n\
+  \  - '0'</pre>"
+identifiers: {cce: 80595-2}
+ocil: 'Run the following command on the kubelet node(s):
+
+  <pre>$ sudo grep -A1 event-qps /etc/origin/node/node-config.yaml</pre>
+
+  The output should return <tt>0</tt>.'
+ocil_clause: events are limited
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'All events should be captured and not restricted as this helps in
+
+  reconstucting the chain-of-events.'
+references: {cis: 2.1.11}
+severity: medium
+template: null
+title: kubelet - Do Not Limit Event Creation
+warnings: []

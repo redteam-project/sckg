@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable SMART Disk Monitoring Service (smartd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-26853-2
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_smartd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop smartd
+      command: /sbin/service 'smartd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off smartd
+      command: /sbin/chkconfig --level 0123456 'smartd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

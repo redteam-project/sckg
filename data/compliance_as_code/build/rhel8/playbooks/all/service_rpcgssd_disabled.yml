@@ -1,0 +1,44 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Secure RPC Client Service (rpcgssd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_rpcgssd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Unit Service Exists - rpcgssd.service
+      command: systemctl list-unit-files rpcgssd.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable service rpcgssd
+      systemd:
+        name: rpcgssd.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"rpcgssd.service" in service_file_exists.stdout_lines[1]'
+
+    - name: Unit Socket Exists - rpcgssd.socket
+      command: systemctl list-unit-files rpcgssd.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable socket rpcgssd
+      systemd:
+        name: rpcgssd.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"rpcgssd.socket" in socket_file_exists.stdout_lines[1]'

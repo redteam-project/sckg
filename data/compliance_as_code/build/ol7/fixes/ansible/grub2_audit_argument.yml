@@ -1,0 +1,112 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = medium
+# reboot = true
+# disruption = low
+# strategy = restrict
+- name: check audit argument exists
+  command: grep 'GRUB_CMDLINE_LINUX.*audit=' /etc/default/grub
+  failed_when: false
+  register: argcheck
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_audit_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+    - PCI-DSS-Req-10.3
+    - NIST-800-171-3.3.1
+    - NIST-800-53-AC-17(1)
+    - NIST-800-53-AU-14(1)
+    - NIST-800-53-AU-1(b)
+    - NIST-800-53-AU-2(a)
+    - NIST-800-53-AU-2(c)
+    - NIST-800-53-AU-2(d)
+    - NIST-800-53-AU-10
+    - NIST-800-53-AU-12
+    - NIST-800-53-IR-5
+    - NIST-800-53-AU-12(1)
+    - CJIS-5.4.1.1
+
+- name: replace existing audit argument
+  replace:
+    path: /etc/default/grub
+    regexp: audit=.
+    replace: audit=1
+  when:
+    - argcheck.rc == 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_audit_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+    - PCI-DSS-Req-10.3
+    - NIST-800-171-3.3.1
+    - NIST-800-53-AC-17(1)
+    - NIST-800-53-AU-14(1)
+    - NIST-800-53-AU-1(b)
+    - NIST-800-53-AU-2(a)
+    - NIST-800-53-AU-2(c)
+    - NIST-800-53-AU-2(d)
+    - NIST-800-53-AU-10
+    - NIST-800-53-AU-12
+    - NIST-800-53-IR-5
+    - NIST-800-53-AU-12(1)
+    - CJIS-5.4.1.1
+
+- name: add audit argument
+  replace:
+    path: /etc/default/grub
+    regexp: (GRUB_CMDLINE_LINUX=.*)"
+    replace: \1 audit=1"
+  when:
+    - argcheck.rc != 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_audit_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+    - PCI-DSS-Req-10.3
+    - NIST-800-171-3.3.1
+    - NIST-800-53-AC-17(1)
+    - NIST-800-53-AU-14(1)
+    - NIST-800-53-AU-1(b)
+    - NIST-800-53-AU-2(a)
+    - NIST-800-53-AU-2(c)
+    - NIST-800-53-AU-2(d)
+    - NIST-800-53-AU-10
+    - NIST-800-53-AU-12
+    - NIST-800-53-IR-5
+    - NIST-800-53-AU-12(1)
+    - CJIS-5.4.1.1
+
+- name: update bootloader menu
+  command: /sbin/grubby --update-kernel=ALL --args="audit=1"
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_audit_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+    - PCI-DSS-Req-10.3
+    - NIST-800-171-3.3.1
+    - NIST-800-53-AC-17(1)
+    - NIST-800-53-AU-14(1)
+    - NIST-800-53-AU-1(b)
+    - NIST-800-53-AU-2(a)
+    - NIST-800-53-AU-2(c)
+    - NIST-800-53-AU-2(d)
+    - NIST-800-53-AU-10
+    - NIST-800-53-AU-12
+    - NIST-800-53-IR-5
+    - NIST-800-53-AU-12(1)
+    - CJIS-5.4.1.1

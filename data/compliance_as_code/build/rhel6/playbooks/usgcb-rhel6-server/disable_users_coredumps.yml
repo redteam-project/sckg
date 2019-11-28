@@ -1,0 +1,25 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Disable Core Dumps for All Users
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27033-0
+    - DISA-STIG-RHEL-06-000308
+    - disable_users_coredumps
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - restrict_strategy
+    - unknown_severity
+  tasks:
+
+    - name: disable core dumps with limits
+      lineinfile:
+        dest: /etc/security/limits.conf
+        regexp: ^[^#].*core
+        line: '*        hard       core      0'
+        create: true

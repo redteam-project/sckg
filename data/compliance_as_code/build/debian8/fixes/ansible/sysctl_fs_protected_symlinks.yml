@@ -1,0 +1,19 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = true
+# disruption = medium
+# strategy = disable
+- name: Ensure sysctl fs.protected_symlinks is set to 1
+  sysctl:
+    name: fs.protected_symlinks
+    value: '1'
+    state: present
+    reload: true
+  tags:
+    - sysctl_fs_protected_symlinks
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - reboot_required
+    - NIST-800-53-SI-11

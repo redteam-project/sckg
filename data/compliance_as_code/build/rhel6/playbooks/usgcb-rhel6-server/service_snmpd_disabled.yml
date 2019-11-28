@@ -1,0 +1,27 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable snmpd Service
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-26906-8
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_snmpd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop snmpd
+      command: /sbin/service 'snmpd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off snmpd
+      command: /sbin/chkconfig --level 0123456 'snmpd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

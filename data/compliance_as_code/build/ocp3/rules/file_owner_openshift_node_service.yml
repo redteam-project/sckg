@@ -1,0 +1,26 @@
+description: ' To properly set the owner of <code>/etc/systemd/system/atomic-openshift-node.service</code>,
+  run the command: <pre>$ sudo chown root /etc/systemd/system/atomic-openshift-node.service
+  </pre>'
+identifiers: {cce: 80632-3}
+ocil: 'To check the ownership of <code>/etc/systemd/system/atomic-openshift-node.service</code>,
+  run the command: <pre>$ ls -lL /etc/systemd/system/atomic-openshift-node.service</pre>
+  If properly configured, the output should indicate the following owner: <code>root</code>'
+ocil_clause: /etc/systemd/system/atomic-openshift-node.service has owner root
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'The <tt>/etc/systemd/system/atomic-openshift-node.service</tt> file contains
+  information about the configuration of the
+
+  OpenShift node service that is configured on the system. Protection of this file
+  is
+
+  critical for OpenShift security.'
+references: {cis: 2.2.4}
+severity: medium
+template:
+  backends: {}
+  name: file_owner
+  vars: {filepath: /etc/systemd/system/atomic-openshift-node.service, fileuid: '0'}
+title: Verify User Who Owns The OpenShift Node Service File
+warnings: []

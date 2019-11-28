@@ -1,0 +1,119 @@
+<def-group>
+
+  
+
+  
+
+  <definition class="compliance" id="service_squid_disabled"
+  version="1">
+    <metadata>
+      <title>Service squid Disabled</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The squid service should be disabled if possible.</description>
+    </metadata>
+   <criteria comment="package squid removed or service squid is not configured to start" operator="OR">
+    <criterion comment="squid removed" test_ref="test_service_squid_package_squid_removed" />
+    <criteria operator="AND" comment="service squid is not configured to start">
+      <criterion comment="squid runlevel 0" test_ref="test_runlevel0_squid_off" />
+      <criterion comment="squid runlevel 1" test_ref="test_runlevel1_squid_off" />
+      <criterion comment="squid runlevel 2" test_ref="test_runlevel2_squid_off" />
+      <criterion comment="squid runlevel 3" test_ref="test_runlevel3_squid_off" />
+      <criterion comment="squid runlevel 4" test_ref="test_runlevel4_squid_off" />
+      <criterion comment="squid runlevel 5" test_ref="test_runlevel5_squid_off" />
+      <criterion comment="squid runlevel 6" test_ref="test_runlevel6_squid_off" />
+    </criteria>
+    </criteria>
+  </definition>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel0_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel0_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel1_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel1_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel2_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel2_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel3_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel3_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel4_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel4_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel5_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel5_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel6_squid_off"
+  version="2">
+    <unix:object object_ref="obj_runlevel6_squid_off" />
+    <unix:state state_ref="state_service_squid_off" />
+  </unix:runlevel_test>
+  <unix:runlevel_object id="obj_runlevel0_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">0</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel1_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">1</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel2_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">2</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel3_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">3</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel4_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">4</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel5_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">5</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel6_squid_off" version="1">
+    <unix:service_name>squid</unix:service_name>
+    <unix:runlevel operation="equals">6</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_state comment="not configured to start" id="state_service_squid_off" version="1">
+    <unix:start datatype="boolean">false</unix:start>
+    <unix:kill datatype="boolean">true</unix:kill>
+  </unix:runlevel_state>
+
+  
+
+
+
+
+  <linux:rpminfo_test check="all" check_existence="none_exist"
+  id="test_service_squid_package_squid_removed" version="1"
+  comment="package squid is removed">
+    <linux:object object_ref="obj_test_service_squid_package_squid_removed" />
+  </linux:rpminfo_test>
+  <linux:rpminfo_object id="obj_test_service_squid_package_squid_removed" version="1">
+    <linux:name>squid</linux:name>
+  </linux:rpminfo_object>
+
+
+</def-group>

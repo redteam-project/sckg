@@ -1,0 +1,55 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Squid
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82190-0
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_squid_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Unit Service Exists - squid.service
+      command: systemctl list-unit-files squid.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable service squid
+      systemd:
+        name: squid.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"squid.service" in service_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"
+
+    - name: Unit Socket Exists - squid.socket
+      command: systemctl list-unit-files squid.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable socket squid
+      systemd:
+        name: squid.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"squid.socket" in socket_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"

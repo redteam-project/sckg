@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop rpcbind
+  command: /sbin/service 'rpcbind' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rpcbind_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27430-8
+
+- name: Switch off rpcbind
+  command: /sbin/chkconfig --level 0123456 'rpcbind' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rpcbind_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27430-8

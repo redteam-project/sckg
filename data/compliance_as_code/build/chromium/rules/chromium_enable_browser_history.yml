@@ -1,0 +1,24 @@
+description: 'Users can enable or disable the saving of browser history in Chromium.
+  Browser
+
+  history should be retained by setting <tt>SavingBrowserHistoryDisabled</tt> to
+
+  <tt>false</tt> in the Chromium policy file.'
+identifiers: {}
+ocil: 'To verify that saving the browser history is enabled, run the following command:
+
+  <pre>$ grep SavingBrowserHistoryDisabled /etc/chromium/policies/managed/*.json</pre>
+
+  The output should contain:
+
+  <pre>"SavingBrowserHistoryDisabled": false,</pre>'
+ocil_clause: it is not enabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: Best practice requires that browser history is retained.
+references: {stigid: CHROMIUM-DTBC0039}
+severity: unknown
+template: null
+title: Enable Saving the Browser History
+warnings: []

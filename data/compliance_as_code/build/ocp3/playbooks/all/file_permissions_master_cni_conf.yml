@@ -1,0 +1,31 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Permissions on the OpenShift Container Network Interface Files
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80634-9
+    - configure_strategy
+    - file_permissions_master_cni_conf
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Find /etc/cni/net.d/ file(s)
+      find:
+        paths: /etc/cni/net.d/
+        patterns: ^.*$
+        use_regex: true
+      register: files_found
+
+    - name: Set permissions for /etc/cni/net.d/ file(s)
+      file:
+        path: '{{ item.path }}'
+        mode: '0644'
+      with_items:
+        - '{{ files_found.files }}'

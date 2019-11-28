@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Hardware Abstraction Layer Service (haldaemon)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27086-8
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_haldaemon_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop haldaemon
+      command: /sbin/service 'haldaemon' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off haldaemon
+      command: /sbin/chkconfig --level 0123456 'haldaemon' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

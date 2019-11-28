@@ -1,0 +1,27 @@
+description: "Timouts for streaming connections should not be disabled as they help\
+  \ to prevent\ndenial-of-service attacks.\nTo configure streaming connection timeouts,\
+  \ edit the kubelet configuration\nfile <tt>/etc/origin/node/node-config.yaml</tt>\n\
+  on the kubelet node(s) and set the below parameter:\n<pre>kubeletArguments:\n  streaming-connection-idle-timeout:\n\
+  \  - '<sub idref=\"var_streaming_connection_timeouts\"/>'</pre>"
+identifiers: {cce: 80607-5}
+ocil: 'Run the following command on the kubelet node(s):
+
+  <pre>$ sudo grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml</pre>
+
+  The output should return <tt><sub idref="var_streaming_connection_timeouts"/></tt>.'
+ocil_clause: the streaming connection timeouts are not disabled
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'Ensuring connections have timeouts helps to protect against denial-of-service
+  attacks as
+
+  well as disconnect inactive connections. In addition, setting connections timeouts
+  helps
+
+  to prevent from running out of ephemeral ports. '
+references: {cis: 2.1.6}
+severity: medium
+template: null
+title: kubelet - Do Not Disable Streaming Timeouts
+warnings: []

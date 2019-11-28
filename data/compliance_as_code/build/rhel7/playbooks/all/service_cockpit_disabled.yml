@@ -1,0 +1,44 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Cockpit Management Server
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - service_cockpit_disabled
+  tasks:
+
+    - name: Unit Service Exists - cockpit.service
+      command: systemctl list-unit-files cockpit.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable service cockpit
+      systemd:
+        name: cockpit.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"cockpit.service" in service_file_exists.stdout_lines[1]'
+
+    - name: Unit Socket Exists - cockpit.socket
+      command: systemctl list-unit-files cockpit.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable socket cockpit
+      systemd:
+        name: cockpit.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"cockpit.socket" in socket_file_exists.stdout_lines[1]'

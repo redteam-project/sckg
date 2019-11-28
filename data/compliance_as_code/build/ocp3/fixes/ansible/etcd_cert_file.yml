@@ -1,0 +1,19 @@
+# platform = multi_platform_ocp
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_CERT_FILE
+    line: ETCD_CERT_FILE=/etc/etcd/server.crt
+    create: true
+  tags:
+    - etcd_cert_file
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80577-0

@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Cyrus SASL Authentication Daemon (saslauthd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27263-3
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_saslauthd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop saslauthd
+      command: /sbin/service 'saslauthd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off saslauthd
+      command: /sbin/chkconfig --level 0123456 'saslauthd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

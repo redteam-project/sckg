@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<ns0:oval_definitions xmlns:ns0="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:ns4="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <ns0:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:47:08</ns2:timestamp>
+  </ns0:generator>
+  <ns0:definitions>
+    <ns0:definition class="inventory" id="oval:ssg-installed_app_is_eap6:def:1" version="1">
+      <ns0:metadata>
+        <ns0:title>JBoss Enterprise Application Platform 6</ns0:title>
+        <ns0:description>EAP Version should be version 6</ns0:description>
+        <ns0:affected family="undefined">
+          <ns0:product>JBoss EAP 6</ns0:product>
+        </ns0:affected>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.0.0" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.0.1" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.1.0" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.1.1" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.0" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.1" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.2" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.3" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.4" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.0" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.1" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.2" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.3" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.0" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.1" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.2" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.3" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.4" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.5" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.6" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.7" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.8" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.9" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.10" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.11" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.12" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.13" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.14" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.15" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.16" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.17" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.18" source="CPE"/>
+        <ns0:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.19" source="CPE"/>
+      </ns0:metadata>
+      <ns0:criteria operator="OR">
+        <ns0:criterion test_ref="oval:ssg-test_installed_eap_version_6:tst:1"/>
+        <ns0:criterion test_ref="oval:ssg-test_installed_eap_version_6_container:tst:1"/>
+        <ns0:criterion test_ref="oval:ssg-test_package_eap6_installed:tst:1"/>
+      </ns0:criteria>
+    </ns0:definition>
+  </ns0:definitions>
+  <ns0:tests>
+    <ns3:rpminfo_test check="all" check_existence="all_exist" comment="package eap6 is installed" id="oval:ssg-test_package_eap6_installed:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-obj_package_eap6_installed:obj:1"/>
+    </ns3:rpminfo_test>
+    <ns4:textfilecontent54_test check="all" comment="Check EAP Version" id="oval:ssg-test_installed_eap_version_6:tst:1" version="1">
+      <ns4:object object_ref="oval:ssg-obj_installed_eap_version_6:obj:1"/>
+      <ns4:state state_ref="oval:ssg-state_installed_eap_version_6:ste:1"/>
+    </ns4:textfilecontent54_test>
+    <ns4:textfilecontent54_test check="all" comment="Check EAP Version" id="oval:ssg-test_installed_eap_version_6_container:tst:1" version="1">
+      <ns4:object object_ref="oval:ssg-obj_installed_eap_version_6_container:obj:1"/>
+      <ns4:state state_ref="oval:ssg-state_installed_eap_version_6:ste:1"/>
+    </ns4:textfilecontent54_test>
+  </ns0:tests>
+  <ns0:objects>
+    <ns3:rpminfo_object id="oval:ssg-obj_package_eap6_installed:obj:1" version="1">
+      <ns3:name>eap6</ns3:name>
+    </ns3:rpminfo_object>
+    <ns4:textfilecontent54_object id="oval:ssg-obj_installed_eap_version_6:obj:1" version="1">
+      <ns4:path var_ref="oval:ssg-local_var_installed_eap_version_6:var:1"/>
+      <ns4:filename>version.txt</ns4:filename>
+      <ns4:pattern operation="pattern match">Red[\s]+Hat[\s]+JBoss[\s]+Enterprise[\s]+Application[\s]+Platform[\s]+\-[\s]+Version[\s]+(.*)GA</ns4:pattern>
+      <ns4:instance datatype="int">1</ns4:instance>
+    </ns4:textfilecontent54_object>
+    <ns4:textfilecontent54_object id="oval:ssg-obj_installed_eap_version_6_container:obj:1" version="1">
+      <ns4:filepath>/opt/eap/version.txt</ns4:filepath>
+      <ns4:pattern operation="pattern match">Red[\s]+Hat[\s]+JBoss[\s]+Enterprise[\s]+Application[\s]+Platform[\s]+\-[\s]+Version[\s]+(.*)GA</ns4:pattern>
+      <ns4:instance datatype="int">1</ns4:instance>
+    </ns4:textfilecontent54_object>
+    <ns4:environmentvariable58_object id="oval:ssg-obj_env_installed_eap6_home:obj:1" version="1">
+      <ns4:pid datatype="int" xsi:nil="true"/>
+      <ns4:name>JBOSS_HOME</ns4:name>
+    </ns4:environmentvariable58_object>
+  </ns0:objects>
+  <ns0:states>
+    <ns4:textfilecontent54_state id="oval:ssg-state_installed_eap_version_6:ste:1" version="1">
+      <ns4:subexpression operation="pattern match">6\.[0-4]+\.[0-9]+</ns4:subexpression>
+    </ns4:textfilecontent54_state>
+  </ns0:states>
+  <ns0:variables>
+    <ns0:local_variable comment="version location" datatype="string" id="oval:ssg-local_var_installed_eap_version_6:var:1" version="1">
+      <ns0:concat>
+        <ns0:object_component item_field="value" object_ref="oval:ssg-obj_env_installed_eap6_home:obj:1"/>
+        <ns0:literal_component datatype="string">/</ns0:literal_component>
+      </ns0:concat>
+    </ns0:local_variable>
+  </ns0:variables>
+</ns0:oval_definitions>

@@ -1,0 +1,60 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = medium
+# reboot = true
+# disruption = low
+# strategy = restrict
+- name: check vsyscall argument exists
+  command: grep 'GRUB_CMDLINE_LINUX.*vsyscall=' /etc/default/grub
+  failed_when: false
+  register: argcheck
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_vsyscall_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+
+- name: replace existing vsyscall argument
+  replace:
+    path: /etc/default/grub
+    regexp: vsyscall=.
+    replace: vsyscall=none
+  when:
+    - argcheck.rc == 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_vsyscall_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+
+- name: add vsyscall argument
+  replace:
+    path: /etc/default/grub
+    regexp: (GRUB_CMDLINE_LINUX=.*)"
+    replace: \1 vsyscall=none"
+  when:
+    - argcheck.rc != 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_vsyscall_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required
+
+- name: update bootloader menu
+  command: /sbin/grubby --update-kernel=ALL --args="vsyscall=none"
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_vsyscall_argument
+    - medium_severity
+    - restrict_strategy
+    - medium_complexity
+    - low_disruption
+    - reboot_required

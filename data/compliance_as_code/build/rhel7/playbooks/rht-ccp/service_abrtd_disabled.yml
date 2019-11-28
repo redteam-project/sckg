@@ -1,0 +1,57 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Automatic Bug Reporting Tool (abrtd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82027-4
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - service_abrtd_disabled
+  tasks:
+
+    - name: Unit Service Exists - abrtd.service
+      command: systemctl list-unit-files abrtd.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable service abrtd
+      systemd:
+        name: abrtd.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"abrtd.service" in service_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"
+
+    - name: Unit Socket Exists - abrtd.socket
+      command: systemctl list-unit-files abrtd.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable socket abrtd
+      systemd:
+        name: abrtd.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"abrtd.socket" in socket_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"

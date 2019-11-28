@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<ns0:ocil xmlns:ns0="http://scap.nist.gov/schema/ocil/2.0">
+  <ns0:generator>
+    <ns0:product_name>xccdf-create-ocil.xslt from SCAP Security Guide</ns0:product_name>
+    <ns0:product_version>ssg: 0.1.47</ns0:product_version>
+    <ns0:schema_version>2.0</ns0:schema_version>
+    <ns0:timestamp>2019-11-28T04:47:22Z</ns0:timestamp>
+  </ns0:generator>
+  <ns0:questionnaires>
+    <ns0:questionnaire id="ocil:ssg-file_permissions_node_config_ocil:questionnaire:1">
+      <ns0:title>Verify Permissions on the OpenShift Node Configuration File</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-file_permissions_node_config_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+  </ns0:questionnaires>
+  <ns0:test_actions>
+    <ns0:boolean_question_test_action id="ocil:ssg-file_permissions_node_config_action:testaction:1" question_ref="ocil:ssg-file_permissions_node_config_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+  </ns0:test_actions>
+  <ns0:questions>
+    <ns0:boolean_question id="ocil:ssg-file_permissions_node_config_question:question:1">
+      <ns0:question_text>To check the permissions of /etc/origin/node/node-config.yaml, run the command:
+$ ls -l /etc/origin/node/node-config.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/node-config.yaml has unix mode -rw-------?
+      </ns0:question_text>
+    </ns0:boolean_question>
+  </ns0:questions>
+</ns0:ocil>

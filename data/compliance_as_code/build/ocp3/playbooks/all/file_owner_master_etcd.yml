@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify User Who Owns The OpenShift etcd Specification File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80625-7
+    - configure_strategy
+    - file_owner_master_etcd
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/pods/etcd.yaml
+      stat:
+        path: /etc/origin/node/pods/etcd.yaml
+      register: file_exists
+
+    - name: Ensure owner 0 on /etc/origin/node/pods/etcd.yaml
+      file:
+        path: /etc/origin/node/pods/etcd.yaml
+        owner: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

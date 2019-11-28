@@ -1,0 +1,3231 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="bash" system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix rule="banner_etc_motd">
+login_banner_text="<sub idref="login_banner_text" />"
+
+# There was a regular-expression matching various banners, needs to be expanded
+expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
+formatted=$(echo "$expanded" | fold -sw 80)
+
+cat &lt;&lt;EOF &gt;/etc/motd
+$formatted
+EOF
+
+printf "\n" &gt;&gt; /etc/motd
+</fix><fix complexity="low" disruption="low" reboot="false" rule="disable_host_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*HostbasedAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "HostbasedAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "HostbasedAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ntp_installed" strategy="enable">
+if ! rpm -q --quiet "ntp" ; then
+    yum install -y "ntp"
+fi
+</fix><fix complexity="high" disruption="medium" reboot="false" rule="rpm_verify_ownership" strategy="restrict">
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
+
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS &lt; &lt;(rpm -Va --nofiledigest | awk '{ if (substr($0,6,1)=="U" || substr($0,7,1)=="G") print $NF }')
+
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
+do
+        RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
+done
+
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+        rpm --setugids "${RPM_PACKAGE}"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_shadow" strategy="configure">
+
+chgrp 0 /etc/shadow
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_execstack" strategy="enable">
+var_selinuxuser_execstack="<sub idref="var_selinuxuser_execstack" />"
+
+setsebool -P selinuxuser_execstack $var_selinuxuser_execstack
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_gpg_web_anon_write" strategy="enable">
+var_gpg_web_anon_write="<sub idref="var_gpg_web_anon_write" />"
+
+setsebool -P gpg_web_anon_write $var_gpg_web_anon_write
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_ocredit" strategy="restrict">
+var_password_pam_ocredit="<sub idref="var_password_pam_ocredit" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^ocredit' $var_password_pam_ocredit '@CCENUM@' '%s = %s'
+</fix><fix rule="selinux_policytype">
+var_selinux_policy_name="<sub idref="var_selinux_policy_name" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_name '@CCENUM@' '%s=%s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_user_exec_content" strategy="enable">
+var_user_exec_content="<sub idref="var_user_exec_content" />"
+
+setsebool -P user_exec_content $var_user_exec_content
+</fix><fix rule="ensure_gpgcheck_local_packages">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_guest_exec_content" strategy="enable">
+var_guest_exec_content="<sub idref="var_guest_exec_content" />"
+
+setsebool -P guest_exec_content $var_guest_exec_content
+</fix><fix rule="audit_rules_file_deletion_events_rmdir">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S rmdir.*"
+	GROUP="delete"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S rmdir -F auid&gt;=1000 -F auid!=unset -F key=delete"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_rp_filter" strategy="disable">
+sysctl_net_ipv4_conf_default_rp_filter_value="<sub idref="sysctl_net_ipv4_conf_default_rp_filter_value" />"
+
+#
+# Set runtime for net.ipv4.conf.default.rp_filter
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.rp_filter="$sysctl_net_ipv4_conf_default_rp_filter_value"
+
+#
+# If net.ipv4.conf.default.rp_filter present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.rp_filter = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.rp_filter' "$sysctl_net_ipv4_conf_default_rp_filter_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_strictmodes" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*StrictModes\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "StrictModes yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "StrictModes yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_passwd" strategy="configure">
+
+chgrp 0 /etc/passwd
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_gssapi_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*GSSAPIAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "GSSAPIAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "GSSAPIAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="audit_rules_dac_modification_removexattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S removexattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S removexattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ntpdate_removed" strategy="disable">
+# CAUTION: This remediation script will remove ntpdate
+#	   from the system, and may remove any packages
+#	   that depend on ntpdate. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "ntpdate" ; then
+    yum remove -y "ntpdate"
+fi
+</fix><fix rule="accounts_passwords_pam_faillock_interval">
+<sub idref="function_include_set_faillock_option" />
+include_set_faillock_option
+
+var_accounts_passwords_pam_faillock_fail_interval="<sub idref="var_accounts_passwords_pam_faillock_fail_interval" />"
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+	set_faillock_option "$pam_file" "fail_interval" "$var_accounts_passwords_pam_faillock_fail_interval"
+done
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_jffs2_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install jffs2" /etc/modprobe.d/jffs2.conf ; then
+	sed -i 's/^install jffs2.*/install jffs2 /bin/true/g' /etc/modprobe.d/jffs2.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/jffs2.conf
+	echo "install jffs2 /bin/true" &gt;&gt; /etc/modprobe.d/jffs2.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_cron_hourly" strategy="configure">
+chmod 0700 /etc/cron.hourly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="configure_opensc_card_drivers" strategy="configure">
+var_smartcard_drivers="<sub idref="var_smartcard_drivers" />"
+
+OPENSC_TOOL="/usr/bin/opensc-tool"
+
+if [ -f "${OPENSC_TOOL}" ]; then
+    ${OPENSC_TOOL} -S app:default:card_drivers:$var_smartcard_drivers
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_shadow" strategy="configure">
+chmod 0000 /etc/shadow
+</fix><fix rule="audit_rules_execution_setsebool">
+
+PATTERN="-a always,exit -F path=/usr/sbin/setsebool\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/setsebool -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_cramfs_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install cramfs" /etc/modprobe.d/cramfs.conf ; then
+	sed -i 's/^install cramfs.*/install cramfs /bin/true/g' /etc/modprobe.d/cramfs.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/cramfs.conf
+	echo "install cramfs /bin/true" &gt;&gt; /etc/modprobe.d/cramfs.conf
+fi
+</fix><fix rule="audit_rules_usergroup_modification_shadow">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_crontab" strategy="configure">
+chmod 0600 /etc/crontab
+</fix><fix rule="set_password_hashing_algorithm_systemauth">
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if ! grep -q "^password.*sufficient.*pam_unix.so.*sha512" $pamFile; then
+		sed -i --follow-symlinks "/^password.*sufficient.*pam_unix.so/ s/$/ sha512/" $pamFile
+	fi
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_rw_noexattrfile" strategy="enable">
+var_selinuxuser_rw_noexattrfile="<sub idref="var_selinuxuser_rw_noexattrfile" />"
+
+setsebool -P selinuxuser_rw_noexattrfile $var_selinuxuser_rw_noexattrfile
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_tipc_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install tipc" /etc/modprobe.d/tipc.conf ; then
+	sed -i 's/^install tipc.*/install tipc /bin/true/g' /etc/modprobe.d/tipc.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/tipc.conf
+	echo "install tipc /bin/true" &gt;&gt; /etc/modprobe.d/tipc.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_lcredit" strategy="restrict">
+var_password_pam_lcredit="<sub idref="var_password_pam_lcredit" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^lcredit' $var_password_pam_lcredit '@CCENUM@' '%s = %s'
+</fix><fix rule="grub2_enable_fips_mode">
+
+# prelink not installed
+if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
+    return 0
+fi
+
+if grep -q ^PRELINKING /etc/sysconfig/prelink
+then
+    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+else
+    printf '\n' &gt;&gt; /etc/sysconfig/prelink
+    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' &gt;&gt; /etc/sysconfig/prelink
+fi
+
+# Undo previous prelink changes to binaries if prelink is available.
+if test -x /usr/sbin/prelink; then
+    /usr/sbin/prelink -ua
+fi
+
+if grep -q -m1 -o aes /proc/cpuinfo; then
+	if ! rpm -q --quiet "dracut-fips-aesni" ; then
+    yum install -y "dracut-fips-aesni"
+fi
+fi
+if ! rpm -q --quiet "dracut-fips" ; then
+    yum install -y "dracut-fips"
+fi
+
+dracut -f
+
+# Correct the form of default kernel command line in  grub
+if grep -q '^GRUB_CMDLINE_LINUX=.*fips=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a fips= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)fips=[^[:space:]]*\(.*"\)/\1 fips=1 \2/'  /etc/default/grub
+else
+	# no existing fips=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 fips=1"/'  /etc/default/grub
+fi
+
+# Get the UUID of the device mounted at /boot.
+BOOT_UUID=$(findmnt --noheadings --output uuid --target /boot)
+
+if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a boot= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/ grub
+else
+	# no existing boot=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 boot=UUID='${BOOT_UUID}'"/'  /etc/default/grub
+fi
+
+# Correct the form of kernel command line for each installed kernel in the bootloader
+/sbin/grubby --update-kernel=ALL --args="fips=1 boot=UUID=${BOOT_UUID}"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_sshd_config" strategy="configure">
+
+chgrp 0 /etc/ssh/sshd_config
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_abrt_anon_write" strategy="enable">
+var_abrt_anon_write="<sub idref="var_abrt_anon_write" />"
+
+setsebool -P abrt_anon_write $var_abrt_anon_write
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsh_removed" strategy="disable">
+# CAUTION: This remediation script will remove rsh
+#	   from the system, and may remove any packages
+#	   that depend on rsh. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "rsh" ; then
+    yum remove -y "rsh"
+fi
+</fix><fix rule="audit_rules_dac_modification_chown">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S chown.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S chown -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_daily" strategy="configure">
+
+chown 0 /etc/cron.daily/
+</fix><fix rule="audit_rules_privileged_commands_su">
+
+PATTERN="-a always,exit -F path=/usr/bin/su\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/su -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_xorg-x11-server-common_removed" strategy="disable">
+# CAUTION: This remediation script will remove xorg-x11-server-common
+#	   from the system, and may remove any packages
+#	   that depend on xorg-x11-server-common. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "xorg-x11-server-common" ; then
+    yum remove -y "xorg-x11-server-common"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_auditd_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'auditd.service'
+"$SYSTEMCTL_EXEC" enable 'auditd.service'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_d" strategy="configure">
+
+chown 0 /etc/cron.d/
+</fix><fix rule="audit_rules_sysadmin_actions">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/sudoers" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers" "wa" "actions"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/sudoers.d" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers.d" "wa" "actions"
+</fix><fix rule="grub2_audit_argument">
+
+# Correct the form of default kernel command line in GRUB
+if grep -q '^GRUB_CMDLINE_LINUX=.*audit=.*"'  '/etc/default/grub' ; then
+	# modify the GRUB command-line if an audit= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)audit=[^[:space:]]*\(.*"\)/\1 audit=1 \2/'  '/etc/default/grub'
+else
+	# no audit=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 audit=1"/'  '/etc/default/grub'
+fi
+
+# Correct the form of kernel command line for each installed kernel in the bootloader
+grubby --update-kernel=ALL --args="audit=1"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_sshd_pub_key" strategy="configure">
+find /etc/ssh/ -regex '^.*.pub$' -exec chmod 0644 {} \;
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_sshd_config" strategy="configure">
+chmod 0600 /etc/ssh/sshd_config
+</fix><fix rule="no_empty_passwords">sed --follow-symlinks -i 's/\&lt;nullok\&gt;//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\&lt;nullok\&gt;//g' /etc/pam.d/password-auth
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsyslog_installed" strategy="enable">
+if ! rpm -q --quiet "rsyslog" ; then
+    yum install -y "rsyslog"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_postgresql_connect_enabled" strategy="enable">
+var_selinuxuser_postgresql_connect_enabled="<sub idref="var_selinuxuser_postgresql_connect_enabled" />"
+
+setsebool -P selinuxuser_postgresql_connect_enabled $var_selinuxuser_postgresql_connect_enabled
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsh-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove rsh-server
+#	   from the system, and may remove any packages
+#	   that depend on rsh-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "rsh-server" ; then
+    yum remove -y "rsh-server"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_libcap-ng-utils_installed" strategy="enable">
+if ! rpm -q --quiet "libcap-ng-utils" ; then
+    yum install -y "libcap-ng-utils"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_screen_installed" strategy="enable">
+if ! rpm -q --quiet "screen" ; then
+    yum install -y "screen"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rng-tools_installed" strategy="enable">
+if ! rpm -q --quiet "rng-tools" ; then
+    yum install -y "rng-tools"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_daemons_use_tty" strategy="enable">
+var_daemons_use_tty="<sub idref="var_daemons_use_tty" />"
+
+setsebool -P daemons_use_tty $var_daemons_use_tty
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_empty_passwords" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitEmptyPasswords\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitEmptyPasswords no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitEmptyPasswords no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_all_disable_ipv6" strategy="disable">
+
+#
+# Set runtime for net.ipv6.conf.all.disable_ipv6
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.all.disable_ipv6="1"
+
+#
+# If net.ipv6.conf.all.disable_ipv6 present in /etc/sysctl.conf, change value to "1"
+#	else, add "net.ipv6.conf.all.disable_ipv6 = 1" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.all.disable_ipv6' "1" '@CCENUM@'
+</fix><fix rule="accounts_password_pam_unix_remember">
+var_password_pam_unix_remember="<sub idref="var_password_pam_unix_remember" />"
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if grep -q "remember=" $pamFile; then
+		sed -i --follow-symlinks "s/\(^password.*sufficient.*pam_unix.so.*\)\(\(remember *= *\)[^ $]*\)/\1remember=$var_password_pam_unix_remember/" $pamFile
+	else
+		sed -i --follow-symlinks "/^password[[:space:]]\+sufficient[[:space:]]\+pam_unix.so/ s/$/ remember=$var_password_pam_unix_remember/" $pamFile
+	fi
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnetd
+#	   from the system, and may remove any packages
+#	   that depend on telnetd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnetd" ; then
+    yum remove -y "telnetd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_syslogng_installed" strategy="enable">
+if ! rpm -q --quiet "syslogng" ; then
+    yum install -y "syslogng"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_local_events" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*local_events\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "local_events = yes" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xserver_clients_write_xshm" strategy="enable">
+var_xserver_clients_write_xshm="<sub idref="var_xserver_clients_write_xshm" />"
+
+setsebool -P xserver_clients_write_xshm $var_xserver_clients_write_xshm
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_use_ecryptfs_home_dirs" strategy="enable">
+var_use_ecryptfs_home_dirs="<sub idref="var_use_ecryptfs_home_dirs" />"
+
+setsebool -P use_ecryptfs_home_dirs $var_use_ecryptfs_home_dirs
+</fix><fix rule="audit_rules_usergroup_modification_group">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/group" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/group" "wa" "audit_rules_usergroup_modification"
+</fix><fix rule="ensure_logrotate_activated">
+LOGROTATE_CONF_FILE="/etc/logrotate.conf"
+CRON_DAILY_LOGROTATE_FILE="/etc/cron.daily/logrotate"
+
+# daily rotation is configured
+grep -q "^daily$" $LOGROTATE_CONF_FILE|| echo "daily" &gt;&gt; $LOGROTATE_CONF_FILE
+
+# remove any line configuring weekly, monthly or yearly rotation
+sed -i -r "/^(weekly|monthly|yearly)$/d" $LOGROTATE_CONF_FILE
+
+# configure cron.daily if not already
+if ! grep -q "^[[:space:]]*/usr/sbin/logrotate[[:alnum:][:blank:][:punct:]]*$LOGROTATE_CONF_FILE$" $CRON_DAILY_LOGROTATE_FILE; then
+	echo "#!/bin/sh" &gt; $CRON_DAILY_LOGROTATE_FILE
+	echo "/usr/sbin/logrotate $LOGROTATE_CONF_FILE" &gt;&gt; $CRON_DAILY_LOGROTATE_FILE
+fi
+</fix><fix rule="audit_rules_dac_modification_fchown">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fchown.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fchown -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_dcredit" strategy="restrict">
+var_password_pam_dcredit="<sub idref="var_password_pam_dcredit" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^dcredit' $var_password_pam_dcredit '@CCENUM@' '%s = %s'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_accept_source_route" strategy="disable">
+sysctl_net_ipv4_conf_all_accept_source_route_value="<sub idref="sysctl_net_ipv4_conf_all_accept_source_route_value" />"
+
+#
+# Set runtime for net.ipv4.conf.all.accept_source_route
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_source_route="$sysctl_net_ipv4_conf_all_accept_source_route_value"
+
+#
+# If net.ipv4.conf.all.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.accept_source_route = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_source_route' "$sysctl_net_ipv4_conf_all_accept_source_route_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_syslogng_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'syslogng.service'
+"$SYSTEMCTL_EXEC" enable 'syslogng.service'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_hfsplus_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install hfsplus" /etc/modprobe.d/hfsplus.conf ; then
+	sed -i 's/^install hfsplus.*/install hfsplus /bin/true/g' /etc/modprobe.d/hfsplus.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/hfsplus.conf
+	echo "install hfsplus /bin/true" &gt;&gt; /etc/modprobe.d/hfsplus.conf
+fi
+</fix><fix rule="mount_option_nosuid_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "nosuid" "" "nfs4"
+</fix><fix rule="audit_rules_dac_modification_lsetxattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S lsetxattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S lsetxattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_rekey_limit" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*RekeyLimit\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "RekeyLimit 512M 1h" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "RekeyLimit 512M 1h" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_bluetooth_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'bluetooth.service'
+"$SYSTEMCTL_EXEC" disable 'bluetooth.service'
+"$SYSTEMCTL_EXEC" mask 'bluetooth.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^bluetooth.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'bluetooth.socket'
+    "$SYSTEMCTL_EXEC" disable 'bluetooth.socket'
+    "$SYSTEMCTL_EXEC" mask 'bluetooth.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'bluetooth.service' || true
+</fix><fix rule="audit_rules_login_events_tallylog">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/var/log/tallylog" "wa" "logins"
+fix_audit_watch_rule "augenrules" "/var/log/tallylog" "wa" "logins"
+</fix><fix rule="audit_rules_privileged_commands_pam_timestamp_check">
+
+PATTERN="-a always,exit -F path=/usr/sbin/pam_timestamp_check\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/pam_timestamp_check -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="auditd_data_retention_num_logs">
+var_auditd_num_logs="<sub idref="var_auditd_num_logs" />"
+
+AUDITCONFIG=/etc/audit/auditd.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDITCONFIG '^num_logs' "$var_auditd_num_logs" "@CCENUM@"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xguest_use_bluetooth" strategy="enable">
+var_xguest_use_bluetooth="<sub idref="var_xguest_use_bluetooth" />"
+
+setsebool -P xguest_use_bluetooth $var_xguest_use_bluetooth
+</fix><fix reboot="false" rule="mount_option_dev_shm_nosuid">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "no" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nosuid" "tmpfs" "tmpfs"
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_maxrepeat" strategy="restrict">
+var_password_pam_maxrepeat="<sub idref="var_password_pam_maxrepeat" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^maxrepeat' $var_password_pam_maxrepeat '@CCENUM@' '%s = %s'
+</fix><fix rule="ensure_gpgcheck_never_disabled">sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_nss-tools_installed" strategy="enable">
+if ! rpm -q --quiet "nss-tools" ; then
+    yum install -y "nss-tools"
+fi
+</fix><fix rule="audit_rules_usergroup_modification_opasswd">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+</fix><fix rule="file_ownership_var_log_audit">
+if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
+  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
+  if ! [ "${GROUP}" == 'root' ] ; then
+    chown root.${GROUP} /var/log/audit
+    chown root.${GROUP} /var/log/audit/audit.log*
+  else
+    chown root.root /var/log/audit
+    chown root.root /var/log/audit/audit.log*
+  fi
+else
+  chown root.root /var/log/audit
+  chown root.root /var/log/audit/audit.log*
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="coredump_disable_storage" strategy="restrict">if [ -e "/etc/systemd/coredump.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*Storage\s*=\s*/Id" "/etc/systemd/coredump.conf"
+else
+    touch "/etc/systemd/coredump.conf"
+fi
+cp "/etc/systemd/coredump.conf" "/etc/systemd/coredump.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "Storage=none" &gt;&gt; "/etc/systemd/coredump.conf"
+# Clean up after ourselves.
+rm "/etc/systemd/coredump.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_secure_mode_insmod" strategy="enable">
+var_secure_mode_insmod="<sub idref="var_secure_mode_insmod" />"
+
+setsebool -P secure_mode_insmod $var_secure_mode_insmod
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_python3-subscription-manager-rhsm_installed" strategy="enable">
+if ! rpm -q --quiet "python3-subscription-manager-rhsm" ; then
+    yum install -y "python3-subscription-manager-rhsm"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_allow" strategy="configure">
+
+chgrp 0 /etc/cron.allow
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_kernel_dmesg_restrict" strategy="disable">
+
+#
+# Set runtime for kernel.dmesg_restrict
+#
+/sbin/sysctl -q -n -w kernel.dmesg_restrict="1"
+
+#
+# If kernel.dmesg_restrict present in /etc/sysctl.conf, change value to "1"
+#	else, add "kernel.dmesg_restrict = 1" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^kernel.dmesg_restrict' "1" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_group" strategy="configure">
+
+chown 0 /etc/group
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_mount_anyfile" strategy="enable">
+var_mount_anyfile="<sub idref="var_mount_anyfile" />"
+
+setsebool -P mount_anyfile $var_mount_anyfile
+</fix><fix rule="audit_rules_privileged_commands_postqueue">
+
+PATTERN="-a always,exit -F path=/usr/sbin/postqueue\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/postqueue -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_freevxfs_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install freevxfs" /etc/modprobe.d/freevxfs.conf ; then
+	sed -i 's/^install freevxfs.*/install freevxfs /bin/true/g' /etc/modprobe.d/freevxfs.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/freevxfs.conf
+	echo "install freevxfs /bin/true" &gt;&gt; /etc/modprobe.d/freevxfs.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_freq" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*freq\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "freq = 50" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_secure_mode" strategy="enable">
+var_secure_mode="<sub idref="var_secure_mode" />"
+
+setsebool -P secure_mode $var_secure_mode
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_firewalld_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'firewalld.service'
+"$SYSTEMCTL_EXEC" enable 'firewalld.service'
+</fix><fix rule="directory_access_var_log_audit">
+
+PATTERN="-a always,exit -F path=/var/log/audit/\\s\\+.*"
+GROUP="access-audit-trail"
+FULL_RULE="-a always,exit -F dir=/var/log/audit/ -F perm=r -F auid&gt;=1000 -F auid!=unset -F key=access-audit-trail"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="audit_rules_privileged_commands_unix_chkpwd">
+
+PATTERN="-a always,exit -F path=/usr/sbin/unix_chkpwd\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/unix_chkpwd -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="audit_rules_privileged_commands_ssh_keysign">
+
+PATTERN="-a always,exit -F path=/usr/libexec/openssh/ssh-keysign\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/libexec/openssh/ssh-keysign -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_kerb_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*KerberosAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "KerberosAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "KerberosAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_zebra_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'zebra.service'
+"$SYSTEMCTL_EXEC" disable 'zebra.service'
+"$SYSTEMCTL_EXEC" mask 'zebra.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^zebra.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'zebra.socket'
+    "$SYSTEMCTL_EXEC" disable 'zebra.socket'
+    "$SYSTEMCTL_EXEC" mask 'zebra.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'zebra.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_inetutils-telnetd_removed" strategy="disable">
+# CAUTION: This remediation script will remove inetutils-telnetd
+#	   from the system, and may remove any packages
+#	   that depend on inetutils-telnetd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "inetutils-telnetd" ; then
+    yum remove -y "inetutils-telnetd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_subscription-manager_installed" strategy="enable">
+if ! rpm -q --quiet "subscription-manager" ; then
+    yum install -y "subscription-manager"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_allow_only_protocol2" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Protocol 2" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "Protocol 2" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_cryptsetup-luks_installed" strategy="enable">
+if ! rpm -q --quiet "cryptsetup-luks" ; then
+    yum install -y "cryptsetup-luks"
+fi
+</fix><fix rule="audit_rules_privileged_commands">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_perform_audit_rules_privileged_commands_remediation" />
+perform_audit_rules_privileged_commands_remediation "auditctl" "1000"
+perform_audit_rules_privileged_commands_remediation "augenrules" "1000"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_default_accept_source_route" strategy="disable">
+sysctl_net_ipv6_conf_default_accept_source_route_value="<sub idref="sysctl_net_ipv6_conf_default_accept_source_route_value" />"
+
+#
+# Set runtime for net.ipv6.conf.default.accept_source_route
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.default.accept_source_route="$sysctl_net_ipv6_conf_default_accept_source_route_value"
+
+#
+# If net.ipv6.conf.default.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.default.accept_source_route = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.default.accept_source_route' "$sysctl_net_ipv6_conf_default_accept_source_route_value" '@CCENUM@'
+</fix><fix rule="sshd_set_keepalive">
+var_sshd_set_keepalive="<sub idref="var_sshd_set_keepalive" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_keepalive" '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_staff_exec_content" strategy="enable">
+var_staff_exec_content="<sub idref="var_staff_exec_content" />"
+
+setsebool -P staff_exec_content $var_staff_exec_content
+</fix><fix rule="selinux_state">
+var_selinux_state="<sub idref="var_selinux_state" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+
+fixfiles onboot
+fixfiles -f relabel
+</fix><fix rule="audit_rules_privileged_commands_postdrop">
+
+PATTERN="-a always,exit -F path=/usr/sbin/postdrop\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/postdrop -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ntp_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'ntp.service'
+"$SYSTEMCTL_EXEC" enable 'ntp.service'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_iptables_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'iptables.service'
+"$SYSTEMCTL_EXEC" enable 'iptables.service'
+</fix><fix rule="mount_option_noexec_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "noexec" "" "nfs4"
+</fix><fix rule="accounts_passwords_pam_faillock_deny_root">
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+# This script fixes absence of pam_faillock.so in PAM stack or the
+# absense of even_deny_root in pam_faillock.so arguments
+# When inserting auth pam_faillock.so entries,
+# the entry with preauth argument will be added before pam_unix.so module
+# and entry with authfail argument will be added before pam_deny.so module.
+
+# The placement of pam_faillock.so entries will not be changed
+# if they are already present
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	# if PAM file is missing, system is not using PAM or broken
+	if [ ! -f $pamFile ]; then
+		continue
+	fi
+
+	# is 'auth required' here?
+	if grep -q "^auth.*required.*pam_faillock.so.*" $pamFile; then
+		# has 'auth required' even_deny_root option?
+		if ! grep -q "^auth.*required.*pam_faillock.so.*preauth.*even_deny_root" $pamFile; then
+			# even_deny_root is not present
+			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*\).*/\1 even_deny_root/" $pamFile
+		fi
+	else
+		# no 'auth required', add it
+		sed -i --follow-symlinks "/^auth.*pam_unix.so.*/i auth required pam_faillock.so preauth silent even_deny_root" $pamFile
+	fi
+
+	# is 'auth [default=die]' here?
+	if grep -q "^auth.*\[default=die\].*pam_faillock.so.*" $pamFile; then
+		# has 'auth [default=die]' even_deny_root option?
+		if ! grep -q "^auth.*\[default=die\].*pam_faillock.so.*authfail.*even_deny_root" $pamFile; then
+			# even_deny_root is not present
+			sed -i --follow-symlinks "s/\(^auth.*\[default=die\].*pam_faillock.so.*authfail.*\).*/\1 even_deny_root/" $pamFile
+		fi
+	else
+		# no 'auth [default=die]', add it
+		sed -i --follow-symlinks "/^auth.*pam_unix.so.*/a auth [default=die] pam_faillock.so authfail silent even_deny_root" $pamFile
+	fi
+done
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_all_accept_redirects" strategy="disable">
+sysctl_net_ipv6_conf_all_accept_redirects_value="<sub idref="sysctl_net_ipv6_conf_all_accept_redirects_value" />"
+
+#
+# Set runtime for net.ipv6.conf.all.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.all.accept_redirects="$sysctl_net_ipv6_conf_all_accept_redirects_value"
+
+#
+# If net.ipv6.conf.all.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.all.accept_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.all.accept_redirects' "$sysctl_net_ipv6_conf_all_accept_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_cron_userdomain_transition" strategy="enable">
+var_cron_userdomain_transition="<sub idref="var_cron_userdomain_transition" />"
+
+setsebool -P cron_userdomain_transition $var_cron_userdomain_transition
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xguest_mount_media" strategy="enable">
+var_xguest_mount_media="<sub idref="var_xguest_mount_media" />"
+
+setsebool -P xguest_mount_media $var_xguest_mount_media
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_kernel_kptr_restrict" strategy="disable">
+
+#
+# Set runtime for kernel.kptr_restrict
+#
+/sbin/sysctl -q -n -w kernel.kptr_restrict="1"
+
+#
+# If kernel.kptr_restrict present in /etc/sysctl.conf, change value to "1"
+#	else, add "kernel.kptr_restrict = 1" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^kernel.kptr_restrict' "1" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_ssh_chroot_rw_homedirs" strategy="enable">
+var_ssh_chroot_rw_homedirs="<sub idref="var_ssh_chroot_rw_homedirs" />"
+
+setsebool -P ssh_chroot_rw_homedirs $var_ssh_chroot_rw_homedirs
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_tftp-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove tftp-server
+#	   from the system, and may remove any packages
+#	   that depend on tftp-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "tftp-server" ; then
+    yum remove -y "tftp-server"
+fi
+</fix><fix rule="mount_option_nodev_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "nodev" "" "nfs4"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_sudo_installed" strategy="enable">
+if ! rpm -q --quiet "sudo" ; then
+    yum install -y "sudo"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_minclass" strategy="restrict">
+var_password_pam_minclass="<sub idref="var_password_pam_minclass" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^minclass' $var_password_pam_minclass '@CCENUM@' '%s = %s'
+</fix><fix rule="audit_rules_usergroup_modification_gshadow">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_kdump_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'kdump.service'
+"$SYSTEMCTL_EXEC" disable 'kdump.service'
+"$SYSTEMCTL_EXEC" mask 'kdump.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^kdump.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'kdump.socket'
+    "$SYSTEMCTL_EXEC" disable 'kdump.socket'
+    "$SYSTEMCTL_EXEC" mask 'kdump.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'kdump.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_abrt_handle_event" strategy="enable">
+var_abrt_handle_event="<sub idref="var_abrt_handle_event" />"
+
+setsebool -P abrt_handle_event $var_abrt_handle_event
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_icmp_echo_ignore_broadcasts" strategy="disable">
+sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value="<sub idref="sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value" />"
+
+#
+# Set runtime for net.ipv4.icmp_echo_ignore_broadcasts
+#
+/sbin/sysctl -q -n -w net.ipv4.icmp_echo_ignore_broadcasts="$sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value"
+
+#
+# If net.ipv4.icmp_echo_ignore_broadcasts present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.icmp_echo_ignore_broadcasts = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.icmp_echo_ignore_broadcasts' "$sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value" '@CCENUM@'
+</fix><fix rule="sshd_disable_compression">
+var_sshd_disable_compression="<sub idref="var_sshd_disable_compression" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^Compression' "$var_sshd_disable_compression" '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_auditadm_exec_content" strategy="enable">
+var_auditadm_exec_content="<sub idref="var_auditadm_exec_content" />"
+
+setsebool -P auditadm_exec_content $var_auditadm_exec_content
+</fix><fix rule="audit_rules_privileged_commands_passwd">
+
+PATTERN="-a always,exit -F path=/usr/bin/passwd\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/passwd -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="audit_rules_kernel_module_loading_finit">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S finit_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S finit_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_audispd-plugins_installed" strategy="enable">
+if ! rpm -q --quiet "audispd-plugins" ; then
+    yum install -y "audispd-plugins"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_talk_removed" strategy="disable">
+# CAUTION: This remediation script will remove talk
+#	   from the system, and may remove any packages
+#	   that depend on talk. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "talk" ; then
+    yum remove -y "talk"
+fi
+</fix><fix rule="audit_rules_dac_modification_setxattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S setxattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S setxattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_unconfined_login" strategy="enable">
+var_unconfined_login="<sub idref="var_unconfined_login" />"
+
+setsebool -P unconfined_login $var_unconfined_login
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ypbind_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'ypbind.service'
+"$SYSTEMCTL_EXEC" disable 'ypbind.service'
+"$SYSTEMCTL_EXEC" mask 'ypbind.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^ypbind.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'ypbind.socket'
+    "$SYSTEMCTL_EXEC" disable 'ypbind.socket'
+    "$SYSTEMCTL_EXEC" mask 'ypbind.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'ypbind.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_sssd-ipa_installed" strategy="enable">
+if ! rpm -q --quiet "sssd-ipa" ; then
+    yum install -y "sssd-ipa"
+fi
+</fix><fix rule="sshd_set_idle_timeout">
+sshd_idle_timeout_value="<sub idref="sshd_idle_timeout_value" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeout_value '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd-ssl_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnetd-ssl
+#	   from the system, and may remove any packages
+#	   that depend on telnetd-ssl. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnetd-ssl" ; then
+    yum remove -y "telnetd-ssl"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_cron_monthly" strategy="configure">
+chmod 0700 /etc/cron.monthly/
+</fix><fix rule="audit_rules_execution_setfiles">
+
+PATTERN="-a always,exit -F path=/usr/sbin/setfiles\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/setfiles -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_x11_forwarding" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*X11Forwarding\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "X11Forwarding yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "X11Forwarding yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="file_permissions_var_log_audit">
+if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
+  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
+  if ! [ "${GROUP}" == 'root' ] ; then
+    chmod 0640 /var/log/audit/audit.log
+    chmod 0440 /var/log/audit/audit.log.*
+  else
+    chmod 0600 /var/log/audit/audit.log
+    chmod 0400 /var/log/audit/audit.log.*
+  fi
+
+  chmod 0640 /etc/audit/audit*
+  chmod 0640 /etc/audit/rules.d/*
+else
+  chmod 0600 /var/log/audit/audit.log
+  chmod 0400 /var/log/audit/audit.log.*
+  chmod 0640 /etc/audit/audit*
+  chmod 0640 /etc/audit/rules.d/*
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xserver_execmem" strategy="enable">
+var_xserver_execmem="<sub idref="var_xserver_execmem" />"
+
+setsebool -P xserver_execmem $var_xserver_execmem
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_audit_installed" strategy="enable">
+if ! rpm -q --quiet "audit" ; then
+    yum install -y "audit"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_cron_installed" strategy="enable">
+if ! rpm -q --quiet "cron" ; then
+    yum install -y "cron"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xguest_exec_content" strategy="enable">
+var_xguest_exec_content="<sub idref="var_xguest_exec_content" />"
+
+setsebool -P xguest_exec_content $var_xguest_exec_content
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_default_accept_ra" strategy="disable">
+sysctl_net_ipv6_conf_default_accept_ra_value="<sub idref="sysctl_net_ipv6_conf_default_accept_ra_value" />"
+
+#
+# Set runtime for net.ipv6.conf.default.accept_ra
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.default.accept_ra="$sysctl_net_ipv6_conf_default_accept_ra_value"
+
+#
+# If net.ipv6.conf.default.accept_ra present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.default.accept_ra = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.default.accept_ra' "$sysctl_net_ipv6_conf_default_accept_ra_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_user_known_hosts" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*IgnoreUserKnownHosts\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "IgnoreUserKnownHosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "IgnoreUserKnownHosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_tcp_syncookies" strategy="disable">
+sysctl_net_ipv4_tcp_syncookies_value="<sub idref="sysctl_net_ipv4_tcp_syncookies_value" />"
+
+#
+# Set runtime for net.ipv4.tcp_syncookies
+#
+/sbin/sysctl -q -n -w net.ipv4.tcp_syncookies="$sysctl_net_ipv4_tcp_syncookies_value"
+
+#
+# If net.ipv4.tcp_syncookies present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.tcp_syncookies = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.tcp_syncookies' "$sysctl_net_ipv4_tcp_syncookies_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_fs_protected_symlinks" strategy="disable">
+
+#
+# Set runtime for fs.protected_symlinks
+#
+/sbin/sysctl -q -n -w fs.protected_symlinks="1"
+
+#
+# If fs.protected_symlinks present in /etc/sysctl.conf, change value to "1"
+#	else, add "fs.protected_symlinks = 1" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^fs.protected_symlinks' "1" '@CCENUM@'
+</fix><fix rule="audit_rules_dac_modification_fchmod">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fchmod.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fchmod -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="audit_rules_dac_modification_lchown">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S lchown.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S lchown -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="accounts_maximum_age_login_defs">
+var_accounts_maximum_age_login_defs="<sub idref="var_accounts_maximum_age_login_defs" />"
+
+grep -q ^PASS_MAX_DAYS /etc/login.defs &amp;&amp; \
+  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" &gt;&gt; /etc/login.defs
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_share_music" strategy="enable">
+var_selinuxuser_share_music="<sub idref="var_selinuxuser_share_music" />"
+
+setsebool -P selinuxuser_share_music $var_selinuxuser_share_music
+</fix><fix rule="require_emergency_target_auth">
+service_file="/usr/lib/systemd/system/emergency.service"
+
+sulogin='/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"'
+
+if grep "^ExecStart=.*" "$service_file" ; then
+    sed -i "s%^ExecStart=.*%ExecStart=-$sulogin%" "$service_file"
+else
+    echo "ExecStart=-$sulogin" &gt;&gt; "$service_file"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_warning_banner" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Banner /etc/issue" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "Banner /etc/issue" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="force_opensc_card_drivers" strategy="configure">
+var_smartcard_drivers="<sub idref="var_smartcard_drivers" />"
+
+OPENSC_TOOL="/usr/bin/opensc-tool"
+
+if [ -f "${OPENSC_TOOL}" ]; then
+    ${OPENSC_TOOL} -S app:default:force_card_driver:$var_smartcard_drivers
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_pcsc-lite_installed" strategy="enable">
+if ! rpm -q --quiet "pcsc-lite" ; then
+    yum install -y "pcsc-lite"
+fi
+</fix><fix rule="audit_rules_file_deletion_events_rename">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S rename.*"
+	GROUP="delete"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S rename -F auid&gt;=1000 -F auid!=unset -F key=delete"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_do_not_permit_user_env" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitUserEnvironment yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="ensure_gpgcheck_globally_activated">
+<sub idref="function_replace_or_append" />
+replace_or_append "/etc/yum.conf" '^gpgcheck' '1' '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xdm_write_home" strategy="enable">
+var_xdm_write_home="<sub idref="var_xdm_write_home" />"
+
+setsebool -P xdm_write_home $var_xdm_write_home
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_abrt_upload_watch_anon_write" strategy="enable">
+var_abrt_upload_watch_anon_write="<sub idref="var_abrt_upload_watch_anon_write" />"
+
+setsebool -P abrt_upload_watch_anon_write $var_abrt_upload_watch_anon_write
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_passwd" strategy="configure">
+chmod 0644 /etc/passwd
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_dccp_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install dccp" /etc/modprobe.d/dccp.conf ; then
+	sed -i 's/^install dccp.*/install dccp /bin/true/g' /etc/modprobe.d/dccp.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/dccp.conf
+	echo "install dccp /bin/true" &gt;&gt; /etc/modprobe.d/dccp.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_shadow" strategy="configure">
+
+chown 0 /etc/shadow
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_grub2_cfg" strategy="configure">
+chmod 0600 /boot/grub2/grub.cfg
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_monthly" strategy="configure">
+
+chown 0 /etc/cron.monthly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_pubkey_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PubkeyAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PubkeyAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PubkeyAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_sshd_config" strategy="configure">
+
+chown 0 /etc/ssh/sshd_config
+</fix><fix rule="audit_rules_privileged_commands_sudoedit">
+
+PATTERN="-a always,exit -F path=/usr/bin/sudoedit\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/sudoedit -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_daemons_dump_core" strategy="enable">
+var_daemons_dump_core="<sub idref="var_daemons_dump_core" />"
+
+setsebool -P daemons_dump_core $var_daemons_dump_core
+</fix><fix rule="audit_rules_system_shutdown">
+# Traverse all of:
+#
+# /etc/audit/audit.rules,			(for auditctl case)
+# /etc/audit/rules.d/*.rules			(for augenrules case)
+#
+# files to check if '-f .*' setting is present in that '*.rules' file already.
+# If found, delete such occurrence since auditctl(8) manual page instructs the
+# '-f 2' rule should be placed as the last rule in the configuration
+find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
+
+# Append '-f 2' requirement at the end of both:
+# * /etc/audit/audit.rules file 		(for auditctl case)
+# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
+
+for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
+do
+	echo '' &gt;&gt; $AUDIT_FILE
+	echo '# Set the audit.rules configuration to halt system upon audit failure per security requirements' &gt;&gt; $AUDIT_FILE
+	echo '-f 2' &gt;&gt; $AUDIT_FILE
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_name_format" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*name_format\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "name_format = hostname" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_use_ssh_chroot" strategy="enable">
+var_selinuxuser_use_ssh_chroot="<sub idref="var_selinuxuser_use_ssh_chroot" />"
+
+setsebool -P selinuxuser_use_ssh_chroot $var_selinuxuser_use_ssh_chroot
+</fix><fix rule="audit_rules_execution_chcon">
+
+PATTERN="-a always,exit -F path=/usr/bin/chcon\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/chcon -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_print_last_log" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PrintLastLog\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PrintLastLog yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PrintLastLog yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="audit_rules_usergroup_modification_passwd">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_crontab" strategy="configure">
+
+chown 0 /etc/crontab
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_hourly" strategy="configure">
+
+chown 0 /etc/cron.hourly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_ssh_sysadm_login" strategy="enable">
+var_ssh_sysadm_login="<sub idref="var_ssh_sysadm_login" />"
+
+setsebool -P ssh_sysadm_login $var_ssh_sysadm_login
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_all_forwarding" strategy="disable">
+sysctl_net_ipv6_conf_all_forwarding_value="<sub idref="sysctl_net_ipv6_conf_all_forwarding_value" />"
+
+#
+# Set runtime for net.ipv6.conf.all.forwarding
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.all.forwarding="$sysctl_net_ipv6_conf_all_forwarding_value"
+
+#
+# If net.ipv6.conf.all.forwarding present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.all.forwarding = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.all.forwarding' "$sysctl_net_ipv6_conf_all_forwarding_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_all_accept_source_route" strategy="disable">
+sysctl_net_ipv6_conf_all_accept_source_route_value="<sub idref="sysctl_net_ipv6_conf_all_accept_source_route_value" />"
+
+#
+# Set runtime for net.ipv6.conf.all.accept_source_route
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.all.accept_source_route="$sysctl_net_ipv6_conf_all_accept_source_route_value"
+
+#
+# If net.ipv6.conf.all.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.all.accept_source_route = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.all.accept_source_route' "$sysctl_net_ipv6_conf_all_accept_source_route_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ypbind_removed" strategy="disable">
+# CAUTION: This remediation script will remove ypbind
+#	   from the system, and may remove any packages
+#	   that depend on ypbind. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "ypbind" ; then
+    yum remove -y "ypbind"
+fi
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_log_martians" strategy="disable">
+sysctl_net_ipv4_conf_default_log_martians_value="<sub idref="sysctl_net_ipv4_conf_default_log_martians_value" />"
+
+#
+# Set runtime for net.ipv4.conf.default.log_martians
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.log_martians="$sysctl_net_ipv4_conf_default_log_martians_value"
+
+#
+# If net.ipv4.conf.default.log_martians present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.log_martians = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.log_martians' "$sysctl_net_ipv4_conf_default_log_martians_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="true" rule="grub2_disable_interactive_boot" strategy="restrict">
+CONFIRM_SPAWN_YES="systemd.confirm_spawn=\(1\|yes\|true\|on\)"
+CONFIRM_SPAWN_NO="systemd.confirm_spawn=no"
+
+if grep -q "\(GRUB_CMDLINE_LINUX\|GRUB_CMDLINE_LINUX_DEFAULT\)" /etc/default/grub
+then
+	sed -i "s/${CONFIRM_SPAWN_YES}/${CONFIRM_SPAWN_NO}/" /etc/default/grub
+fi
+# Remove 'systemd.confirm_spawn' kernel argument also from runtime settings
+/sbin/grubby --update-kernel=ALL --remove-args="systemd.confirm_spawn"
+</fix><fix rule="set_password_hashing_algorithm_logindefs">if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
+	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
+else
+	echo "" &gt;&gt; /etc/login.defs
+	echo "ENCRYPT_METHOD SHA512" &gt;&gt; /etc/login.defs
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="coredump_disable_backtraces" strategy="restrict">if [ -e "/etc/systemd/coredump.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*ProcessSizeMax\s*=\s*/Id" "/etc/systemd/coredump.conf"
+else
+    touch "/etc/systemd/coredump.conf"
+fi
+cp "/etc/systemd/coredump.conf" "/etc/systemd/coredump.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "ProcessSizeMax=0" &gt;&gt; "/etc/systemd/coredump.conf"
+# Clean up after ourselves.
+rm "/etc/systemd/coredump.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_talk-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove talk-server
+#	   from the system, and may remove any packages
+#	   that depend on talk-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "talk-server" ; then
+    yum remove -y "talk-server"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="configure_opensc_nss_db" strategy="configure">
+PKCSSW=$(/usr/bin/pkcs11-switch)
+
+if [ ${PKCSSW} != "opensc" ] ; then
+    ${PKCSSW} opensc
+fi
+</fix><fix rule="audit_rules_dac_modification_fremovexattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fremovexattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fremovexattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_maxclassrepeat" strategy="restrict">
+var_password_pam_maxclassrepeat="<sub idref="var_password_pam_maxclassrepeat" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^maxclassrepeat' $var_password_pam_maxclassrepeat '@CCENUM@' '%s = %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xserver_object_manager" strategy="enable">
+var_xserver_object_manager="<sub idref="var_xserver_object_manager" />"
+
+setsebool -P xserver_object_manager $var_xserver_object_manager
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xdm_sysadm_login" strategy="enable">
+var_xdm_sysadm_login="<sub idref="var_xdm_sysadm_login" />"
+
+setsebool -P xdm_sysadm_login $var_xdm_sysadm_login
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_kernel_randomize_va_space" strategy="disable">
+
+#
+# Set runtime for kernel.randomize_va_space
+#
+/sbin/sysctl -q -n -w kernel.randomize_va_space="2"
+
+#
+# If kernel.randomize_va_space present in /etc/sysctl.conf, change value to "2"
+#	else, add "kernel.randomize_va_space = 2" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ntpd_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'ntpd.service'
+"$SYSTEMCTL_EXEC" enable 'ntpd.service'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_binutils_installed" strategy="enable">
+if ! rpm -q --quiet "binutils" ; then
+    yum install -y "binutils"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsyslog-gnutls_installed" strategy="enable">
+if ! rpm -q --quiet "rsyslog-gnutls" ; then
+    yum install -y "rsyslog-gnutls"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_telnet_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'telnet.service'
+"$SYSTEMCTL_EXEC" disable 'telnet.service'
+"$SYSTEMCTL_EXEC" mask 'telnet.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^telnet.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'telnet.socket'
+    "$SYSTEMCTL_EXEC" disable 'telnet.socket'
+    "$SYSTEMCTL_EXEC" mask 'telnet.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'telnet.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_rlogin_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'rlogin.service'
+"$SYSTEMCTL_EXEC" disable 'rlogin.service'
+"$SYSTEMCTL_EXEC" mask 'rlogin.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^rlogin.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'rlogin.socket'
+    "$SYSTEMCTL_EXEC" disable 'rlogin.socket'
+    "$SYSTEMCTL_EXEC" mask 'rlogin.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'rlogin.service' || true
+</fix><fix rule="audit_rules_privileged_commands_sudo">
+
+PATTERN="-a always,exit -F path=/usr/bin/sudo\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/sudo -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xdm_bind_vnc_tcp_port" strategy="enable">
+var_xdm_bind_vnc_tcp_port="<sub idref="var_xdm_bind_vnc_tcp_port" />"
+
+setsebool -P xdm_bind_vnc_tcp_port $var_xdm_bind_vnc_tcp_port
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_ssh_keysign" strategy="enable">
+var_ssh_keysign="<sub idref="var_ssh_keysign" />"
+
+setsebool -P ssh_keysign $var_ssh_keysign
+</fix><fix rule="clean_components_post_updating">
+if grep --silent ^clean_requirements_on_remove /etc/yum.conf ; then
+        sed -i "s/^clean_requirements_on_remove.*/clean_requirements_on_remove=1/g" /etc/yum.conf
+else
+        echo -e "\n# Set clean_requirements_on_remove to 1 per security requirements" &gt;&gt; /etc/yum.conf
+        echo "clean_requirements_on_remove=1" &gt;&gt; /etc/yum.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_debug-shell_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'debug-shell.service'
+"$SYSTEMCTL_EXEC" disable 'debug-shell.service'
+"$SYSTEMCTL_EXEC" mask 'debug-shell.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^debug-shell.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'debug-shell.socket'
+    "$SYSTEMCTL_EXEC" disable 'debug-shell.socket'
+    "$SYSTEMCTL_EXEC" mask 'debug-shell.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'debug-shell.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_netfs_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'netfs.service'
+"$SYSTEMCTL_EXEC" disable 'netfs.service'
+"$SYSTEMCTL_EXEC" mask 'netfs.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^netfs.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'netfs.socket'
+    "$SYSTEMCTL_EXEC" disable 'netfs.socket'
+    "$SYSTEMCTL_EXEC" mask 'netfs.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'netfs.service' || true
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_bluetooth_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install bluetooth" /etc/modprobe.d/bluetooth.conf ; then
+	sed -i 's/^install bluetooth.*/install bluetooth /bin/true/g' /etc/modprobe.d/bluetooth.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/bluetooth.conf
+	echo "install bluetooth /bin/true" &gt;&gt; /etc/modprobe.d/bluetooth.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_iptables_installed" strategy="enable">
+if ! rpm -q --quiet "iptables" ; then
+    yum install -y "iptables"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_gshadow" strategy="configure">
+
+chgrp 0 /etc/gshadow
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_accept_redirects" strategy="disable">
+sysctl_net_ipv4_conf_all_accept_redirects_value="<sub idref="sysctl_net_ipv4_conf_all_accept_redirects_value" />"
+
+#
+# Set runtime for net.ipv4.conf.all.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_redirects="$sysctl_net_ipv4_conf_all_accept_redirects_value"
+
+#
+# If net.ipv4.conf.all.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.accept_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_redirects' "$sysctl_net_ipv4_conf_all_accept_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_crond_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'crond.service'
+"$SYSTEMCTL_EXEC" enable 'crond.service'
+</fix><fix rule="accounts_passwords_pam_faillock_unlock_time">
+var_accounts_passwords_pam_faillock_unlock_time="<sub idref="var_accounts_passwords_pam_faillock_unlock_time" />"
+<sub idref="function_include_set_faillock_option" />
+include_set_faillock_option
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+	set_faillock_option "$pam_file" "unlock_time" "$var_accounts_passwords_pam_faillock_unlock_time"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_group" strategy="configure">
+
+chgrp 0 /etc/group
+</fix><fix rule="audit_rules_kernel_module_loading_delete">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S delete_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S delete_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="audit_rules_media_export">
+
+# Perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S .* -F auid&gt;=1000 -F auid!=unset -k *"
+	GROUP="mount"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S mount -F auid&gt;=1000 -F auid!=unset -k export"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_deny_execmem" strategy="enable">
+var_deny_execmem="<sub idref="var_deny_execmem" />"
+
+setsebool -P deny_execmem $var_deny_execmem
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_cron_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'cron.service'
+"$SYSTEMCTL_EXEC" enable 'cron.service'
+</fix><fix rule="audit_rules_dac_modification_fchmodat">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fchmodat.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fchmodat -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_log_format" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*log_format\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "log_format = ENRICHED" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix rule="audit_rules_file_deletion_events_unlinkat">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S unlinkat.*"
+	GROUP="delete"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S unlinkat -F auid&gt;=1000 -F auid!=unset -F key=delete"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_set_loglevel_verbose" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*LogLevel\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "LogLevel VERBOSE" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "LogLevel VERBOSE" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_gnutls-utils_installed" strategy="enable">
+if ! rpm -q --quiet "gnutls-utils" ; then
+    yum install -y "gnutls-utils"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnet_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnet
+#	   from the system, and may remove any packages
+#	   that depend on telnet. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnet" ; then
+    yum remove -y "telnet"
+fi
+</fix><fix complexity="low" disruption="medium" reboot="false" rule="sssd_enable_smartcards" strategy="configure">
+SSSD_CONF="/etc/sssd/sssd.conf"
+SSSD_OPT="pam_cert_auth"
+SSSD_OPT_VAL=true
+PAM_REGEX="[[:space:]]*\[pam]"
+PAM_OPT_REGEX="${PAM_REGEX}([^\n\[]*\n+)+?[[:space:]]*${SSSD_OPT}"
+
+if grep -qzosP $PAM_OPT_REGEX $SSSD_CONF; then
+	sed -i "s/${SSSD_OPT}[^(\n)]*/${SSSD_OPT} = ${SSSD_OPT_VAL}/" $SSSD_CONF
+elif grep -qs $PAM_REGEX $SSSD_CONF; then
+	sed -i "/$PAM_REGEX/a ${SSSD_OPT} = ${SSSD_OPT_VAL}" $SSSD_CONF
+else
+	mkdir -p /etc/sssd
+	touch $SSSD_CONF
+	echo -e "[pam]\n${SSSD_OPT} = ${SSSD_OPT_VAL}" &gt;&gt; $SSSD_CONF
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_minlen" strategy="restrict">
+var_password_pam_minlen="<sub idref="var_password_pam_minlen" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^minlen' $var_password_pam_minlen '@CCENUM@' '%s = %s'
+</fix><fix rule="require_singleuser_auth">
+service_file="/usr/lib/systemd/system/rescue.service"
+
+sulogin='/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"'
+
+if grep "^ExecStart=.*" "$service_file" ; then
+    sed -i "s%^ExecStart=.*%ExecStart=-$sulogin%" "$service_file"
+else
+    echo "ExecStart=-$sulogin" &gt;&gt; "$service_file"
+fi
+</fix><fix rule="audit_rules_dac_modification_fchownat">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fchownat.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fchownat -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ip6tables_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'ip6tables.service'
+"$SYSTEMCTL_EXEC" enable 'ip6tables.service'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_logging_syslogd_can_sendmail" strategy="enable">
+var_logging_syslogd_can_sendmail="<sub idref="var_logging_syslogd_can_sendmail" />"
+
+setsebool -P logging_syslogd_can_sendmail $var_logging_syslogd_can_sendmail
+</fix><fix rule="audit_rules_privileged_commands_gpasswd">
+
+PATTERN="-a always,exit -F path=/usr/bin/gpasswd\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/gpasswd -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="sshd_use_approved_macs">
+sshd_approved_macs="<sub idref="sshd_approved_macs" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^MACs' "$sshd_approved_macs" '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_all_accept_ra" strategy="disable">
+sysctl_net_ipv6_conf_all_accept_ra_value="<sub idref="sysctl_net_ipv6_conf_all_accept_ra_value" />"
+
+#
+# Set runtime for net.ipv6.conf.all.accept_ra
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.all.accept_ra="$sysctl_net_ipv6_conf_all_accept_ra_value"
+
+#
+# If net.ipv6.conf.all.accept_ra present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.all.accept_ra = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.all.accept_ra' "$sysctl_net_ipv6_conf_all_accept_ra_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_fs_suid_dumpable" strategy="disable">
+
+#
+# Set runtime for fs.suid_dumpable
+#
+/sbin/sysctl -q -n -w fs.suid_dumpable="0"
+
+#
+# If fs.suid_dumpable present in /etc/sysctl.conf, change value to "0"
+#	else, add "fs.suid_dumpable = 0" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^fs.suid_dumpable' "0" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_hourly" strategy="configure">
+
+chgrp 0 /etc/cron.hourly/
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_rds_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install rds" /etc/modprobe.d/rds.conf ; then
+	sed -i 's/^install rds.*/install rds /bin/true/g' /etc/modprobe.d/rds.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/rds.conf
+	echo "install rds /bin/true" &gt;&gt; /etc/modprobe.d/rds.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_tcp_server" strategy="enable">
+var_selinuxuser_tcp_server="<sub idref="var_selinuxuser_tcp_server" />"
+
+setsebool -P selinuxuser_tcp_server $var_selinuxuser_tcp_server
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_direct_dri_enabled" strategy="enable">
+var_selinuxuser_direct_dri_enabled="<sub idref="var_selinuxuser_direct_dri_enabled" />"
+
+setsebool -P selinuxuser_direct_dri_enabled $var_selinuxuser_direct_dri_enabled
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openscap-scanner_installed" strategy="enable">
+if ! rpm -q --quiet "openscap-scanner" ; then
+    yum install -y "openscap-scanner"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_aide_installed" strategy="enable">
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_allow" strategy="configure">
+
+chown 0 /etc/cron.allow
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openssh-server_installed" strategy="enable">
+if ! rpm -q --quiet "openssh-server" ; then
+    yum install -y "openssh-server"
+fi
+</fix><fix rule="restrict_serial_port_logins">sed -i '/ttyS/d' /etc/securetty
+</fix><fix rule="audit_rules_execution_semanage">
+
+PATTERN="-a always,exit -F path=/usr/sbin/semanage\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/semanage -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_logadm_exec_content" strategy="enable">
+var_logadm_exec_content="<sub idref="var_logadm_exec_content" />"
+
+setsebool -P logadm_exec_content $var_logadm_exec_content
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_rp_filter" strategy="disable">
+sysctl_net_ipv4_conf_all_rp_filter_value="<sub idref="sysctl_net_ipv4_conf_all_rp_filter_value" />"
+
+#
+# Set runtime for net.ipv4.conf.all.rp_filter
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.rp_filter="$sysctl_net_ipv4_conf_all_rp_filter_value"
+
+#
+# If net.ipv4.conf.all.rp_filter present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.rp_filter = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.rp_filter' "$sysctl_net_ipv4_conf_all_rp_filter_value" '@CCENUM@'
+</fix><fix rule="audit_rules_file_deletion_events_renameat">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S renameat.*"
+	GROUP="delete"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S renameat -F auid&gt;=1000 -F auid!=unset -F key=delete"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="audit_rules_dac_modification_lremovexattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S lremovexattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S lremovexattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_execmod" strategy="enable">
+var_selinuxuser_execmod="<sub idref="var_selinuxuser_execmod" />"
+
+setsebool -P selinuxuser_execmod $var_selinuxuser_execmod
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_udp_server" strategy="enable">
+var_selinuxuser_udp_server="<sub idref="var_selinuxuser_udp_server" />"
+
+setsebool -P selinuxuser_udp_server $var_selinuxuser_udp_server
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_mmap_low_allowed" strategy="enable">
+var_mmap_low_allowed="<sub idref="var_mmap_low_allowed" />"
+
+setsebool -P mmap_low_allowed $var_mmap_low_allowed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="network_nmcli_permissions" strategy="restrict">
+printf "[Disable General User Access to NetworkManager]\nIdentity=default\nAction=org.freedesktop.NetworkManager.*\nResultAny=no\nResultInactive=no\nResultActive=auth_admin\n" &gt; /etc/polkit-1/localauthority/20-org.d/10-nm-harden-access.pkla
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_nis_removed" strategy="disable">
+# CAUTION: This remediation script will remove nis
+#	   from the system, and may remove any packages
+#	   that depend on nis. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "nis" ; then
+    yum remove -y "nis"
+fi
+</fix><fix rule="banner_etc_issue">
+login_banner_text="<sub idref="login_banner_text" />"
+
+# There was a regular-expression matching various banners, needs to be expanded
+expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
+formatted=$(echo "$expanded" | fold -sw 80)
+
+cat &lt;&lt;EOF &gt;/etc/issue
+$formatted
+EOF
+
+printf "\n" &gt;&gt; /etc/issue
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_ucredit" strategy="restrict">
+var_password_pam_ucredit="<sub idref="var_password_pam_ucredit" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^ucredit' $var_password_pam_ucredit '@CCENUM@' '%s = %s'
+</fix><fix rule="rpm_verify_hashes">
+# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
+files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
+# From files names get package names and change newline to space, because rpm writes each package to new line
+packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
+
+yum reinstall -y $packages_to_reinstall
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_policycoreutils_installed" strategy="enable">
+if ! rpm -q --quiet "policycoreutils" ; then
+    yum install -y "policycoreutils"
+fi
+</fix><fix rule="audit_rules_login_events_faillock">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/var/run/faillock" "wa" "logins"
+fix_audit_watch_rule "augenrules" "/var/run/faillock" "wa" "logins"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_sysadm_exec_content" strategy="enable">
+var_sysadm_exec_content="<sub idref="var_sysadm_exec_content" />"
+
+setsebool -P sysadm_exec_content $var_sysadm_exec_content
+</fix><fix reboot="false" rule="mount_option_dev_shm_nodev">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "no" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nodev" "tmpfs" "tmpfs"
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_tar_installed" strategy="enable">
+if ! rpm -q --quiet "tar" ; then
+    yum install -y "tar"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_sshd_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'sshd.service'
+"$SYSTEMCTL_EXEC" disable 'sshd.service'
+"$SYSTEMCTL_EXEC" mask 'sshd.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^sshd.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'sshd.socket'
+    "$SYSTEMCTL_EXEC" disable 'sshd.socket'
+    "$SYSTEMCTL_EXEC" mask 'sshd.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'sshd.service' || true
+</fix><fix rule="sshd_disable_rhosts_rsa">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_send_redirects" strategy="disable">
+
+#
+# Set runtime for net.ipv4.conf.default.send_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.send_redirects="0"
+
+#
+# If net.ipv4.conf.default.send_redirects present in /etc/sysctl.conf, change value to "0"
+#	else, add "net.ipv4.conf.default.send_redirects = 0" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.send_redirects' "0" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xdm_exec_bootloader" strategy="enable">
+var_xdm_exec_bootloader="<sub idref="var_xdm_exec_bootloader" />"
+
+setsebool -P xdm_exec_bootloader $var_xdm_exec_bootloader
+</fix><fix reboot="false" rule="mount_option_home_nosuid">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /home || { echo "Not remediating, because there is no record of /home in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/home" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/home"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_fips_mode" strategy="enable">
+var_fips_mode="<sub idref="var_fips_mode" />"
+
+setsebool -P fips_mode $var_fips_mode
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_polyinstantiation_enabled" strategy="enable">
+var_polyinstantiation_enabled="<sub idref="var_polyinstantiation_enabled" />"
+
+setsebool -P polyinstantiation_enabled $var_polyinstantiation_enabled
+</fix><fix rule="accounts_no_uid_except_zero">awk -F: '$3 == 0 &amp;&amp; $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_cron_weekly" strategy="configure">
+chmod 0700 /etc/cron.weekly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_ping" strategy="enable">
+var_selinuxuser_ping="<sub idref="var_selinuxuser_ping" />"
+
+setsebool -P selinuxuser_ping $var_selinuxuser_ping
+</fix><fix rule="audit_rules_execution_restorecon">
+
+PATTERN="-a always,exit -F path=/usr/sbin/restorecon\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/restorecon -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="ensure_redhat_gpgkey_installed"># The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
+readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
+readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
+
+# Location of the key we would like to import (once it's integrity verified)
+readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
+
+RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
+
+# Verify /etc/pki/rpm-gpg directory permissions are safe
+if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
+then
+  # If they are safe, try to obtain fingerprints from the key file
+  # (to ensure there won't be e.g. CRC error).
+
+  readarray -t GPG_OUT &lt; &lt;(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
+
+  GPG_RESULT=$?
+  # No CRC error, safe to proceed
+  if [ "${GPG_RESULT}" -eq "0" ]
+  then
+    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
+      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
+      rpm --import "${REDHAT_RELEASE_KEY}"
+    }
+  fi
+fi
+</fix><fix rule="accounts_minimum_age_login_defs">
+var_accounts_minimum_age_login_defs="<sub idref="var_accounts_minimum_age_login_defs" />"
+
+grep -q ^PASS_MIN_DAYS /etc/login.defs &amp;&amp; \
+  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" &gt;&gt; /etc/login.defs
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_secadm_exec_content" strategy="enable">
+var_secadm_exec_content="<sub idref="var_secadm_exec_content" />"
+
+setsebool -P secadm_exec_content $var_secadm_exec_content
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv6_conf_default_accept_redirects" strategy="disable">
+sysctl_net_ipv6_conf_default_accept_redirects_value="<sub idref="sysctl_net_ipv6_conf_default_accept_redirects_value" />"
+
+#
+# Set runtime for net.ipv6.conf.default.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv6.conf.default.accept_redirects="$sysctl_net_ipv6_conf_default_accept_redirects_value"
+
+#
+# If net.ipv6.conf.default.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv6.conf.default.accept_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.default.accept_redirects' "$sysctl_net_ipv6_conf_default_accept_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_login_console_enabled" strategy="enable">
+var_login_console_enabled="<sub idref="var_login_console_enabled" />"
+
+setsebool -P login_console_enabled $var_login_console_enabled
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_crontab" strategy="configure">
+
+chgrp 0 /etc/crontab
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_usbguard_installed" strategy="enable">
+if ! rpm -q --quiet "usbguard" ; then
+    yum install -y "usbguard"
+fi
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_secure_redirects" strategy="disable">
+sysctl_net_ipv4_conf_default_secure_redirects_value="<sub idref="sysctl_net_ipv4_conf_default_secure_redirects_value" />"
+
+#
+# Set runtime for net.ipv4.conf.default.secure_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.secure_redirects="$sysctl_net_ipv4_conf_default_secure_redirects_value"
+
+#
+# If net.ipv4.conf.default.secure_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.secure_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.secure_redirects' "$sysctl_net_ipv4_conf_default_secure_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_rsh_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'rsh.service'
+"$SYSTEMCTL_EXEC" disable 'rsh.service'
+"$SYSTEMCTL_EXEC" mask 'rsh.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^rsh.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'rsh.socket'
+    "$SYSTEMCTL_EXEC" disable 'rsh.socket'
+    "$SYSTEMCTL_EXEC" mask 'rsh.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'rsh.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_passwd" strategy="configure">
+
+chown 0 /etc/passwd
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_daemons_use_tcp_wrapper" strategy="enable">
+var_daemons_use_tcp_wrapper="<sub idref="var_daemons_use_tcp_wrapper" />"
+
+setsebool -P daemons_use_tcp_wrapper $var_daemons_use_tcp_wrapper
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_cron_can_relabel" strategy="enable">
+var_cron_can_relabel="<sub idref="var_cron_can_relabel" />"
+
+setsebool -P cron_can_relabel $var_cron_can_relabel
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_weekly" strategy="configure">
+
+chgrp 0 /etc/cron.weekly/
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_vfat_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install vfat" /etc/modprobe.d/vfat.conf ; then
+	sed -i 's/^install vfat.*/install vfat /bin/true/g' /etc/modprobe.d/vfat.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/vfat.conf
+	echo "install vfat /bin/true" &gt;&gt; /etc/modprobe.d/vfat.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_xinetd_removed" strategy="disable">
+# CAUTION: This remediation script will remove xinetd
+#	   from the system, and may remove any packages
+#	   that depend on xinetd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "xinetd" ; then
+    yum remove -y "xinetd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_deny_ptrace" strategy="enable">
+var_deny_ptrace="<sub idref="var_deny_ptrace" />"
+
+setsebool -P deny_ptrace $var_deny_ptrace
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_ip_forward" strategy="disable">
+
+#
+# Set runtime for net.ipv4.ip_forward
+#
+/sbin/sysctl -q -n -w net.ipv4.ip_forward="0"
+
+#
+# If net.ipv4.ip_forward present in /etc/sysctl.conf, change value to "0"
+#	else, add "net.ipv4.ip_forward = 0" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.ip_forward' "0" '@CCENUM@'
+</fix><fix rule="audit_rules_kernel_module_loading_init">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S init_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S init_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="disable_prelink"># prelink not installed
+if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
+    return 0
+fi
+
+if grep -q ^PRELINKING /etc/sysconfig/prelink
+then
+    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+else
+    printf '\n' &gt;&gt; /etc/sysconfig/prelink
+    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' &gt;&gt; /etc/sysconfig/prelink
+fi
+
+# Undo previous prelink changes to binaries if prelink is available.
+if test -x /usr/sbin/prelink; then
+    /usr/sbin/prelink -ua
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_mysql_connect_enabled" strategy="enable">
+var_selinuxuser_mysql_connect_enabled="<sub idref="var_selinuxuser_mysql_connect_enabled" />"
+
+setsebool -P selinuxuser_mysql_connect_enabled $var_selinuxuser_mysql_connect_enabled
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnet-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnet-server
+#	   from the system, and may remove any packages
+#	   that depend on telnet-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnet-server" ; then
+    yum remove -y "telnet-server"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_root_login" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitRootLogin\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitRootLogin no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitRootLogin no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="auditd_audispd_syslog_plugin_activated">
+var_syslog_active="yes"
+
+
+AUDISP_SYSLOGCONFIG=/etc/audisp/plugins.d/syslog.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDISP_SYSLOGCONFIG '^active' "$var_syslog_active" "@CCENUM@"
+</fix><fix complexity="high" disruption="medium" reboot="false" rule="rpm_verify_permissions" strategy="restrict">
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
+
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS &lt; &lt;(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
+
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
+do
+	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
+done
+
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+	rpm --setperms "${RPM_PACKAGE}"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_vim_installed" strategy="enable">
+if ! rpm -q --quiet "vim" ; then
+    yum install -y "vim"
+fi
+</fix><fix rule="audit_rules_login_events_lastlog">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/var/log/lastlog" "wa" "logins"
+fix_audit_watch_rule "augenrules" "/var/log/lastlog" "wa" "logins"
+</fix><fix rule="audit_rules_privileged_commands_umount">
+
+PATTERN="-a always,exit -F path=/usr/bin/umount\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/umount -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_opensc_installed" strategy="enable">
+if ! rpm -q --quiet "opensc" ; then
+    yum install -y "opensc"
+fi
+</fix><fix rule="auditd_audispd_encrypt_sent_records">
+
+
+AUDISP_REMOTE_CONFIG="/etc/audisp/audisp-remote.conf"
+option="^enable_krb5"
+value="yes"
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDISP_REMOTE_CONFIG "$option" "$value" "@CCENUM@"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_rexec_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'rexec.service'
+"$SYSTEMCTL_EXEC" disable 'rexec.service'
+"$SYSTEMCTL_EXEC" mask 'rexec.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^rexec.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'rexec.socket'
+    "$SYSTEMCTL_EXEC" disable 'rexec.socket'
+    "$SYSTEMCTL_EXEC" mask 'rexec.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'rexec.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_cron_d" strategy="configure">
+chmod 0700 /etc/cron.d/
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_icmp_ignore_bogus_error_responses" strategy="disable">
+sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value="<sub idref="sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value" />"
+
+#
+# Set runtime for net.ipv4.icmp_ignore_bogus_error_responses
+#
+/sbin/sysctl -q -n -w net.ipv4.icmp_ignore_bogus_error_responses="$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value"
+
+#
+# If net.ipv4.icmp_ignore_bogus_error_responses present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.icmp_ignore_bogus_error_responses = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.icmp_ignore_bogus_error_responses' "$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_secure_redirects" strategy="disable">
+sysctl_net_ipv4_conf_all_secure_redirects_value="<sub idref="sysctl_net_ipv4_conf_all_secure_redirects_value" />"
+
+#
+# Set runtime for net.ipv4.conf.all.secure_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.secure_redirects="$sysctl_net_ipv4_conf_all_secure_redirects_value"
+
+#
+# If net.ipv4.conf.all.secure_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.secure_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.secure_redirects' "$sysctl_net_ipv4_conf_all_secure_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_use_priv_separation" strategy="restrict">
+var_sshd_priv_separation="<sub idref="var_sshd_priv_separation" />"
+
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*UsePrivilegeSeparation\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "UsePrivilegeSeparation $var_sshd_priv_separation" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "UsePrivilegeSeparation $var_sshd_priv_separation" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="audit_rules_dac_modification_chmod">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S chmod.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S chmod -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_logging_syslogd_use_tty" strategy="enable">
+var_logging_syslogd_use_tty="<sub idref="var_logging_syslogd_use_tty" />"
+
+setsebool -P logging_syslogd_use_tty $var_logging_syslogd_use_tty
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_monthly" strategy="configure">
+
+chgrp 0 /etc/cron.monthly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_grub2_cfg" strategy="configure">
+
+chgrp 0 /boot/grub2/grub.cfg
+</fix><fix rule="kernel_module_ipv6_option_disabled">
+# Prevent the IPv6 kernel module (ipv6) from loading the IPv6 networking stack
+echo "options ipv6 disable=1" &gt; /etc/modprobe.d/ipv6.conf
+
+# Since according to: https://access.redhat.com/solutions/72733
+# "ipv6 disable=1" options doesn't always disable the IPv6 networking stack from
+# loading, instruct also sysctl configuration to disable IPv6 according to:
+# https://access.redhat.com/solutions/8709#rhel6disable
+
+declare -a IPV6_SETTINGS=("net.ipv6.conf.all.disable_ipv6" "net.ipv6.conf.default.disable_ipv6")
+
+for setting in ${IPV6_SETTINGS[@]}
+do
+	# Set runtime =1 for setting
+	/sbin/sysctl -q -n -w "$setting=1"
+
+	# If setting is present in /etc/sysctl.conf, change value to "1"
+	# else, add "$setting = 1" to /etc/sysctl.conf
+	if grep -q ^"$setting" /etc/sysctl.conf ; then
+		sed -i "s/^$setting.*/$setting = 1/g" /etc/sysctl.conf
+	else
+		echo "" &gt;&gt; /etc/sysctl.conf
+		echo "# Set $setting = 1 per security requirements" &gt;&gt; /etc/sysctl.conf
+		echo "$setting = 1" &gt;&gt; /etc/sysctl.conf
+	fi
+done
+</fix><fix rule="account_disable_post_pw_expiration">
+var_account_disable_post_pw_expiration="<sub idref="var_account_disable_post_pw_expiration" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/default/useradd' '^INACTIVE' "$var_account_disable_post_pw_expiration" '@CCENUM@' '%s=%s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_gshadow" strategy="configure">
+
+chown 0 /etc/gshadow
+</fix><fix rule="securetty_root_login_console_only">sed -i '/^vc\//d' /etc/securetty
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_rsyslog_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'rsyslog.service'
+"$SYSTEMCTL_EXEC" enable 'rsyslog.service'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_sctp_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install sctp" /etc/modprobe.d/sctp.conf ; then
+	sed -i 's/^install sctp.*/install sctp /bin/true/g' /etc/modprobe.d/sctp.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/sctp.conf
+	echo "install sctp /bin/true" &gt;&gt; /etc/modprobe.d/sctp.conf
+fi
+</fix><fix rule="audit_rules_privileged_commands_chsh">
+
+PATTERN="-a always,exit -F path=/usr/bin/chsh\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/chsh -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="no_direct_root_logins">echo &gt; /etc/securetty
+</fix><fix rule="accounts_passwords_pam_faillock_deny">
+var_accounts_passwords_pam_faillock_deny="<sub idref="var_accounts_passwords_pam_faillock_deny" />"
+<sub idref="function_include_set_faillock_option" />
+include_set_faillock_option
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+	set_faillock_option "$pam_file" "deny" "$var_accounts_passwords_pam_faillock_deny"
+done
+</fix><fix rule="audit_rules_privileged_commands_userhelper">
+
+PATTERN="-a always,exit -F path=/usr/sbin/userhelper\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/sbin/userhelper -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="grub2_enable_selinux">
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openssh-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove openssh-server
+#	   from the system, and may remove any packages
+#	   that depend on openssh-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "openssh-server" ; then
+    yum remove -y "openssh-server"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_gdm_removed" strategy="disable">
+# CAUTION: This remediation script will remove gdm
+#	   from the system, and may remove any packages
+#	   that depend on gdm. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "gdm" ; then
+    yum remove -y "gdm"
+fi
+</fix><fix rule="sysctl_kernel_exec_shield">
+
+if [ "$(getconf LONG_BIT)" = "32" ] ; then
+  #
+  # Set runtime for kernel.exec-shield
+  #
+  sysctl -q -n -w kernel.exec-shield=1
+
+  #
+  # If kernel.exec-shield present in /etc/sysctl.conf, change value to "1"
+  #	else, add "kernel.exec-shield = 1" to /etc/sysctl.conf
+  #
+<sub idref="function_replace_or_append" />
+  replace_or_append '/etc/sysctl.conf' '^kernel.exec-shield' '1' '@CCENUM@'
+fi
+
+if [ "$(getconf LONG_BIT)" = "64" ] ; then
+  if grep --silent noexec /boot/grub2/grub*.cfg ; then 
+        sed -i "s/noexec.*//g" /etc/default/grub
+        sed -i "s/noexec.*//g" /etc/grub.d/*
+        GRUBCFG=`ls | grep '.cfg$'`
+        grub2-mkconfig -o "/boot/grub2/$GRUBCFG"
+  fi
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_scap-security-guide_installed" strategy="enable">
+if ! rpm -q --quiet "scap-security-guide" ; then
+    yum install -y "scap-security-guide"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_write_logs" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*write_logs\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "write_logs = yes" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_gshadow" strategy="configure">
+chmod 0000 /etc/gshadow
+</fix><fix rule="audit_rules_dac_modification_fsetxattr">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fsetxattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fsetxattr -F auid&gt;=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_accept_redirects" strategy="disable">
+sysctl_net_ipv4_conf_default_accept_redirects_value="<sub idref="sysctl_net_ipv4_conf_default_accept_redirects_value" />"
+
+#
+# Set runtime for net.ipv4.conf.default.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.accept_redirects="$sysctl_net_ipv4_conf_default_accept_redirects_value"
+
+#
+# If net.ipv4.conf.default.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.accept_redirects = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.accept_redirects' "$sysctl_net_ipv4_conf_default_accept_redirects_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_vsftpd_removed" strategy="disable">
+# CAUTION: This remediation script will remove vsftpd
+#	   from the system, and may remove any packages
+#	   that depend on vsftpd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "vsftpd" ; then
+    yum remove -y "vsftpd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_autofs_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'autofs.service'
+"$SYSTEMCTL_EXEC" disable 'autofs.service'
+"$SYSTEMCTL_EXEC" mask 'autofs.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^autofs.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'autofs.socket'
+    "$SYSTEMCTL_EXEC" disable 'autofs.socket'
+    "$SYSTEMCTL_EXEC" mask 'autofs.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'autofs.service' || true
+</fix><fix reboot="false" rule="mount_option_nosuid_removable_partitions">
+var_removable_partition="<sub idref="var_removable_partition" />"
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+</fix><fix reboot="false" rule="mount_option_noexec_removable_partitions">
+var_removable_partition="<sub idref="var_removable_partition" />"
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "noexec" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_hfs_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install hfs" /etc/modprobe.d/hfs.conf ; then
+	sed -i 's/^install hfs.*/install hfs /bin/true/g' /etc/modprobe.d/hfs.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/hfs.conf
+	echo "install hfs /bin/true" &gt;&gt; /etc/modprobe.d/hfs.conf
+fi
+</fix><fix rule="set_password_hashing_algorithm_libuserconf">
+LIBUSER_CONF="/etc/libuser.conf"
+CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
+
+# Try find crypt_style in [defaults] section. If it is here, then change algorithm to sha512.
+# If it isn't here, then add it to [defaults] section.
+if grep -qzosP $CRYPT_STYLE_REGEX $LIBUSER_CONF ; then
+        sed -i "s/\(crypt_style[[:space:]]*=[[:space:]]*\).*/\1sha512/g" $LIBUSER_CONF
+elif grep -qs "\[defaults]" $LIBUSER_CONF ; then
+        sed -i "/[[:space:]]*\[defaults]/a crypt_style = sha512" $LIBUSER_CONF
+else
+        echo -e "[defaults]\ncrypt_style = sha512" &gt;&gt; $LIBUSER_CONF
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_mock_enable_homedirs" strategy="enable">
+var_mock_enable_homedirs="<sub idref="var_mock_enable_homedirs" />"
+
+setsebool -P mock_enable_homedirs $var_mock_enable_homedirs
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_weekly" strategy="configure">
+
+chown 0 /etc/cron.weekly/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_group" strategy="configure">
+chmod 0644 /etc/group
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_daily" strategy="configure">
+
+chgrp 0 /etc/cron.daily/
+</fix><fix reboot="false" rule="mount_option_nodev_removable_partitions">
+var_removable_partition="<sub idref="var_removable_partition" />"
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nodev" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="accounts_password_pam_difok" strategy="restrict">
+var_password_pam_difok="<sub idref="var_password_pam_difok" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/security/pwquality.conf' '^difok' $var_password_pam_difok '@CCENUM@' '%s = %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_domain_fd_use" strategy="enable">
+var_domain_fd_use="<sub idref="var_domain_fd_use" />"
+
+setsebool -P domain_fd_use $var_domain_fd_use
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_default_accept_source_route" strategy="disable">
+sysctl_net_ipv4_conf_default_accept_source_route_value="<sub idref="sysctl_net_ipv4_conf_default_accept_source_route_value" />"
+
+#
+# Set runtime for net.ipv4.conf.default.accept_source_route
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.accept_source_route="$sysctl_net_ipv4_conf_default_accept_source_route_value"
+
+#
+# If net.ipv4.conf.default.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.accept_source_route = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.accept_source_route' "$sysctl_net_ipv4_conf_default_accept_source_route_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ypserv_removed" strategy="disable">
+# CAUTION: This remediation script will remove ypserv
+#	   from the system, and may remove any packages
+#	   that depend on ypserv. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "ypserv" ; then
+    yum remove -y "ypserv"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_cron_system_cronjob_use_shares" strategy="enable">
+var_cron_system_cronjob_use_shares="<sub idref="var_cron_system_cronjob_use_shares" />"
+
+setsebool -P cron_system_cronjob_use_shares $var_cron_system_cronjob_use_shares
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_xinetd_disabled" strategy="disable">
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'xinetd.service'
+"$SYSTEMCTL_EXEC" disable 'xinetd.service'
+"$SYSTEMCTL_EXEC" mask 'xinetd.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^xinetd.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'xinetd.socket'
+    "$SYSTEMCTL_EXEC" disable 'xinetd.socket'
+    "$SYSTEMCTL_EXEC" mask 'xinetd.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'xinetd.service' || true
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_xguest_connect_network" strategy="enable">
+var_xguest_connect_network="<sub idref="var_xguest_connect_network" />"
+
+setsebool -P xguest_connect_network $var_xguest_connect_network
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_set_loglevel_info" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*LogLevel\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "LogLevel INFO" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "LogLevel INFO" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="audit_rules_privileged_commands_crontab">
+
+PATTERN="-a always,exit -F path=/usr/bin/crontab\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/crontab -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix rule="audit_rules_file_deletion_events_unlink">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S unlink.*"
+	GROUP="delete"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S unlink -F auid&gt;=1000 -F auid!=unset -F key=delete"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_cron_daily" strategy="configure">
+chmod 0700 /etc/cron.daily/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_kerberos_enabled" strategy="enable">
+var_kerberos_enabled="<sub idref="var_kerberos_enabled" />"
+
+setsebool -P kerberos_enabled $var_kerberos_enabled
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_rhosts" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*IgnoreRhosts\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "IgnoreRhosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "IgnoreRhosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_d" strategy="configure">
+
+chgrp 0 /etc/cron.d/
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_sshd_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'sshd.service'
+"$SYSTEMCTL_EXEC" enable 'sshd.service'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_pcscd_enabled" strategy="enable">
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'pcscd.service'
+"$SYSTEMCTL_EXEC" enable 'pcscd.service'
+</fix><fix rule="sshd_use_approved_ciphers">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^Ciphers' 'aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc' '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="kernel_module_usb-storage_disabled" strategy="disable">if LC_ALL=C grep -q -m 1 "^install usb-storage" /etc/modprobe.d/usb-storage.conf ; then
+	sed -i 's/^install usb-storage.*/install usb-storage /bin/true/g' /etc/modprobe.d/usb-storage.conf
+else
+	echo -e "\n# Disable per security requirements" &gt;&gt; /etc/modprobe.d/usb-storage.conf
+	echo "install usb-storage /bin/true" &gt;&gt; /etc/modprobe.d/usb-storage.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_grub2_cfg" strategy="configure">
+
+chown 0 /boot/grub2/grub.cfg
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_domain_kernel_load_modules" strategy="enable">
+var_domain_kernel_load_modules="<sub idref="var_domain_kernel_load_modules" />"
+
+setsebool -P domain_kernel_load_modules $var_domain_kernel_load_modules
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_fs_protected_hardlinks" strategy="disable">
+
+#
+# Set runtime for fs.protected_hardlinks
+#
+/sbin/sysctl -q -n -w fs.protected_hardlinks="1"
+
+#
+# If fs.protected_hardlinks present in /etc/sysctl.conf, change value to "1"
+#	else, add "fs.protected_hardlinks = 1" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^fs.protected_hardlinks' "1" '@CCENUM@'
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_log_martians" strategy="disable">
+sysctl_net_ipv4_conf_all_log_martians_value="<sub idref="sysctl_net_ipv4_conf_all_log_martians_value" />"
+
+#
+# Set runtime for net.ipv4.conf.all.log_martians
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.log_martians="$sysctl_net_ipv4_conf_all_log_martians_value"
+
+#
+# If net.ipv4.conf.all.log_martians present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.log_martians = value" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.log_martians' "$sysctl_net_ipv4_conf_all_log_martians_value" '@CCENUM@'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_secure_mode_policyload" strategy="enable">
+var_secure_mode_policyload="<sub idref="var_secure_mode_policyload" />"
+
+setsebool -P secure_mode_policyload $var_secure_mode_policyload
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sebool_selinuxuser_execheap" strategy="enable">
+var_selinuxuser_execheap="<sub idref="var_selinuxuser_execheap" />"
+
+setsebool -P selinuxuser_execheap $var_selinuxuser_execheap
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_sshd_private_key" strategy="configure">
+find /etc/ssh/ -regex '^.*_key$' -exec chmod 0640 {} \;
+</fix><fix rule="audit_rules_privileged_commands_newgrp">
+
+PATTERN="-a always,exit -F path=/usr/bin/newgrp\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/newgrp -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix><fix complexity="low" disruption="medium" reboot="true" rule="sysctl_net_ipv4_conf_all_send_redirects" strategy="disable">
+
+#
+# Set runtime for net.ipv4.conf.all.send_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.send_redirects="0"
+
+#
+# If net.ipv4.conf.all.send_redirects present in /etc/sysctl.conf, change value to "0"
+#	else, add "net.ipv4.conf.all.send_redirects = 0" to /etc/sysctl.conf
+#
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.send_redirects' "0" '@CCENUM@'
+</fix><fix rule="audit_rules_privileged_commands_chage">
+
+PATTERN="-a always,exit -F path=/usr/bin/chage\\s\\+.*"
+GROUP="privileged"
+# Although the fix doesn't use ARCH, we reset it because it could have been set by some other remediation
+ARCH=""
+FULL_RULE="-a always,exit -F path=/usr/bin/chage -F perm=x -F auid&gt;=1000 -F auid!=unset -F key=privileged"
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+</fix></fix-group></fix-content>

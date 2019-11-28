@@ -1,0 +1,1333 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="ansible" system="urn:xccdf:fix:script:ansible" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix complexity="low" disruption="low" reboot="false" rule="file_owner_node_config" strategy="configure">- name: Test for existence /etc/origin/node/node-config.yaml
+  stat:
+    path: /etc/origin/node/node-config.yaml
+  register: file_exists
+  tags:
+    - file_owner_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80629-9
+
+- name: Ensure owner 0 on /etc/origin/node/node-config.yaml
+  file:
+    path: /etc/origin/node/node-config.yaml
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80629-9
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_cni_conf" strategy="configure">- name: Find /etc/cni/net.d/ file(s) matching ^.*$
+  find:
+    paths: /etc/cni/net.d/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_groupowner_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80611-7
+
+- name: Ensure group owner on /etc/cni/net.d/ file(s) matching ^.*$
+  file:
+    path: '{{ item.path }}'
+    group: '0'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_groupowner_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80611-7
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_origin" strategy="configure">- name: Test for existence /etc/origin/
+  stat:
+    path: /etc/origin/
+  register: file_exists
+  tags:
+    - file_permissions_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure permission 0700 on /etc/origin/
+  file:
+    path: /etc/origin/
+    mode: '0700'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_openvswitch" strategy="configure">- name: Find /etc/origin/openvswitch/ file(s) matching ^.*$
+  find:
+    paths: /etc/origin/openvswitch/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_groupowner_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82172-8
+
+- name: Ensure group owner on /etc/origin/openvswitch/ file(s) matching ^.*$
+  file:
+    path: '{{ item.path }}'
+    group: '0'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_groupowner_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82172-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_openshift_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/master/openshift-master.kubeconfig
+  stat:
+    path: /etc/origin/master/openshift-master.kubeconfig
+  register: file_exists
+  tags:
+    - file_groupowner_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80615-8
+
+- name: Ensure group owner 0 on /etc/origin/master/openshift-master.kubeconfig
+  file:
+    path: /etc/origin/master/openshift-master.kubeconfig
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80615-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_client_cert_auth" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_CLIENT_CERT_AUTH=
+    line: ETCD_CLIENT_CERT_AUTH=true
+    create: true
+  tags:
+    - etcd_client_cert_auth
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80579-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_peer_key_file" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_PEER_KEY_FILE
+    line: ETCD_PEER_KEY_FILE=/etc/etcd/peer.key
+    create: true
+  tags:
+    - etcd_peer_key_file
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80581-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_etcd" strategy="configure">- name: Test for existence /etc/origin/node/pods/etcd.yaml
+  stat:
+    path: /etc/origin/node/pods/etcd.yaml
+  register: file_exists
+  tags:
+    - file_owner_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80625-7
+
+- name: Ensure owner 0 on /etc/origin/node/pods/etcd.yaml
+  file:
+    path: /etc/origin/node/pods/etcd.yaml
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80625-7
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_admin_conf" strategy="configure">- name: Test for existence /etc/origin/master/admin.kubeconfig
+  stat:
+    path: /etc/origin/master/admin.kubeconfig
+  register: file_exists
+  tags:
+    - file_groupowner_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80610-9
+
+- name: Ensure group owner 0 on /etc/origin/master/admin.kubeconfig
+  file:
+    path: /etc/origin/master/admin.kubeconfig
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80610-9
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_openshift_node_service" strategy="configure">- name: Test for existence /etc/systemd/system/atomic-openshift-node.service
+  stat:
+    path: /etc/systemd/system/atomic-openshift-node.service
+  register: file_exists
+  tags:
+    - file_permissions_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80643-0
+
+- name: Ensure permission 0644 on /etc/systemd/system/atomic-openshift-node.service
+  file:
+    path: /etc/systemd/system/atomic-openshift-node.service
+    mode: '0644'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80643-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_origin" strategy="configure">- name: Test for existence /etc/origin/
+  stat:
+    path: /etc/origin/
+  register: file_exists
+  tags:
+    - file_groupowner_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure group owner 0 on /etc/origin/
+  file:
+    path: /etc/origin/
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_openvswitch" strategy="configure">- name: Find /etc/origin/openvswitch/ file(s)
+  find:
+    paths: /etc/origin/openvswitch/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_permissions_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82173-6
+
+- name: Set permissions for /etc/origin/openvswitch/ file(s)
+  file:
+    path: '{{ item.path }}'
+    mode: '0644'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_permissions_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82173-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_cni_conf" strategy="configure">- name: Find /etc/cni/net.d/ file(s)
+  find:
+    paths: /etc/cni/net.d/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_permissions_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80634-9
+
+- name: Set permissions for /etc/cni/net.d/ file(s)
+  file:
+    path: '{{ item.path }}'
+    mode: '0644'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_permissions_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80634-9
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_node_config" strategy="configure">- name: Test for existence /etc/origin/node/node-config.yaml
+  stat:
+    path: /etc/origin/node/node-config.yaml
+  register: file_exists
+  tags:
+    - file_groupowner_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80617-4
+
+- name: Ensure group owner 0 on /etc/origin/node/node-config.yaml
+  file:
+    path: /etc/origin/node/node-config.yaml
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80617-4
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_openvswitch" strategy="configure">- name: Find /etc/origin/openvswitch/ file(s) matching ^.*$
+  find:
+    paths: /etc/origin/openvswitch/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_owner_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82171-0
+
+- name: Ensure group owner on /etc/origin/openvswitch/ file(s) matching ^.*$
+  file:
+    path: '{{ item.path }}'
+    owner: '0'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_owner_master_openvswitch
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82171-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_openshift_node_client_crt" strategy="configure">- name: Test for existence /etc/origin/node/client-ca.crt
+  stat:
+    path: /etc/origin/node/client-ca.crt
+  register: file_exists
+  tags:
+    - file_groupowner_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80619-0
+
+- name: Ensure group owner 0 on /etc/origin/node/client-ca.crt
+  file:
+    path: /etc/origin/node/client-ca.crt
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80619-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_admin_conf" strategy="configure">- name: Test for existence /etc/origin/master/admin.kubeconfig
+  stat:
+    path: /etc/origin/master/admin.kubeconfig
+  register: file_exists
+  tags:
+    - file_owner_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80622-4
+
+- name: Ensure owner 0 on /etc/origin/master/admin.kubeconfig
+  file:
+    path: /etc/origin/master/admin.kubeconfig
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80622-4
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_node_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/node/node.kubeconfig
+  stat:
+    path: /etc/origin/node/node.kubeconfig
+  register: file_exists
+  tags:
+    - file_owner_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80630-7
+
+- name: Ensure owner 0 on /etc/origin/node/node.kubeconfig
+  file:
+    path: /etc/origin/node/node.kubeconfig
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80630-7
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_wal_dir" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_WAL_DIR=
+    line: ETCD_WAL_DIR=/var/lib/etcd/member/wal
+    create: true
+  tags:
+    - etcd_wal_dir
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80586-1
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_openshift_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/master/openshift-master.kubeconfig
+  stat:
+    path: /etc/origin/master/openshift-master.kubeconfig
+  register: file_exists
+  tags:
+    - file_permissions_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80638-0
+
+- name: Ensure permission 0600 on /etc/origin/master/openshift-master.kubeconfig
+  file:
+    path: /etc/origin/master/openshift-master.kubeconfig
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80638-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_cni_conf" strategy="configure">- name: Find /etc/cni/net.d/ file(s) matching ^.*$
+  find:
+    paths: /etc/cni/net.d/
+    patterns: ^.*$
+    use_regex: true
+  register: files_found
+  tags:
+    - file_owner_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80623-2
+
+- name: Ensure group owner on /etc/cni/net.d/ file(s) matching ^.*$
+  file:
+    path: '{{ item.path }}'
+    owner: '0'
+  with_items:
+    - '{{ files_found.files }}'
+  tags:
+    - file_owner_master_cni_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80623-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_var_lib_etcd" strategy="configure">- name: Test for existence /var/lib/etcd/
+  stat:
+    path: /var/lib/etcd/
+  register: file_exists
+  tags:
+    - file_owner_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure owner 0 on /var/lib/etcd/
+  file:
+    path: /var/lib/etcd/
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_auto_tls" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_AUTO_TLS=
+    line: ETCD_AUTO_TLS=false
+    create: true
+  tags:
+    - etcd_auto_tls
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80573-9
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_api_server" strategy="configure">- name: Test for existence /etc/origin/node/pods/apiserver.yaml
+  stat:
+    path: /etc/origin/node/pods/apiserver.yaml
+  register: file_exists
+  tags:
+    - file_owner_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82058-9
+
+- name: Ensure owner 0 on /etc/origin/node/pods/apiserver.yaml
+  file:
+    path: /etc/origin/node/pods/apiserver.yaml
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82058-9
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_openshift_conf" strategy="configure">- name: Test for existence /etc/origin/master/master-config.yaml
+  stat:
+    path: /etc/origin/master/master-config.yaml
+  register: file_exists
+  tags:
+    - file_groupowner_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80614-1
+
+- name: Ensure group owner 0 on /etc/origin/master/master-config.yaml
+  file:
+    path: /etc/origin/master/master-config.yaml
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80614-1
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_node_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/node/node.kubeconfig
+  stat:
+    path: /etc/origin/node/node.kubeconfig
+  register: file_exists
+  tags:
+    - file_permissions_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80641-4
+
+- name: Ensure permission 0600 on /etc/origin/node/node.kubeconfig
+  file:
+    path: /etc/origin/node/node.kubeconfig
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80641-4
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_var_lib_etcd" strategy="configure">- name: Test for existence /var/lib/etcd/
+  stat:
+    path: /var/lib/etcd/
+  register: file_exists
+  tags:
+    - file_permissions_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure permission 0700 on /var/lib/etcd/
+  file:
+    path: /var/lib/etcd/
+    mode: '0700'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_openshift_node_client_crt" strategy="configure">- name: Test for existence /etc/origin/node/client-ca.crt
+  stat:
+    path: /etc/origin/node/client-ca.crt
+  register: file_exists
+  tags:
+    - file_owner_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80631-5
+
+- name: Ensure owner 0 on /etc/origin/node/client-ca.crt
+  file:
+    path: /etc/origin/node/client-ca.crt
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80631-5
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_scheduler_conf" strategy="configure">- name: Test for existence /etc/origin/master/scheduler.json
+  stat:
+    path: /etc/origin/master/scheduler.json
+  register: file_exists
+  tags:
+    - file_permissions_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80639-8
+
+- name: Ensure permission 0600 on /etc/origin/master/scheduler.json
+  file:
+    path: /etc/origin/master/scheduler.json
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80639-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_var_lib_etcd" strategy="configure">- name: Test for existence /var/lib/etcd/
+  stat:
+    path: /var/lib/etcd/
+  register: file_exists
+  tags:
+    - file_groupowner_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80621-6
+
+- name: Ensure group owner 0 on /var/lib/etcd/
+  file:
+    path: /var/lib/etcd/
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_var_lib_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80621-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_node_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/node/node.kubeconfig
+  stat:
+    path: /etc/origin/node/node.kubeconfig
+  register: file_exists
+  tags:
+    - file_groupowner_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80618-2
+
+- name: Ensure group owner 0 on /etc/origin/node/node.kubeconfig
+  file:
+    path: /etc/origin/node/node.kubeconfig
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_node_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80618-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_openshift_conf" strategy="configure">- name: Test for existence /etc/origin/master/master-config.yaml
+  stat:
+    path: /etc/origin/master/master-config.yaml
+  register: file_exists
+  tags:
+    - file_permissions_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80637-2
+
+- name: Ensure permission 0600 on /etc/origin/master/master-config.yaml
+  file:
+    path: /etc/origin/master/master-config.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80637-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_peer_auto_tls" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_PEER_AUTO_TLS=
+    line: ETCD_PEER_AUTO_TLS=false
+    create: true
+  tags:
+    - etcd_peer_auto_tls
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80583-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_controller_manager" strategy="configure">- name: Test for existence /etc/origin/node/pods/controller.yaml
+  stat:
+    path: /etc/origin/node/pods/controller.yaml
+  register: file_exists
+  tags:
+    - file_owner_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80624-0
+
+- name: Ensure owner 0 on /etc/origin/node/pods/controller.yaml
+  file:
+    path: /etc/origin/node/pods/controller.yaml
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80624-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_cert_file" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_CERT_FILE
+    line: ETCD_CERT_FILE=/etc/etcd/server.crt
+    create: true
+  tags:
+    - etcd_cert_file
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80577-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_max_wals" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_MAX_WALS=
+    line: ETCD_MAX_WALS=0
+    create: true
+  tags:
+    - etcd_max_wals
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80584-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_etcd" strategy="configure">- name: Test for existence /etc/origin/node/pods/etcd.yaml
+  stat:
+    path: /etc/origin/node/pods/etcd.yaml
+  register: file_exists
+  tags:
+    - file_groupowner_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80613-3
+
+- name: Ensure group owner 0 on /etc/origin/node/pods/etcd.yaml
+  file:
+    path: /etc/origin/node/pods/etcd.yaml
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80613-3
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_scheduler_conf" strategy="configure">- name: Test for existence /etc/origin/master/scheduler.json
+  stat:
+    path: /etc/origin/master/scheduler.json
+  register: file_exists
+  tags:
+    - file_owner_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80628-1
+
+- name: Ensure owner 0 on /etc/origin/master/scheduler.json
+  file:
+    path: /etc/origin/master/scheduler.json
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80628-1
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_openshift_conf" strategy="configure">- name: Test for existence /etc/origin/master/master-config.yaml
+  stat:
+    path: /etc/origin/master/master-config.yaml
+  register: file_exists
+  tags:
+    - file_owner_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80626-5
+
+- name: Ensure owner 0 on /etc/origin/master/master-config.yaml
+  file:
+    path: /etc/origin/master/master-config.yaml
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_openshift_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80626-5
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_peer_cert_file" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_PEER_CERT_FILE
+    line: ETCD_PEER_CERT_FILE=/etc/etcd/peer.crt
+    create: true
+  tags:
+    - etcd_peer_cert_file
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80580-4
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_scheduler_conf" strategy="configure">- name: Test for existence /etc/origin/master/scheduler.json
+  stat:
+    path: /etc/origin/master/scheduler.json
+  register: file_exists
+  tags:
+    - file_groupowner_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80616-6
+
+- name: Ensure group owner 0 on /etc/origin/master/scheduler.json
+  file:
+    path: /etc/origin/master/scheduler.json
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_scheduler_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80616-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_controller_manager" strategy="configure">- name: Test for existence /etc/origin/node/pods/controller.yaml
+  stat:
+    path: /etc/origin/node/pods/controller.yaml
+  register: file_exists
+  tags:
+    - file_permissions_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80635-6
+
+- name: Ensure permission 0600 on /etc/origin/node/pods/controller.yaml
+  file:
+    path: /etc/origin/node/pods/controller.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80635-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_origin" strategy="configure">- name: Test for existence /etc/origin/
+  stat:
+    path: /etc/origin/
+  register: file_exists
+  tags:
+    - file_owner_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure owner 0 on /etc/origin/
+  file:
+    path: /etc/origin/
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_etcd" strategy="configure">- name: Test for existence /etc/origin/node/pods/etcd.yaml
+  stat:
+    path: /etc/origin/node/pods/etcd.yaml
+  register: file_exists
+  tags:
+    - file_permissions_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80636-4
+
+- name: Ensure permission 0600 on /etc/origin/node/pods/etcd.yaml
+  file:
+    path: /etc/origin/node/pods/etcd.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_etcd
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80636-4
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_openshift_node_service" strategy="configure">- name: Test for existence /etc/systemd/system/atomic-openshift-node.service
+  stat:
+    path: /etc/systemd/system/atomic-openshift-node.service
+  register: file_exists
+  tags:
+    - file_groupowner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80620-8
+
+- name: Ensure group owner 0 on /etc/systemd/system/atomic-openshift-node.service
+  file:
+    path: /etc/systemd/system/atomic-openshift-node.service
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80620-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_master_openshift_kubeconfig" strategy="configure">- name: Test for existence /etc/origin/master/openshift-master.kubeconfig
+  stat:
+    path: /etc/origin/master/openshift-master.kubeconfig
+  register: file_exists
+  tags:
+    - file_owner_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80627-3
+
+- name: Ensure owner 0 on /etc/origin/master/openshift-master.kubeconfig
+  file:
+    path: /etc/origin/master/openshift-master.kubeconfig
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_master_openshift_kubeconfig
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80627-3
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_node_config" strategy="configure">- name: Test for existence /etc/origin/node/node-config.yaml
+  stat:
+    path: /etc/origin/node/node-config.yaml
+  register: file_exists
+  tags:
+    - file_permissions_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80640-6
+
+- name: Ensure permission 0600 on /etc/origin/node/node-config.yaml
+  file:
+    path: /etc/origin/node/node-config.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80640-6
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_api_server" strategy="configure">- name: Test for existence /etc/origin/node/pods/apiserver.yaml
+  stat:
+    path: /etc/origin/node/pods/apiserver.yaml
+  register: file_exists
+  tags:
+    - file_groupowner_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80576-2
+
+- name: Ensure group owner 0 on /etc/origin/node/pods/apiserver.yaml
+  file:
+    path: /etc/origin/node/pods/apiserver.yaml
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80576-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_master_controller_manager" strategy="configure">- name: Test for existence /etc/origin/node/pods/controller.yaml
+  stat:
+    path: /etc/origin/node/pods/controller.yaml
+  register: file_exists
+  tags:
+    - file_groupowner_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80612-5
+
+- name: Ensure group owner 0 on /etc/origin/node/pods/controller.yaml
+  file:
+    path: /etc/origin/node/pods/controller.yaml
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_master_controller_manager
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80612-5
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_openshift_node_client_crt" strategy="configure">- name: Test for existence /etc/origin/node/client-ca.crt
+  stat:
+    path: /etc/origin/node/client-ca.crt
+  register: file_exists
+  tags:
+    - file_permissions_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80642-2
+
+- name: Ensure permission 0600 on /etc/origin/node/client-ca.crt
+  file:
+    path: /etc/origin/node/client-ca.crt
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_openshift_node_client_crt
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80642-2
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_peer_client_cert_auth" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_PEER_CLIENT_CERT_AUTH=
+    line: ETCD_PEER_CLIENT_CERT_AUTH=true
+    create: true
+  tags:
+    - etcd_peer_client_cert_auth
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80582-0
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_unique_ca" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_TRUSTED_CA_FILE=
+    line: ETCD_TRUSTED_CA_FILE=/etc/etcd/ca.crt
+    create: true
+  tags:
+    - etcd_unique_ca
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80585-3
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_openshift_node_service" strategy="configure">- name: Test for existence /etc/systemd/system/atomic-openshift-node.service
+  stat:
+    path: /etc/systemd/system/atomic-openshift-node.service
+  register: file_exists
+  tags:
+    - file_owner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80632-3
+
+- name: Ensure owner 0 on /etc/systemd/system/atomic-openshift-node.service
+  file:
+    path: /etc/systemd/system/atomic-openshift-node.service
+    owner: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_owner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80632-3
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_admin_conf" strategy="configure">- name: Test for existence /etc/origin/master/admin.kubeconfig
+  stat:
+    path: /etc/origin/master/admin.kubeconfig
+  register: file_exists
+  tags:
+    - file_permissions_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80633-1
+
+- name: Ensure permission 0600 on /etc/origin/master/admin.kubeconfig
+  file:
+    path: /etc/origin/master/admin.kubeconfig
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_admin_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80633-1
+</fix><fix complexity="low" disruption="low" reboot="false" rule="etcd_key_file" strategy="restrict">- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_KEY_FILE=
+    line: ETCD_KEY_FILE=/etc/etcd/server.key
+    create: true
+  tags:
+    - etcd_key_file
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80578-8
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_master_api_server" strategy="configure">- name: Test for existence /etc/origin/node/pods/apiserver.yaml
+  stat:
+    path: /etc/origin/node/pods/apiserver.yaml
+  register: file_exists
+  tags:
+    - file_permissions_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80574-7
+
+- name: Ensure permission 0600 on /etc/origin/node/pods/apiserver.yaml
+  file:
+    path: /etc/origin/node/pods/apiserver.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_master_api_server
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80574-7
+</fix></fix-group></fix-content>

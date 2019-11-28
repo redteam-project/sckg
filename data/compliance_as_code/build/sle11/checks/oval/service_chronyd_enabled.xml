@@ -1,0 +1,113 @@
+<def-group>
+
+  <definition class="compliance" id="service_chronyd_enabled"
+  version="1">
+    <metadata>
+      <title>Service chronyd Enabled</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The chronyd service should be enabled if possible.</description>
+    </metadata>
+    <criteria comment="package chrony installed and service chronyd is configured to start" operator="AND">
+    <criterion comment="chrony installed" test_ref="test_service_chronyd_package_chrony_installed" />
+    <criteria operator="OR" comment="service chronyd is configured to start">
+      <criterion comment="chronyd runlevel 0" test_ref="test_runlevel0_chronyd_on" />
+      <criterion comment="chronyd runlevel 1" test_ref="test_runlevel1_chronyd_on" />
+      <criterion comment="chronyd runlevel 2" test_ref="test_runlevel2_chronyd_on" />
+      <criterion comment="chronyd runlevel 3" test_ref="test_runlevel3_chronyd_on" />
+      <criterion comment="chronyd runlevel 4" test_ref="test_runlevel4_chronyd_on" />
+      <criterion comment="chronyd runlevel 5" test_ref="test_runlevel5_chronyd_on" />
+      <criterion comment="chronyd runlevel 6" test_ref="test_runlevel6_chronyd_on" />
+    </criteria>
+    </criteria>
+  </definition>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel0_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel0_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel1_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel1_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel2_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel2_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel3_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel3_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel4_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel4_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel5_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel5_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel6_chronyd_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel6_chronyd_on" />
+    <unix:state state_ref="state_service_chronyd_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_object id="obj_runlevel0_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">0</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel1_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">1</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel2_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">2</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel3_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">3</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel4_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">4</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel5_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">5</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel6_chronyd_on" version="1">
+    <unix:service_name>chronyd</unix:service_name>
+    <unix:runlevel operation="equals">6</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_state comment="configured to start" id="state_service_chronyd_on" version="1">
+    <unix:start datatype="boolean">true</unix:start>
+    <unix:kill datatype="boolean">false</unix:kill>
+  </unix:runlevel_state>
+
+
+
+  <linux:rpminfo_test check="all" check_existence="all_exist"
+  id="test_service_chronyd_package_chrony_installed" version="1"
+  comment="package chrony is installed">
+    <linux:object object_ref="obj_test_service_chronyd_package_chrony_installed" />
+    
+  </linux:rpminfo_test>
+  <linux:rpminfo_object id="obj_test_service_chronyd_package_chrony_installed" version="1">
+    <linux:name>chrony</linux:name>
+  </linux:rpminfo_object>
+  
+
+</def-group>

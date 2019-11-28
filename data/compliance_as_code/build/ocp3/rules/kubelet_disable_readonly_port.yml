@@ -1,0 +1,26 @@
+description: "To disable the read-only port, edit the kubelet configuration\nfile\
+  \ <tt>/etc/origin/node/node-config.yaml</tt>\non the kubelet node(s) and set the\
+  \ below parameter:\n<pre>kubeletArguments:\n  read-only-port:\n  - '0'</pre>"
+identifiers: {cce: 80601-8}
+ocil: 'Run the following command on the kubelet node(s):
+
+  <pre>$ sudo grep -A1 read-only-port /etc/origin/node/node-config.yaml</pre>
+
+  The output should be <tt>0</tt>.'
+ocil_clause: the read-only port is not disabled
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'OpenShift disables the read-only port (<tt>10255</tt>) on all nodes by
+  setting the
+
+  <tt>read-only-port</tt> kubelet flag to <tt>0</tt>. This ensures only
+
+  authenticated connections are able to receive information about the OpenShift
+
+  system.'
+references: {cis: 2.1.5}
+severity: medium
+template: null
+title: kubelet - Disable the Read-Only Port
+warnings: []

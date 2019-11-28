@@ -1,0 +1,34 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop kdump
+  command: /sbin/service 'kdump' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_kdump_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26850-8
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-CM-6(b)
+
+- name: Switch off kdump
+  command: /sbin/chkconfig --level 0123456 'kdump' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_kdump_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26850-8
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-CM-6(b)

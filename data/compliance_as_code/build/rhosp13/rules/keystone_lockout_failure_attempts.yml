@@ -1,0 +1,32 @@
+description: "The account lockout feature limits the number of incorrect password\n\
+  attempts. If a user fails to authenticate after the maximum number\nof attempts,\
+  \ the service disables the user. \n<br />\nThe maximum number of failed authentication\
+  \ attempts is set by the\n<tt>lockout_failure_attempts</tt> option in under the\n\
+  <tt>[security_compliance]</tt> section in <tt>keystone.conf</tt>."
+identifiers: {}
+ocil: 'Run the following command to see what the maximum authentication
+
+  attempts is:
+
+  <br />
+
+  <pre>$ grep lockout_failure_attempts /etc/keystone/keystone.conf</pre>
+
+  <br />
+
+  If properly configured, the output should be:
+
+  <pre>lockout_failure_attempts=<sub idref="var_keystone_lockout_failure_attempts"
+  /></pre>'
+ocil_clause: lockout_failure_attempts is commented out or not configured properly
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Defining a maximum number of failed logon attempts can help
+
+  mitigate brute force password attacks.'
+references: {nist: AC-7}
+severity: medium
+template: null
+title: Set Maximum Number of Failed Authentication Attempts
+warnings: []

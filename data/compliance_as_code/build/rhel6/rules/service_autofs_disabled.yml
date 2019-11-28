@@ -1,0 +1,61 @@
+description: 'The <tt>autofs</tt> daemon mounts and unmounts filesystems, such as
+  user
+
+  home directories shared via NFS, on demand. In addition, autofs can be used to handle
+
+  removable media, and the default configuration provides the cdrom device as <tt>/misc/cd</tt>.
+
+  However, this method of providing access to removable media is not common, so autofs
+
+  can almost always be disabled if NFS is not in use. Even if NFS is required, it
+  may be
+
+  possible to configure filesystem mounts statically by editing <tt>/etc/fstab</tt>
+
+  rather than relying on the automounter.
+
+  <br /><br />
+
+
+  The <code>autofs</code> service can be disabled with the following command:
+
+  <pre>$ sudo chkconfig autofs off</pre>'
+identifiers: {cce: 26976-1}
+ocil: ' To check that the <code>autofs</code> service is disabled in system boot configuration,
+  run the following command: <pre>$ sudo chkconfig <code>autofs</code> --list</pre>
+  Output should indicate the <code>autofs</code> service has either not been installed,
+  or has been disabled at all runlevels, as shown in the example below: <pre>$ sudo
+  chkconfig <code>autofs</code> --list <code>autofs</code>       0:off   1:off   2:off   3:off   4:off   5:off   6:off</pre>
+
+  Run the following command to verify <code>autofs</code> is disabled through current
+  runtime configuration: <pre>$ sudo service autofs status</pre>
+
+  If the service is disabled the command will return the following output: <pre>autofs
+  is stopped</pre>'
+ocil_clause: null
+oval_external_content: null
+platform: machine
+prodtype: wrlinux1019,rhel6,rhel7,rhel8,fedora,ol7,ol8,rhv4
+rationale: 'Disabling the automounter permits the administrator to
+
+  statically control filesystem mounting through <tt>/etc/fstab</tt>.
+
+  <br /><br />
+
+  Additionally, automatically mounting filesystems permits easy introduction of
+
+  unknown devices, thereby facilitating malicious activity.'
+references: {cis: 1.1.22, cis-csc: '1,12,15,16,5', cobit5: 'APO13.01,DSS01.04,DSS05.03,DSS05.04,DSS05.05,DSS05.07,DSS05.10,DSS06.03,DSS06.10',
+  cui: 3.4.6, disa: '366,778,1958', hipaa: '164.308(a)(3)(i),164.308(a)(3)(ii)(A),164.310(d)(1),164.310(d)(2),164.312(a)(1),164.312(a)(2)(iv),164.312(b)',
+  isa-62443-2009: '4.3.3.2.2,4.3.3.5.1,4.3.3.5.2,4.3.3.6.1,4.3.3.6.2,4.3.3.6.3,4.3.3.6.4,4.3.3.6.5,4.3.3.6.6,4.3.3.6.7,4.3.3.6.8,4.3.3.6.9,4.3.3.7.2,4.3.3.7.4',
+  isa-62443-2013: 'SR 1.1,SR 1.10,SR 1.13,SR 1.2,SR 1.3,SR 1.4,SR 1.5,SR 1.7,SR 1.8,SR
+    1.9,SR 2.1,SR 2.6', iso27001-2013: 'A.11.2.6,A.13.1.1,A.13.2.1,A.18.1.4,A.6.2.1,A.6.2.2,A.7.1.1,A.9.2.1,A.9.2.2,A.9.2.3,A.9.2.4,A.9.2.6,A.9.3.1,A.9.4.2,A.9.4.3',
+  nist: 'AC-19(a),AC-19(d),AC-19(e),IA-3', nist-csf: 'PR.AC-1,PR.AC-3,PR.AC-6,PR.AC-7',
+  srg: SRG-OS-999999, stigid: RHEL-06-000526}
+severity: medium
+template:
+  backends: {}
+  name: service_disabled
+  vars: {servicename: autofs}
+title: Disable the Automounter
+warnings: []

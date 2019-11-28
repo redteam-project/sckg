@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - netconsole.service"
+  command: systemctl list-unit-files netconsole.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service netconsole
+  systemd:
+    name: "netconsole.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"netconsole.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - netconsole.socket"
+  command: systemctl list-unit-files netconsole.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket netconsole
+  systemd:
+    name: "netconsole.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"netconsole.socket" in socket_file_exists.stdout_lines[1]'

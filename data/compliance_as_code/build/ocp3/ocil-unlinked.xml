@@ -1,0 +1,2581 @@
+<?xml version="1.0"?>
+<ocil xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://scap.nist.gov/schema/ocil/2.0" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <generator>
+    <product_name>xccdf-create-ocil.xslt from SCAP Security Guide</product_name>
+    <product_version>ssg: 0.1.47</product_version>
+    <schema_version>2.0</schema_version>
+    <timestamp>2019-11-28T04:47:21Z</timestamp>
+  </generator>
+  <questionnaires>
+    <questionnaire id="scheduler_profiling_argument_ocil">
+      <title>Disable Scheduler Profiling</title>
+      <actions>
+        <test_action_ref>scheduler_profiling_argument_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_least_privilege_scc_ocil">
+      <title>Ensure Pods use Least Privileged Security Context Constraints (SCC)</title>
+      <actions>
+        <test_action_ref>general_least_privilege_scc_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_limit_cluster_admin_ocil">
+      <title>Limit Use of cluster-admin Role</title>
+      <actions>
+        <test_action_ref>general_limit_cluster_admin_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_enable_seccomp_ocil">
+      <title>Enable seccomp</title>
+      <actions>
+        <test_action_ref>general_enable_seccomp_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_use_openshift_projects_ocil">
+      <title>Use OpenShift Projects to Maintain Boundaries Between Resources</title>
+      <actions>
+        <test_action_ref>general_use_openshift_projects_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_configure_imagepolicywebhook_ocil">
+      <title>Manage Image Provenance Using ImagePolicyWebhook Adminission</title>
+      <actions>
+        <test_action_ref>general_configure_imagepolicywebhook_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_create_network_segmentation_ocil">
+      <title>Ensure Network Segmentation is Configured</title>
+      <actions>
+        <test_action_ref>general_create_network_segmentation_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="general_scc_for_privileged_containers_ocil">
+      <title>Use Security Context Constrains as Compensating Controls for Privileged Containers</title>
+      <actions>
+        <test_action_ref>general_scc_for_privileged_containers_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_configure_client_ca_ocil">
+      <title>kubelet - Configure the Client CA Certificate</title>
+      <actions>
+        <test_action_ref>kubelet_configure_client_ca_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_disable_readonly_port_ocil">
+      <title>kubelet - Disable the Read-Only Port</title>
+      <actions>
+        <test_action_ref>kubelet_disable_readonly_port_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_enable_iptables_util_chains_ocil">
+      <title>kubelet - Allow Automatic Firewall Configuration</title>
+      <actions>
+        <test_action_ref>kubelet_enable_iptables_util_chains_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_enable_server_cert_rotation_ocil">
+      <title>kubelet - Enable Server Certificate Rotation</title>
+      <actions>
+        <test_action_ref>kubelet_enable_server_cert_rotation_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_configure_tls_cert_ocil">
+      <title>Ensure That The kubelet Client Certificate Is Correctly Set</title>
+      <actions>
+        <test_action_ref>kubelet_configure_tls_cert_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_enable_streaming_connections_ocil">
+      <title>kubelet - Do Not Disable Streaming Timeouts</title>
+      <actions>
+        <test_action_ref>kubelet_enable_streaming_connections_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_configure_event_creation_ocil">
+      <title>kubelet - Do Not Limit Event Creation</title>
+      <actions>
+        <test_action_ref>kubelet_configure_event_creation_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_configure_tls_key_ocil">
+      <title>Ensure That The kubelet Server Key Is Correctly Set</title>
+      <actions>
+        <test_action_ref>kubelet_configure_tls_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_disable_hostname_override_ocil">
+      <title>kubelet - Disable Hostname Override</title>
+      <actions>
+        <test_action_ref>kubelet_disable_hostname_override_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_enable_client_cert_rotation_ocil">
+      <title>kubelet - Enable Client Certificate Rotation</title>
+      <actions>
+        <test_action_ref>kubelet_enable_client_cert_rotation_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="kubelet_disable_cadvisor_port_ocil">
+      <title>kubelet - Disable cAdvisor Port</title>
+      <actions>
+        <test_action_ref>kubelet_disable_cadvisor_port_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="controller_disable_profiling_ocil">
+      <title>Verify Controller Profiling is not Exposed to the Web</title>
+      <actions>
+        <test_action_ref>controller_disable_profiling_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="controller_bind_address_ocil">
+      <title>Ensure Controller bind-address argument is set</title>
+      <actions>
+        <test_action_ref>controller_bind_address_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="controller_use_service_account_ocil">
+      <title>Ensure that the --use-service-account-credentials argument is set</title>
+      <actions>
+        <test_action_ref>controller_use_service_account_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="controller_terminated_pod_gc_threshhold_ocil">
+      <title>Enable terminated-pod-gc-threshold for the Controller Manager</title>
+      <actions>
+        <test_action_ref>controller_terminated_pod_gc_threshhold_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="controller_rotate_kubelet_server_certs_ocil">
+      <title>Ensure that the RotateKubeletServerCertificate argument is set</title>
+      <actions>
+        <test_action_ref>controller_rotate_kubelet_server_certs_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_wal_dir_ocil">
+      <title>Configure etcd Log Storage</title>
+      <actions>
+        <test_action_ref>etcd_wal_dir_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_client_cert_auth_ocil">
+      <title>Enable The Client Certificate Authentication</title>
+      <actions>
+        <test_action_ref>etcd_client_cert_auth_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_peer_key_file_ocil">
+      <title>Ensure That The etcd Peer Key File Is Correctly Set</title>
+      <actions>
+        <test_action_ref>etcd_peer_key_file_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_peer_cert_file_ocil">
+      <title>Ensure That The etcd Peer Client Certificate Is Correctly Set</title>
+      <actions>
+        <test_action_ref>etcd_peer_cert_file_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_peer_auto_tls_ocil">
+      <title>Disable etcd Peer Self-Signed Certificates</title>
+      <actions>
+        <test_action_ref>etcd_peer_auto_tls_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_unique_ca_ocil">
+      <title>Configure A Unique CA Certificate for etcd</title>
+      <actions>
+        <test_action_ref>etcd_unique_ca_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_max_wals_ocil">
+      <title>Disable etcd Auto Log Rotation</title>
+      <actions>
+        <test_action_ref>etcd_max_wals_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_peer_client_cert_auth_ocil">
+      <title>Enable The Peer Client Certificate Authentication</title>
+      <actions>
+        <test_action_ref>etcd_peer_client_cert_auth_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_cert_file_ocil">
+      <title>Ensure That The etcd Client Certificate Is Correctly Set</title>
+      <actions>
+        <test_action_ref>etcd_cert_file_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_auto_tls_ocil">
+      <title>Disable etcd Self-Signed Certificates</title>
+      <actions>
+        <test_action_ref>etcd_auto_tls_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="etcd_key_file_ocil">
+      <title>Ensure That The etcd Key File Is Correctly Set</title>
+      <actions>
+        <test_action_ref>etcd_key_file_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_node_config_ocil">
+      <title>Verify User Who Owns The OpenShift Node Configuration File</title>
+      <actions>
+        <test_action_ref>file_owner_node_config_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_cni_conf_ocil">
+      <title>Verify Group Who Owns The OpenShift Container Network Interface Files</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_cni_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_etc_origin_ocil">
+      <title>The OpenShift Configuration Directory Must Have Mode 0700</title>
+      <actions>
+        <test_action_ref>file_permissions_etc_origin_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_openvswitch_ocil">
+      <title>Verify Group Who Owns The OpenShift Open vSwitch Files</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_openvswitch_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_openshift_kubeconfig_ocil">
+      <title>Verify Group Who Owns The OpenShift Master Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_openshift_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_etcd_ocil">
+      <title>Verify User Who Owns The OpenShift etcd Specification File</title>
+      <actions>
+        <test_action_ref>file_owner_master_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_admin_conf_ocil">
+      <title>Verify Group Who Owns The OpenShift Admin Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_admin_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_openshift_node_service_ocil">
+      <title>Verify Permissions on the OpenShift Node Service File</title>
+      <actions>
+        <test_action_ref>file_permissions_openshift_node_service_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_etc_origin_ocil">
+      <title>Verify Group Who Owns The OpenShift Configuration Directory</title>
+      <actions>
+        <test_action_ref>file_groupowner_etc_origin_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_openvswitch_ocil">
+      <title>Verify Permissions on the OpenShift Open vSwitch Files</title>
+      <actions>
+        <test_action_ref>file_permissions_master_openvswitch_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_cni_conf_ocil">
+      <title>Verify Permissions on the OpenShift Container Network Interface Files</title>
+      <actions>
+        <test_action_ref>file_permissions_master_cni_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_node_config_ocil">
+      <title>Verify Group Who Owns The OpenShift Node Configuration File</title>
+      <actions>
+        <test_action_ref>file_groupowner_node_config_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_openvswitch_ocil">
+      <title>Verify User Who Owns The OpenShift Open vSwitch Files</title>
+      <actions>
+        <test_action_ref>file_owner_master_openvswitch_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_openshift_node_client_crt_ocil">
+      <title>Verify Group Who Owns OpenShift Node Certificate File</title>
+      <actions>
+        <test_action_ref>file_groupowner_openshift_node_client_crt_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_admin_conf_ocil">
+      <title>Verify User Who Owns The OpenShift Admin Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_owner_master_admin_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_node_kubeconfig_ocil">
+      <title>Verify User Who Owns The OpenShift Node Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_owner_node_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_controller_manager_ocil">
+      <title>Verify Permissions on the OpenShift Controller Manager Specification File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_controller_manager_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_openshift_kubeconfig_ocil">
+      <title>Verify Permissions on the OpenShift Master Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_openshift_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_cni_conf_ocil">
+      <title>Verify User Who Owns The OpenShift Container Network Interface Files</title>
+      <actions>
+        <test_action_ref>file_owner_master_cni_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_scheduler_conf_ocil">
+      <title>Verify Group Who Owns The OpenShift Scheduler Configuration File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_scheduler_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_var_lib_etcd_ocil">
+      <title>The OpenShift etcd Data Directory Must Have Mode 0700</title>
+      <actions>
+        <test_action_ref>file_permissions_var_lib_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_api_server_ocil">
+      <title>Verify User Who Owns The OpenShift API Specification File</title>
+      <actions>
+        <test_action_ref>file_owner_master_api_server_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_openshift_conf_ocil">
+      <title>Verify Group Who Owns The OpenShift Master Configuration File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_openshift_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_node_kubeconfig_ocil">
+      <title>Verify Permissions on the OpenShift Node Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_permissions_node_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_openshift_node_client_crt_ocil">
+      <title>Verify User Who Owns OpenShift Node Certificate File</title>
+      <actions>
+        <test_action_ref>file_owner_openshift_node_client_crt_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_scheduler_conf_ocil">
+      <title>Verify Permissions on the OpenShift Scheduler Configuration File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_scheduler_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_var_lib_etcd_ocil">
+      <title>Verify Group Who Owns The OpenShift etcd Data Directory</title>
+      <actions>
+        <test_action_ref>file_groupowner_var_lib_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_node_kubeconfig_ocil">
+      <title>Verify Group Who Owns The OpenShift Node Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_groupowner_node_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_openshift_conf_ocil">
+      <title>Verify Permissions on the OpenShift Master Configuration File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_openshift_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_controller_manager_ocil">
+      <title>Verify User Who Owns The OpenShift Controller Manager Specification File</title>
+      <actions>
+        <test_action_ref>file_owner_master_controller_manager_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_etcd_ocil">
+      <title>Verify Group Who Owns The OpenShift etcd Specification File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_scheduler_conf_ocil">
+      <title>Verify User Who Owns The OpenShift Scheduler Configuration File</title>
+      <actions>
+        <test_action_ref>file_owner_master_scheduler_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_openshift_conf_ocil">
+      <title>Verify User Who Owns The OpenShift Master Configuration File</title>
+      <actions>
+        <test_action_ref>file_owner_master_openshift_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_var_lib_etcd_ocil">
+      <title>Verify User Who Owns The OpenShift etcd Data Directory</title>
+      <actions>
+        <test_action_ref>file_owner_var_lib_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_etc_origin_ocil">
+      <title>Verify User Who Owns The OpenShift Configuration Directory</title>
+      <actions>
+        <test_action_ref>file_owner_etc_origin_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_etcd_ocil">
+      <title>Verify Permissions on the OpenShift etcd Specification File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_etcd_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_openshift_node_service_ocil">
+      <title>Verify Group Who Owns The OpenShift Node Service File</title>
+      <actions>
+        <test_action_ref>file_groupowner_openshift_node_service_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_master_openshift_kubeconfig_ocil">
+      <title>Verify User Who Owns The OpenShift Master Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_owner_master_openshift_kubeconfig_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_node_config_ocil">
+      <title>Verify Permissions on the OpenShift Node Configuration File</title>
+      <actions>
+        <test_action_ref>file_permissions_node_config_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_api_server_ocil">
+      <title>Verify Group Who Owns The OpenShift API Specification File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_api_server_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_groupowner_master_controller_manager_ocil">
+      <title>Verify Group Who Owns The OpenShift Controller Manager Specification File</title>
+      <actions>
+        <test_action_ref>file_groupowner_master_controller_manager_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_openshift_node_client_crt_ocil">
+      <title>Verify Permissions on OpenShift Node Certificate File</title>
+      <actions>
+        <test_action_ref>file_permissions_openshift_node_client_crt_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_owner_openshift_node_service_ocil">
+      <title>Verify User Who Owns The OpenShift Node Service File</title>
+      <actions>
+        <test_action_ref>file_owner_openshift_node_service_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_admin_conf_ocil">
+      <title>Verify Permissions on the OpenShift Admin Kubeconfig File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_admin_conf_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="file_permissions_master_api_server_ocil">
+      <title>Verify Permissions on the OpenShift API Specification File</title>
+      <actions>
+        <test_action_ref>file_permissions_master_api_server_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_kubelet_certificate_authority_ocil">
+      <title>Configure the kubelet Certificate Authority for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_kubelet_certificate_authority_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_tls_private_key_ocil">
+      <title>Configure the Certificate Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_tls_private_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_tls_cert_ocil">
+      <title>Configure the Certificate for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_tls_cert_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_client_ca_ocil">
+      <title>Configure the Client Certificate Authority for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_client_ca_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_audit_log_path_ocil">
+      <title>Configure the Audit Log Path</title>
+      <actions>
+        <test_action_ref>api_server_audit_log_path_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_tls_cipher_suites_ocil">
+      <title>Use Strong Cryptographic Ciphers on the API Server</title>
+      <actions>
+        <test_action_ref>api_server_tls_cipher_suites_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_EventRateLimit_ocil">
+      <title>Enable the EventRateLimit Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_EventRateLimit_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_authorization_mode_ocil">
+      <title>Ensure API Server authorization-mode is set to Webhook</title>
+      <actions>
+        <test_action_ref>api_server_authorization_mode_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_audit_log_maxage_ocil">
+      <title>Configure the Audit Log Maximum Retention Days (maximumFileRetentionDays)</title>
+      <actions>
+        <test_action_ref>api_server_audit_log_maxage_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_DenyEscalatingExec_ocil">
+      <title>Enable the DenyEscalatingExec Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_DenyEscalatingExec_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_ServiceAccount_ocil">
+      <title>Enable the ServiceAccount Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_ServiceAccount_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_AlwaysAdmit_ocil">
+      <title>Disable the AlwaysAdmit Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_AlwaysAdmit_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_token_auth_ocil">
+      <title>Disable Token-based Authentication</title>
+      <actions>
+        <test_action_ref>api_server_token_auth_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_anonymous_auth_ocil">
+      <title>Disable Anonymous Authentication to the API Server</title>
+      <actions>
+        <test_action_ref>api_server_anonymous_auth_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_profiling_ocil">
+      <title>Disable Profiling on the API server</title>
+      <actions>
+        <test_action_ref>api_server_profiling_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_etcd_ca_ocil">
+      <title>Configure the etcd Certificate Authority for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_etcd_ca_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_advanced_auditing_ocil">
+      <title>Enable Advanced Auditing for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_advanced_auditing_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_audit_log_maxbackup_ocil">
+      <title>Configure the Maximum Retained Audit Logs</title>
+      <actions>
+        <test_action_ref>api_server_audit_log_maxbackup_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_audit_log_maxsize_ocil">
+      <title>Configure Maximum Audit Log Size</title>
+      <actions>
+        <test_action_ref>api_server_audit_log_maxsize_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_NodeRestriction_ocil">
+      <title>Enable the NodeRestriction Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_NodeRestriction_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_SecurityContextDeny_ocil">
+      <title>Enable the SecurityContextDeny Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_SecurityContextDeny_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_PodSecurityPolicy_ocil">
+      <title>Enable the PodSecurityPolicy Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_PodSecurityPolicy_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_basic_auth_ocil">
+      <title>Disable basic-auth-file for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_basic_auth_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_service_account_private_key_ocil">
+      <title>Configure the Service Account Private Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_service_account_private_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_kubelet_client_key_ocil">
+      <title>Configure the kubelet Certificate Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_kubelet_client_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_service_account_public_key_ocil">
+      <title>Configure the Service Account Public Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_service_account_public_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_etcd_key_ocil">
+      <title>Configure the etcd Certificate Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_etcd_key_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_insecure_allow_any_token_ocil">
+      <title>Disable Insecure Tokens</title>
+      <actions>
+        <test_action_ref>api_server_insecure_allow_any_token_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_AlwaysPullImages_ocil">
+      <title>Enable the AlwaysPullImages Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_AlwaysPullImages_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_kubelet_client_cert_ocil">
+      <title>Configure the kubelet Certificate File for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_kubelet_client_cert_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_request_timeout_ocil">
+      <title>Configure the API Server Request Timeout</title>
+      <actions>
+        <test_action_ref>api_server_request_timeout_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_kubelet_https_ocil">
+      <title>Enable kubelet HTTPS connections to the API Server</title>
+      <actions>
+        <test_action_ref>api_server_kubelet_https_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_etcd_cert_ocil">
+      <title>Configure the etcd Certificate for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_etcd_cert_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_experimental_encryption_provider_config_ocil">
+      <title>Configure the Encryption Provider</title>
+      <actions>
+        <test_action_ref>api_server_experimental_encryption_provider_config_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_insecure_port_ocil">
+      <title>Prevent Insecure Port Access</title>
+      <actions>
+        <test_action_ref>api_server_insecure_port_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_admission_control_plugin_NamespaceLifecycle_ocil">
+      <title>Enable the NamespaceLifecyle Admission Control Plugin</title>
+      <actions>
+        <test_action_ref>api_server_admission_control_plugin_NamespaceLifecycle_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_service_account_ca_ocil">
+      <title>Configure the Service Account Certificate Authority Key for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_service_account_ca_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_experimental_encryption_provider_cipher_ocil">
+      <title>Configure the Encryption Provider Cipher</title>
+      <actions>
+        <test_action_ref>api_server_experimental_encryption_provider_cipher_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_secure_port_ocil">
+      <title>Enable the Secure Port for the API Server</title>
+      <actions>
+        <test_action_ref>api_server_secure_port_action</test_action_ref>
+      </actions>
+    </questionnaire>
+    <questionnaire id="api_server_insecure_bind_address_ocil">
+      <title>Disable Use of the Insecure Bind Address</title>
+      <actions>
+        <test_action_ref>api_server_insecure_bind_address_action</test_action_ref>
+      </actions>
+    </questionnaire>
+  </questionnaires>
+  <test_actions>
+    <boolean_question_test_action id="scheduler_profiling_argument_action" question_ref="scheduler_profiling_argument_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_least_privilege_scc_action" question_ref="general_least_privilege_scc_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_limit_cluster_admin_action" question_ref="general_limit_cluster_admin_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_enable_seccomp_action" question_ref="general_enable_seccomp_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_use_openshift_projects_action" question_ref="general_use_openshift_projects_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_configure_imagepolicywebhook_action" question_ref="general_configure_imagepolicywebhook_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_create_network_segmentation_action" question_ref="general_create_network_segmentation_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="general_scc_for_privileged_containers_action" question_ref="general_scc_for_privileged_containers_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_configure_client_ca_action" question_ref="kubelet_configure_client_ca_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_disable_readonly_port_action" question_ref="kubelet_disable_readonly_port_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_enable_iptables_util_chains_action" question_ref="kubelet_enable_iptables_util_chains_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_enable_server_cert_rotation_action" question_ref="kubelet_enable_server_cert_rotation_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_configure_tls_cert_action" question_ref="kubelet_configure_tls_cert_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_enable_streaming_connections_action" question_ref="kubelet_enable_streaming_connections_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_configure_event_creation_action" question_ref="kubelet_configure_event_creation_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_configure_tls_key_action" question_ref="kubelet_configure_tls_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_disable_hostname_override_action" question_ref="kubelet_disable_hostname_override_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_enable_client_cert_rotation_action" question_ref="kubelet_enable_client_cert_rotation_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="kubelet_disable_cadvisor_port_action" question_ref="kubelet_disable_cadvisor_port_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="controller_disable_profiling_action" question_ref="controller_disable_profiling_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="controller_bind_address_action" question_ref="controller_bind_address_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="controller_use_service_account_action" question_ref="controller_use_service_account_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="controller_terminated_pod_gc_threshhold_action" question_ref="controller_terminated_pod_gc_threshhold_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="controller_rotate_kubelet_server_certs_action" question_ref="controller_rotate_kubelet_server_certs_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_wal_dir_action" question_ref="etcd_wal_dir_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_client_cert_auth_action" question_ref="etcd_client_cert_auth_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_peer_key_file_action" question_ref="etcd_peer_key_file_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_peer_cert_file_action" question_ref="etcd_peer_cert_file_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_peer_auto_tls_action" question_ref="etcd_peer_auto_tls_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_unique_ca_action" question_ref="etcd_unique_ca_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_max_wals_action" question_ref="etcd_max_wals_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_peer_client_cert_auth_action" question_ref="etcd_peer_client_cert_auth_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_cert_file_action" question_ref="etcd_cert_file_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_auto_tls_action" question_ref="etcd_auto_tls_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="etcd_key_file_action" question_ref="etcd_key_file_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_node_config_action" question_ref="file_owner_node_config_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_cni_conf_action" question_ref="file_groupowner_master_cni_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_etc_origin_action" question_ref="file_permissions_etc_origin_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_openvswitch_action" question_ref="file_groupowner_master_openvswitch_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_openshift_kubeconfig_action" question_ref="file_groupowner_master_openshift_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_etcd_action" question_ref="file_owner_master_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_admin_conf_action" question_ref="file_groupowner_master_admin_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_openshift_node_service_action" question_ref="file_permissions_openshift_node_service_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_etc_origin_action" question_ref="file_groupowner_etc_origin_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_openvswitch_action" question_ref="file_permissions_master_openvswitch_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_cni_conf_action" question_ref="file_permissions_master_cni_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_node_config_action" question_ref="file_groupowner_node_config_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_openvswitch_action" question_ref="file_owner_master_openvswitch_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_openshift_node_client_crt_action" question_ref="file_groupowner_openshift_node_client_crt_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_admin_conf_action" question_ref="file_owner_master_admin_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_node_kubeconfig_action" question_ref="file_owner_node_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_controller_manager_action" question_ref="file_permissions_master_controller_manager_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_openshift_kubeconfig_action" question_ref="file_permissions_master_openshift_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_cni_conf_action" question_ref="file_owner_master_cni_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_scheduler_conf_action" question_ref="file_groupowner_master_scheduler_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_var_lib_etcd_action" question_ref="file_permissions_var_lib_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_api_server_action" question_ref="file_owner_master_api_server_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_openshift_conf_action" question_ref="file_groupowner_master_openshift_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_node_kubeconfig_action" question_ref="file_permissions_node_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_openshift_node_client_crt_action" question_ref="file_owner_openshift_node_client_crt_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_scheduler_conf_action" question_ref="file_permissions_master_scheduler_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_var_lib_etcd_action" question_ref="file_groupowner_var_lib_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_node_kubeconfig_action" question_ref="file_groupowner_node_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_openshift_conf_action" question_ref="file_permissions_master_openshift_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_controller_manager_action" question_ref="file_owner_master_controller_manager_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_etcd_action" question_ref="file_groupowner_master_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_scheduler_conf_action" question_ref="file_owner_master_scheduler_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_openshift_conf_action" question_ref="file_owner_master_openshift_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_var_lib_etcd_action" question_ref="file_owner_var_lib_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_etc_origin_action" question_ref="file_owner_etc_origin_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_etcd_action" question_ref="file_permissions_master_etcd_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_openshift_node_service_action" question_ref="file_groupowner_openshift_node_service_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_master_openshift_kubeconfig_action" question_ref="file_owner_master_openshift_kubeconfig_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_node_config_action" question_ref="file_permissions_node_config_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_api_server_action" question_ref="file_groupowner_master_api_server_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_groupowner_master_controller_manager_action" question_ref="file_groupowner_master_controller_manager_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_openshift_node_client_crt_action" question_ref="file_permissions_openshift_node_client_crt_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_owner_openshift_node_service_action" question_ref="file_owner_openshift_node_service_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_admin_conf_action" question_ref="file_permissions_master_admin_conf_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="file_permissions_master_api_server_action" question_ref="file_permissions_master_api_server_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_kubelet_certificate_authority_action" question_ref="api_server_kubelet_certificate_authority_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_tls_private_key_action" question_ref="api_server_tls_private_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_tls_cert_action" question_ref="api_server_tls_cert_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_client_ca_action" question_ref="api_server_client_ca_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_audit_log_path_action" question_ref="api_server_audit_log_path_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_tls_cipher_suites_action" question_ref="api_server_tls_cipher_suites_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_EventRateLimit_action" question_ref="api_server_admission_control_plugin_EventRateLimit_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_authorization_mode_action" question_ref="api_server_authorization_mode_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_audit_log_maxage_action" question_ref="api_server_audit_log_maxage_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_DenyEscalatingExec_action" question_ref="api_server_admission_control_plugin_DenyEscalatingExec_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_ServiceAccount_action" question_ref="api_server_admission_control_plugin_ServiceAccount_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_AlwaysAdmit_action" question_ref="api_server_admission_control_plugin_AlwaysAdmit_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_token_auth_action" question_ref="api_server_token_auth_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_anonymous_auth_action" question_ref="api_server_anonymous_auth_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_profiling_action" question_ref="api_server_profiling_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_etcd_ca_action" question_ref="api_server_etcd_ca_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_advanced_auditing_action" question_ref="api_server_advanced_auditing_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_audit_log_maxbackup_action" question_ref="api_server_audit_log_maxbackup_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_audit_log_maxsize_action" question_ref="api_server_audit_log_maxsize_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_NodeRestriction_action" question_ref="api_server_admission_control_plugin_NodeRestriction_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_SecurityContextDeny_action" question_ref="api_server_admission_control_plugin_SecurityContextDeny_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_PodSecurityPolicy_action" question_ref="api_server_admission_control_plugin_PodSecurityPolicy_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_basic_auth_action" question_ref="api_server_basic_auth_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_service_account_private_key_action" question_ref="api_server_service_account_private_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_kubelet_client_key_action" question_ref="api_server_kubelet_client_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_service_account_public_key_action" question_ref="api_server_service_account_public_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_etcd_key_action" question_ref="api_server_etcd_key_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_insecure_allow_any_token_action" question_ref="api_server_insecure_allow_any_token_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_AlwaysPullImages_action" question_ref="api_server_admission_control_plugin_AlwaysPullImages_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_kubelet_client_cert_action" question_ref="api_server_kubelet_client_cert_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_request_timeout_action" question_ref="api_server_request_timeout_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_kubelet_https_action" question_ref="api_server_kubelet_https_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_etcd_cert_action" question_ref="api_server_etcd_cert_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_experimental_encryption_provider_config_action" question_ref="api_server_experimental_encryption_provider_config_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_insecure_port_action" question_ref="api_server_insecure_port_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_admission_control_plugin_NamespaceLifecycle_action" question_ref="api_server_admission_control_plugin_NamespaceLifecycle_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_service_account_ca_action" question_ref="api_server_service_account_ca_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_experimental_encryption_provider_cipher_action" question_ref="api_server_experimental_encryption_provider_cipher_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_secure_port_action" question_ref="api_server_secure_port_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+    <boolean_question_test_action id="api_server_insecure_bind_address_action" question_ref="api_server_insecure_bind_address_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+  </test_actions>
+  <questions>
+    <boolean_question id="scheduler_profiling_argument_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 profiling /etc/origin/master/master-config.yaml
+The output should return false.
+      Is it the case that profiling is not being used and is not disabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_least_privilege_scc_question">
+      <question_text>To show all available SCCs:
+$ oc describe scc
+
+To audit a single pod:
+$ oc describe POD | grep openshift.io\/scc
+
+Ensure each Pod on the system is configured to use the least privilege SCC possible.
+      Is it the case that they are not?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_limit_cluster_admin_question">
+      <question_text>To ensure that cluster-admin role is only used as where required, run
+the following command to receive a list of all associated bindings:
+$ oc get clusterrolebindings | grep cluster-admin
+
+Verify all bindings are appropriately bound to cluster-admin, which should
+reflect the least privilege required.
+      Is it the case that they are not?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_enable_seccomp_question">
+      <question_text>Verify that Security Context Constraints (SCCs) have been configured with seccomp:
+$ oc get scc -ocustom-columns=NAME:.metadata.name,SECCOMP-PROFILES:.seccompProfiles
+      Is it the case that they are not?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_use_openshift_projects_question">
+      <question_text>To display a list of projects configured on a system, run the following command:
+$ oc get projects
+
+Verify each project represents a unique community.
+      Is it the case that they are not?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_configure_imagepolicywebhook_question">
+      <question_text>Review ImagePolicyConfig in /etc/origin/master/master-config.yaml:
+$ grep admissionConfig /etc/origin/master/master-config.yaml
+
+Look for the following:
+admissionConfig:
+  pluginConfig:
+    openshift.io/ImagePolicy
+      Is it the case that an image provenance policy is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_create_network_segmentation_question">
+      <question_text>Verify on OpenShift master nodes the plugin being used:
+$ grep networkPluginName /etc/origin/master/master-config.yaml
+
+Nodes should be properly configured to create network segmentation using the Multi-tenant plugin or
+Network Policies.
+      Is it the case that they are not?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="general_scc_for_privileged_containers_question">
+      <question_text>Determine all SCCs that allow privileged containers:
+$ oc get scc -ocustom-columns=NAME:.metadata.name,ALLOWS_PRIVILEGED:.allowPrivilegedContainer
+
+Review users and groups assigned to SCCs allowing privileged containers:
+$ oc describe sccs scc-id
+
+Adjust or assign SCCs or create custom SCCs as needed to minimize privileges.
+      Is it the case that privileges are not minimized?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_configure_client_ca_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep client-ca.crt /etc/origin/node/node-config.yaml
+The output should something similar to client-ca.crt.
+      Is it the case that no client CA certificate has been configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_disable_readonly_port_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 read-only-port /etc/origin/node/node-config.yaml
+The output should be 0.
+      Is it the case that the read-only port is not disabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_enable_iptables_util_chains_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 make-iptables-util-chains /etc/origin/node/node-config.yaml
+The output should return true.
+      Is it the case that the kubelet cannot modify the firewall settings?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_enable_server_cert_rotation_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep RotateKubeletServerCertificate /etc/origin/node/node-config.yaml
+The output should return true.
+      Is it the case that the kubelet cannot rotate server certificate?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_configure_tls_cert_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 cert-dir /etc/origin/node/node-config.yaml
+Verify that a certificate path is configured.
+$ sudo ls /etc/origin/node/certificates/kubelet-client-current.pem
+Verify that a client certificate is configured.
+      Is it the case that the kubelet certificate is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_enable_streaming_connections_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 streaming-connection-idle-timeout /etc/origin/node/node-config.yaml
+The output should return .
+      Is it the case that the streaming connection timeouts are not disabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_configure_event_creation_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 event-qps /etc/origin/node/node-config.yaml
+The output should return 0.
+      Is it the case that events are limited?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_configure_tls_key_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 cert-dir /etc/origin/node/node-config.yaml
+Verify that a certificate path is configured.
+$ sudo ls /etc/origin/node/certificates/kubelet-server-current.pem
+Verify that a server key certificate is configured.
+      Is it the case that the kubelet server key certificate is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_disable_hostname_override_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep hostname-override /etc/origin/node/node-config.yaml
+The output should return no output.
+      Is it the case that the hostname cannot be overrided?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_enable_client_cert_rotation_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep RotateKubeletClientCertificate /etc/origin/node/node-config.yaml
+The output should return true.
+      Is it the case that the kubelet cannot rotate client certificate?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="kubelet_disable_cadvisor_port_question">
+      <question_text>Run the following command on the kubelet node(s):
+$ sudo grep -A1 cadvisor-port /etc/origin/node/node-config.yaml
+The output should return 0.
+      Is it the case that the cAdvisor port is not disabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="controller_disable_profiling_question">
+      <question_text>Verify that OPENSHIFT_PROFILE is not set to web by running the following command:
+$ grep OPENSHIFT_PROFILE /etc/origin/master/master.env
+
+Verify that OPENSHIFT_PROFILE=web is NOT returned.
+      Is it the case that &lt;tt&gt;OPENSHIFT_PROFILE&lt;/tt&gt; is configured to &lt;tt&gt;web&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="controller_bind_address_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep bind-address /etc/origin/master/master-config.yaml
+
+Verify that the bind-address argument is set to a secure
+IP address.
+      Is it the case that &lt;tt&gt;bind-address&lt;/tt&gt; is not configured to a secure IP address?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="controller_use_service_account_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep service-account-credentials /etc/origin/master/master-config.yaml 
+
+Verify that the controllerArguments option
+use-service-account-credentials argument is not set to
+false.
+
+If the configuration file does not explicitly set 
+use-service-account-credentials, and the grep command returns no
+text, the default value of true is being used.
+      Is it the case that &lt;tt&gt;use-service-account-credentials&lt;/tt&gt; is set to &lt;tt&gt;false&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="controller_terminated_pod_gc_threshhold_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep terminated-pod-gc-threshold /etc/origin/master/master-config.yaml
+
+Verify that the terminated-pod-gc-threshold argument is not set
+to false.
+
+If the configuration file does not explicitly set
+terminated-pod-gc-threshold, and the grep command returns no
+text, the default value of true is being used.
+      Is it the case that &lt;tt&gt;terminated-pod-gc-threshold&lt;/tt&gt; is not enabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="controller_rotate_kubelet_server_certs_question">
+      <question_text>Run the following command on the master node(s):
+$ grep RotateKubeletServerCertificate
+
+The output should return true.
+      Is it the case that &lt;tt&gt;RotateKubeletServerCertificate&lt;/tt&gt; argument is set to &lt;tt&gt;false&lt;/tt&gt; in the
+&lt;tt&gt;controllerArguments&lt;/tt&gt; options?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_wal_dir_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_WAL_DIR /etc/etcd/etcd.conf
+The output should return /var/lib/etcd/member/wal.
+      Is it the case that the etcd logs are not configured in a separate location?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_client_cert_auth_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_CLIENT_CERT_AUTH
+The output should return true.
+      Is it the case that the etcd client certificate authentication is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_peer_key_file_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_PEER_KEY_FILE=/etc/etcd/etcd.conf
+Verify that there is a key file configured.
+      Is it the case that the etcd client key file is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_peer_cert_file_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_PEER_CERT_FILE=/etc/etcd/etcd.conf
+Verify that there is a certificate configured.
+      Is it the case that the etcd client certificate is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_peer_auto_tls_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_PEER_AUTO_TLS /etc/etcd/etcd.conf
+The output should return false.
+      Is it the case that the etcd is using peer self-signed certificates?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_unique_ca_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_TRUSTED_CA_FILE /etc/etcd/etcd.conf
+Inspect the certificate file that is returned and verify that it
+does not match the OpenShift CA certificate.
+      Is it the case that the etcd CA certificate is not unique?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_max_wals_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_MAX_WALS /etc/etcd/etcd.conf
+The output should return 0.
+      Is it the case that the etcd auto log rotation is not disabled?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_peer_client_cert_auth_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_PEER_CLIENT_CERT_AUTH
+The output should return true.
+      Is it the case that the etcd peer client certificate authentication is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_cert_file_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_CERT_FILE=/etc/etcd/etcd.conf
+Verify that there is a certificate configured.
+      Is it the case that the etcd client certificate is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_auto_tls_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_AUTO_TLS /etc/etcd/etcd.conf
+The output should not return true.
+      Is it the case that the etcd is using self-signed certificates?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="etcd_key_file_question">
+      <question_text>Run the following command on the master node(s):
+$ grep ETCD_KEY_FILE=/etc/etcd/etcd.conf
+Verify that there is a key file configured.
+      Is it the case that the etcd client key file is not configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_node_config_question">
+      <question_text>To check the ownership of /etc/origin/node/node-config.yaml, run the command: $ ls -lL /etc/origin/node/node-config.yaml If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/node-config.yaml has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_cni_conf_question">
+      <question_text>To check the group ownership of /etc/cni/net.d/*, run the command: $ ls -lL /etc/cni/net.d/* If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/cni/net.d/* has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_etc_origin_question">
+      <question_text>To check the permissions of /etc/origin/, run the command:
+$ ls -l /etc/origin/
+If properly configured, the output should indicate the following permissions:
+-rwx------
+      Is it the case that /etc/origin/ has unix mode -rwx------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_openvswitch_question">
+      <question_text>To check the group ownership of /etc/origin/openvswitch/*, run the command: $ ls -lL /etc/origin/openvswitch/* If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/openvswitch/* has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_openshift_kubeconfig_question">
+      <question_text>To check the group ownership of /etc/origin/master/openshift-master.kubeconfig, run the command: $ ls -lL /etc/origin/master/openshift-master.kubeconfig If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/master/openshift-master.kubeconfig has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_etcd_question">
+      <question_text>To check the ownership of /etc/origin/node/pods/etcd.yaml, run the command: $ ls -lL /etc/origin/node/pods/etcd.yaml If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/pods/etcd.yaml has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_admin_conf_question">
+      <question_text>To check the group ownership of /etc/origin/master/admin.kubeconfig, run the command: $ ls -lL /etc/origin/master/admin.kubeconfig If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/master/admin.kubeconfig has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_openshift_node_service_question">
+      <question_text>To check the permissions of /etc/systemd/system/atomic-openshift-node.service, run the command:
+$ ls -l /etc/systemd/system/atomic-openshift-node.service
+If properly configured, the output should indicate the following permissions:
+-rw-r--r--
+      Is it the case that /etc/systemd/system/atomic-openshift-node.service has unix mode -rw-r--r--?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_etc_origin_question">
+      <question_text>To check the group ownership of /etc/origin/, run the command: $ ls -lL /etc/origin/ If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/ has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_openvswitch_question">
+      <question_text>To check the permissions of /etc/origin/openvswitch/*, run the command:
+$ ls -l /etc/origin/openvswitch/*
+If properly configured, the output should indicate the following permissions:
+-rw-r--r--
+      Is it the case that /etc/origin/openvswitch/* has unix mode -rw-r--r--?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_cni_conf_question">
+      <question_text>To check the permissions of /etc/cni/net.d/*, run the command:
+$ ls -l /etc/cni/net.d/*
+If properly configured, the output should indicate the following permissions:
+-rw-r--r--
+      Is it the case that /etc/cni/net.d/* has unix mode -rw-r--r--?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_node_config_question">
+      <question_text>To check the group ownership of /etc/origin/node/node-config.yaml, run the command: $ ls -lL /etc/origin/node/node-config.yaml If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/node-config.yaml has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_openvswitch_question">
+      <question_text>To check the ownership of /etc/origin/openvswitch/*, run the command: $ ls -lL /etc/origin/openvswitch/* If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/openvswitch/* has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_openshift_node_client_crt_question">
+      <question_text>To check the group ownership of /etc/origin/node/client-ca.crt, run the command: $ ls -lL /etc/origin/node/client-ca.crt If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/client-ca.crt has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_admin_conf_question">
+      <question_text>To check the ownership of /etc/origin/master/admin.kubeconfig, run the command: $ ls -lL /etc/origin/master/admin.kubeconfig If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/master/admin.kubeconfig has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_node_kubeconfig_question">
+      <question_text>To check the ownership of /etc/origin/node/node.kubeconfig, run the command: $ ls -lL /etc/origin/node/node.kubeconfig If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/node.kubeconfig has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_controller_manager_question">
+      <question_text>To check the permissions of /etc/origin/node/pods/controller.yaml, run the command:
+$ ls -l /etc/origin/node/pods/controller.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/pods/controller.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_openshift_kubeconfig_question">
+      <question_text>To check the permissions of /etc/origin/master/openshift-master.kubeconfig, run the command:
+$ ls -l /etc/origin/master/openshift-master.kubeconfig
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/master/openshift-master.kubeconfig has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_cni_conf_question">
+      <question_text>To check the ownership of /etc/cni/net.d/*, run the command: $ ls -lL /etc/cni/net.d/* If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/cni/net.d/* has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_scheduler_conf_question">
+      <question_text>To check the group ownership of /etc/origin/master/scheduler.json, run the command: $ ls -lL /etc/origin/master/scheduler.json If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/master/scheduler.json has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_var_lib_etcd_question">
+      <question_text>To check the permissions of /var/lib/etcd, run the command:
+$ ls -l /var/lib/etcd
+If properly configured, the output should indicate the following permissions:
+-rwx------
+      Is it the case that /var/lib/etcd has unix mode -rwx------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_api_server_question">
+      <question_text>To check the ownership of /etc/origin/node/pods/apiserver.yaml, run the command: $ ls -lL /etc/origin/node/pods/apiserver.yaml If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/pods/apiserver.yaml has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_openshift_conf_question">
+      <question_text>To check the group ownership of /etc/origin/master/master-config.yaml, run the command: $ ls -lL /etc/origin/master/master-config.yaml If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/master/master-config.yaml has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_node_kubeconfig_question">
+      <question_text>To check the permissions of /etc/origin/node/node.kubeconfig, run the command:
+$ ls -l /etc/origin/node/node.kubeconfig
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/node.kubeconfig has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_openshift_node_client_crt_question">
+      <question_text>To check the ownership of /etc/origin/node/client-ca.crt, run the command: $ ls -lL /etc/origin/node/client-ca.crt If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/client-ca.crt has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_scheduler_conf_question">
+      <question_text>To check the permissions of /etc/origin/master/scheduler.json, run the command:
+$ ls -l /etc/origin/master/scheduler.json
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/master/scheduler.json has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_var_lib_etcd_question">
+      <question_text>To check the group ownership of /var/lib/etcd, run the command: $ ls -lL /var/lib/etcd If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /var/lib/etcd has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_node_kubeconfig_question">
+      <question_text>To check the group ownership of /etc/origin/node/node.kubeconfig, run the command: $ ls -lL /etc/origin/node/node.kubeconfig If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/node.kubeconfig has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_openshift_conf_question">
+      <question_text>To check the permissions of /etc/origin/master/master-config.yaml, run the command:
+$ ls -l /etc/origin/master/master-config.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/master/master-config.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_controller_manager_question">
+      <question_text>To check the ownership of /etc/origin/node/pods/controller.yaml, run the command: $ ls -lL /etc/origin/node/pods/controller.yaml If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/node/pods/controller.yaml has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_etcd_question">
+      <question_text>To check the group ownership of /etc/origin/node/pods/etcd.yaml, run the command: $ ls -lL /etc/origin/node/pods/etcd.yaml If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/pods/etcd.yaml has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_scheduler_conf_question">
+      <question_text>To check the ownership of /etc/origin/master/scheduler.json, run the command: $ ls -lL /etc/origin/master/scheduler.json If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/master/scheduler.json has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_openshift_conf_question">
+      <question_text>To check the ownership of /etc/origin/master/master-config.yaml, run the command: $ ls -lL /etc/origin/master/master-config.yaml If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/master/master-config.yaml has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_var_lib_etcd_question">
+      <question_text>To check the ownership of /var/lib/etcd, run the command: $ ls -lL /var/lib/etcd If properly configured, the output should indicate the following owner: root
+      Is it the case that /var/lib/etcd has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_etc_origin_question">
+      <question_text>To check the ownership of /etc/origin/, run the command: $ ls -lL /etc/origin/ If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/ has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_etcd_question">
+      <question_text>To check the permissions of /etc/origin/node/pods/etcd.yaml, run the command:
+$ ls -l /etc/origin/node/pods/etcd.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/pods/etcd.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_openshift_node_service_question">
+      <question_text>To check the group ownership of /etc/systemd/system/atomic-openshift-node.service, run the command: $ ls -lL /etc/systemd/system/atomic-openshift-node.service If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/systemd/system/atomic-openshift-node.service has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_master_openshift_kubeconfig_question">
+      <question_text>To check the ownership of /etc/origin/master/openshift-master.kubeconfig, run the command: $ ls -lL /etc/origin/master/openshift-master.kubeconfig If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/origin/master/openshift-master.kubeconfig has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_node_config_question">
+      <question_text>To check the permissions of /etc/origin/node/node-config.yaml, run the command:
+$ ls -l /etc/origin/node/node-config.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/node-config.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_api_server_question">
+      <question_text>To check the group ownership of /etc/origin/node/pods/apiserver.yaml, run the command: $ ls -lL /etc/origin/node/pods/apiserver.yaml If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/pods/apiserver.yaml has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_groupowner_master_controller_manager_question">
+      <question_text>To check the group ownership of /etc/origin/node/pods/controller.yaml, run the command: $ ls -lL /etc/origin/node/pods/controller.yaml If properly configured, the output should indicate the following group-owner: root
+      Is it the case that /etc/origin/node/pods/controller.yaml has group owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_openshift_node_client_crt_question">
+      <question_text>To check the permissions of /etc/origin/node/client-ca.crt, run the command:
+$ ls -l /etc/origin/node/client-ca.crt
+If properly configured, the output should indicate the following permissions:
+-rw-r--r--
+      Is it the case that /etc/origin/node/client-ca.crt has unix mode -rw-r--r--?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_owner_openshift_node_service_question">
+      <question_text>To check the ownership of /etc/systemd/system/atomic-openshift-node.service, run the command: $ ls -lL /etc/systemd/system/atomic-openshift-node.service If properly configured, the output should indicate the following owner: root
+      Is it the case that /etc/systemd/system/atomic-openshift-node.service has owner root?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_admin_conf_question">
+      <question_text>To check the permissions of /etc/origin/master/admin.kubeconfig, run the command:
+$ ls -l /etc/origin/master/admin.kubeconfig
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/master/admin.kubeconfig has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="file_permissions_master_api_server_question">
+      <question_text>To check the permissions of /etc/origin/node/pods/apiserver.yaml, run the command:
+$ ls -l /etc/origin/node/pods/apiserver.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/pods/apiserver.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_kubelet_certificate_authority_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 kubeletClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+kubeletClientInfo:
+  ca: ca-bundle.crt
+  certFile: master.kubelet-client.crt
+  keyFile: master.kubelet-client.key
+      Is it the case that &lt;tt&gt;ca&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;kubeletClientInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_tls_private_key_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A7 servingInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+servingInfo:
+  clientCA: ca.crt
+  certFile: master.server.crt
+  keyFile: master.server.key
+      Is it the case that &lt;tt&gt;keyFile&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;servingInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_tls_cert_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A7 servingInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+servingInfo:
+  clientCA: ca.crt
+  certFile: master.server.crt
+  keyFile: master.server.key
+      Is it the case that &lt;tt&gt;certFile&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;servingInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_client_ca_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A7 servingInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+servingInfo:
+  clientCA: ca.crt
+  certFile: master.server.crt
+  keyFile: master.server.key
+      Is it the case that &lt;tt&gt;clientCA&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;servingInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_audit_log_path_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep auditFilePath /etc/origin/master/master-config.yaml
+The output should return a valid audit log path. The default is
+/etc/origin/master/audit-ocp.log.
+      Is it the case that &lt;tt&gt;audit-log-path&lt;/tt&gt; does not contain a valid audit file path?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_tls_cipher_suites_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A8 cipherSuites /etc/origin/master/master-config.yaml
+Verify that the output is similar to:
+cipherSuites:
+  - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+  - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+  - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+  - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+  - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+  - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+  - TLS_RSA_WITH_AES_256_GCM_SHA384
+  - TLS_RSA_WITH_AES_128_GCM_SHA256
+      Is it the case that &lt;tt&gt;cipherSuites&lt;/tt&gt; does not contain TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256 from servingInfo?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_EventRateLimit_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 EventRateLimit /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;enable-admission-plugins&lt;/tt&gt; does not include &lt;tt&gt;EventRateLimit&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_authorization_mode_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A1 authorization-mode /etc/origin/master/master-config.yaml
+Verify that there is no output, or the output is set to Webhook.
+      Is it the case that &lt;tt&gt;authorization-mode&lt;/tt&gt; is not configured to &lt;tt&gt;Webhook&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_audit_log_maxage_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep maximumFileRetentionDays /etc/origin/master/master-config.yaml
+The output should return a value of 30 or as appropriate.
+      Is it the case that &lt;tt&gt;maximumFileRetentionDays&lt;/tt&gt; is set less than &lt;tt&gt;30&lt;/tt&gt; or as appropriate?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_DenyEscalatingExec_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 DenyEscalatingExec /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;DenyEscalatingExec&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_ServiceAccount_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 ServiceAccount /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;ServiceAccount&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_AlwaysAdmit_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 AlwaysAdmit /etc/origin/master/master-config.yaml
+The output should return no output.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; is not set?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_token_auth_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 token-auth-file /etc/origin/master/master-config.yaml
+The output should return no output.
+      Is it the case that &lt;tt&gt;token-auth-file&lt;/tt&gt; argument is configured?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_anonymous_auth_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A1 anonymous-auth /etc/origin/master/master-config.yaml
+The output should return false.
+      Is it the case that &lt;tt&gt;anonymous-auth&lt;/tt&gt; is not set to &lt;tt&gt;false&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_profiling_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 profiling /etc/origin/master/master-config.yaml
+The output should return false.
+      Is it the case that &lt;tt&gt;profiling&lt;/tt&gt; is enabled (set to value of &lt;tt&gt;true&lt;/tt&gt;)?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_etcd_ca_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+etcdClientInfo:
+  ca: master.etcd-ca.crt
+  certFile: master.etcd-client.crt
+  keyFile: master.etcd-client.key
+      Is it the case that &lt;tt&gt;ca&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;etcdClientInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_advanced_auditing_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep AdvancedAuditing /etc/origin/master/master-config.yaml
+The output should return AdvancedAuditing=true.
+      Is it the case that &lt;tt&gt;feature-gates&lt;/tt&gt; is set to a value that includes &lt;tt&gt;AdvancedAuditing=false&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_audit_log_maxbackup_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep maximumRetainedFiles /etc/origin/master/master-config.yaml
+The output should return a value of 10 or as appropriate.
+      Is it the case that &lt;tt&gt;maximumRetainedFiles&lt;/tt&gt; is set to &lt;tt&gt;10&lt;/tt&gt; or as appropriate?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_audit_log_maxsize_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep maximumFileSizeMegabytes /etc/origin/master/master-config.yaml
+The output should return a value of 100 or as appropriate.
+      Is it the case that &lt;tt&gt;maximumFileSizeMegabytes&lt;/tt&gt; is set to &lt;tt&gt;100&lt;/tt&gt; or as appropriate?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_NodeRestriction_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 NodeRestriction /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;enable-admission-plugins&lt;/tt&gt; does not contain &lt;tt&gt;NodeRestriction&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_SecurityContextDeny_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 SecurityContextDeny /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;SecurityContextDeny&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_PodSecurityPolicy_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 PodSecurityPolicy /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;PodSecurityPolicy&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_basic_auth_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 basic-auth-file /etc/origin/master/master-config.yaml
+The output should return no output.
+      Is it the case that basic-auth-file is configured and enabled on the master node?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_service_account_private_key_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml
+The output should contain a line similar to:
+privateKeyFile: serviceaccounts.private.key
+      Is it the case that &lt;tt&gt;privateKeyFile&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;serviceAccountConfig&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_kubelet_client_key_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 kubeletClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+kubeletClientInfo:
+  ca: ca-bundle.crt
+  certFile: master.kubelet-client.crt
+  keyFile: master.kubelet-client.key
+      Is it the case that &lt;tt&gt;keyFile&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;kubeletClientInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_service_account_public_key_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml
+The output should contain a line similar to:
+publicKeyFiles:
+  - serviceaccounts.public.key
+      Is it the case that &lt;tt&gt;publicKeyFiles&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;serviceAccountConfig&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_etcd_key_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+etcdClientInfo:
+  ca: master.etcd-ca.crt
+  certFile: master.etcd-client.crt
+  keyFile: master.etcd-client.key
+      Is it the case that &lt;tt&gt;keyFile&lt;/tt&gt; does not exist or is not configured to valid certificates?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_insecure_allow_any_token_question">
+      <question_text>If OpenShift 3.10 or earlier is installed, run the following command on the master node(s):
+$ sudo grep insecure-allow-any-token /etc/origin/master/master-config.yaml
+The output should return no output.
+      Is it the case that OpenShift 3.10 or earlier is installed and insecure-allow-any-token is configured and enabled on the master node?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_AlwaysPullImages_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 AlwaysPullImages /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;AlwaysPullImages&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_kubelet_client_cert_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 kubeletClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+kubeletClientInfo:
+  ca: ca-bundle.crt
+  certFile: master.kubelet-client.crt
+  keyFile: master.kubelet-client.key
+      Is it the case that &lt;tt&gt;certFile&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;kubeletClientInfo&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_request_timeout_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 request-timeout /etc/origin/master/master-config.yaml
+The output should return 300.
+      Is it the case that &lt;tt&gt;request-timeout&lt;/tt&gt; is not set or is not set to an appropriate value?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_kubelet_https_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep kubelet-https /etc/origin/master/master-config.yaml
+The output should return no output.
+      Is it the case that kubelet-https is specified it must be set to &lt;tt&gt;true&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_etcd_cert_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A3 etcdClientInfo /etc/origin/master/master-config.yaml
+The output should contain something similar to:
+etcdClientInfo:
+  ca: master.etcd-ca.crt
+  certFile: master.etcd-client.crt
+  keyFile: master.etcd-client.key
+      Is it the case that &lt;tt&gt;certFile&lt;/tt&gt; does not exist or is not configured to valid certificates?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_experimental_encryption_provider_config_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 experimental-encryption-provider-config /etc/origin/master/master-config.yaml
+The output should return /etc/origin/master/encryption-config.yaml.
+      Is it the case that &lt;tt&gt;experimental-encryption-provider-config&lt;/tt&gt; arguments do not point to the &lt;tt&gt;EncryptionConfig&lt;/tt&gt; file?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_insecure_port_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 insecure-port /etc/origin/master/master-config.yaml
+There should be no output returned.
+      Is it the case that &lt;tt&gt;insecure-port&lt;/tt&gt; setting exists?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_admission_control_plugin_NamespaceLifecycle_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 NamespaceLifecycle /etc/origin/master/master-config.yaml
+The output should return disable: false.
+      Is it the case that &lt;tt&gt;admissionConfig&lt;/tt&gt; does not contain &lt;tt&gt;NamespaceLifecycle&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_service_account_ca_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A9 serviceAccountConfig /etc/origin/master/master-config.yaml
+The output should contain a line similar to:
+masterCA: ca-bundle.crt
+      Is it the case that &lt;tt&gt;masterCA&lt;/tt&gt; is not set as appropriate for &lt;tt&gt;serviceAccountConfig&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_experimental_encryption_provider_cipher_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A4 aescbc /etc/origin/master/encryption-config.yaml
+Verify that the aescbc encryption provider is used for all the desired
+resources.
+      Is it the case that &lt;tt&gt;aescbc&lt;/tt&gt; is not configured as the encryption provider?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_secure_port_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 secure-port /etc/origin/master/master-config.yaml
+The output should not return 0.
+      Is it the case that &lt;tt&gt;secure-port&lt;/tt&gt; is set with a value greater than &lt;tt&gt;0&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+    <boolean_question id="api_server_insecure_bind_address_question">
+      <question_text>Run the following command on the master node(s):
+$ sudo grep -A2 insecure-bind-address /etc/origin/master/master-config.yaml
+The output should return 127.0.01.
+      Is it the case that insecure-bind-address is specified and it must be set to &lt;tt&gt;127.0.01&lt;/tt&gt;?
+      </question_text>
+    </boolean_question>
+  </questions>
+</ocil>

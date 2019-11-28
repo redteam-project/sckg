@@ -1,0 +1,28 @@
+description: 'Deployed applications must not be granted file permissions
+
+  - except to those that are dedicated to the application only. These
+
+  permissions are enforced by the Java Security Manager and the policies it
+
+  loads at startup. These permissions can be assigned or restricted in an
+
+  application-specific, granular manner.'
+identifiers: {}
+ocil: null
+ocil_clause: proper permissions are not set for java.io.FilePermission for deployed
+  applications
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Java permissions for deployed applications should be carefully restricted
+
+  to enforce the least privilege principle. Granting unrestricted access to
+
+  the host operating system creates a large attack vector for malicious
+
+  users that have penetrated the JBoss server.'
+references: {nist: AC-6}
+severity: medium
+template: null
+title: Ensure Deployed Applications Have Restricted File Permissions
+warnings: []

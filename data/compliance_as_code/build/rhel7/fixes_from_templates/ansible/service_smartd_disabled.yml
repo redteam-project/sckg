@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - smartd.service"
+  command: systemctl list-unit-files smartd.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service smartd
+  systemd:
+    name: "smartd.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"smartd.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - smartd.socket"
+  command: systemctl list-unit-files smartd.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket smartd
+  systemd:
+    name: "smartd.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"smartd.socket" in socket_file_exists.stdout_lines[1]'

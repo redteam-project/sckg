@@ -1,0 +1,38 @@
+description: 'The rpcsvcgssd service manages RPCSEC GSS contexts required to
+
+  secure protocols that use RPC (most often Kerberos and NFS). The rpcsvcgssd
+
+  service is the server-side of RPCSEC GSS. If the system does not require secure
+
+  RPC then this service should be disabled.
+
+
+  The <code>rpcsvcgssd</code> service can be disabled with the following command:
+
+  <pre>$ sudo chkconfig rpcsvcgssd off</pre>'
+identifiers: {cce: 27122-1}
+ocil: ' To check that the <code>rpcsvcgssd</code> service is disabled in system boot
+  configuration, run the following command: <pre>$ sudo chkconfig <code>rpcsvcgssd</code>
+  --list</pre> Output should indicate the <code>rpcsvcgssd</code> service has either
+  not been installed, or has been disabled at all runlevels, as shown in the example
+  below: <pre>$ sudo chkconfig <code>rpcsvcgssd</code> --list <code>rpcsvcgssd</code>       0:off   1:off   2:off   3:off   4:off   5:off   6:off</pre>
+
+  Run the following command to verify <code>rpcsvcgssd</code> is disabled through
+  current runtime configuration: <pre>$ sudo service rpcsvcgssd status</pre>
+
+  If the service is disabled the command will return the following output: <pre>rpcsvcgssd
+  is stopped</pre>'
+ocil_clause: null
+oval_external_content: null
+platform: machine
+prodtype: rhel6,rhel7,rhel8,fedora
+rationale: Unnecessary services should be disabled to decrease the attack surface
+  of the system.
+references: {}
+severity: unknown
+template:
+  backends: {}
+  name: service_disabled
+  vars: {packagename: nfs-utils, servicename: rpcsvcgssd}
+title: Disable Secure RPC Server Service (rpcsvcgssd)
+warnings: []

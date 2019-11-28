@@ -1,0 +1,31 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Enable service ntpd
+  block:
+
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+
+    - name: Enable service ntpd
+      service:
+        name: ntpd
+        enabled: 'yes'
+        state: started
+      when:
+        - '"ntp" in ansible_facts.packages'
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_ntpd_enabled
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27093-4
+    - PCI-DSS-Req-10.4
+    - DISA-STIG-RHEL-06-000247
+    - NIST-800-53-AU-8(1)

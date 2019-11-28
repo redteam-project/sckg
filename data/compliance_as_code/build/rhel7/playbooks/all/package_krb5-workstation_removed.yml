@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Uninstall krb5-workstation Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82930-9
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_krb5-workstation_removed
+  tasks:
+
+    - name: Ensure krb5-workstation is removed
+      package:
+        name: krb5-workstation
+        state: absent

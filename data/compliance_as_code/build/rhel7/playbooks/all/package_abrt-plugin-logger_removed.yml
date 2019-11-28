@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Uninstall abrt-plugin-logger Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82914-3
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - low_severity
+    - no_reboot_needed
+    - package_abrt-plugin-logger_removed
+  tasks:
+
+    - name: Ensure abrt-plugin-logger is removed
+      package:
+        name: abrt-plugin-logger
+        state: absent

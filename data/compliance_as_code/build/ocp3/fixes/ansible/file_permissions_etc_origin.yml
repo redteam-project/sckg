@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: Test for existence /etc/origin/
+  stat:
+    path: /etc/origin/
+  register: file_exists
+  tags:
+    - file_permissions_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure permission 0700 on /etc/origin/
+  file:
+    path: /etc/origin/
+    mode: '0700'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_etc_origin
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed

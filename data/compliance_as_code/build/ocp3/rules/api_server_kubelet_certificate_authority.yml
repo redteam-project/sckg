@@ -1,0 +1,31 @@
+description: "To ensure OpenShift verifies kubelet certificates before establishing\n\
+  connections, follow the OpenShift documentation and setup the TLS connection\nbetween\
+  \ the API Server and kubelets. Then, verify\nthat <tt>kubeletClientInfo</tt> has\
+  \ the <tt>ca</tt> configured in \nthe API Server pod specification file\n<tt>/etc/origin/master/master-config.yaml</tt>\
+  \ on the master\nnode(s) to something similar to:\n<pre>kubeletClientInfo:\n  ca:\
+  \ ca-bundle.crt\n  certFile: master.kubelet-client.crt\n  keyFile: master.kubelet-client.key</pre>"
+identifiers: {}
+ocil: "Run the following command on the master node(s):\n<pre>$ sudo grep -A3 kubeletClientInfo\
+  \ /etc/origin/master/master-config.yaml</pre>\nThe output should contain something\
+  \ similar to:\n<pre>kubeletClientInfo:\n  ca: ca-bundle.crt\n  certFile: master.kubelet-client.crt\n\
+  \  keyFile: master.kubelet-client.key</pre>"
+ocil_clause: <tt>ca</tt> is not set as appropriate for <tt>kubeletClientInfo</tt>
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'Connections from the API Server to the kubelet are used for fetching logs
+
+  for pods, attaching (through kubectl) to running pods, and using the kubelet
+
+  port-forwarding functionality. These connections terminate at the kubelet
+
+  HTTPS endpoint. By default, the API Server does not verify the kubelet serving
+
+  certificate, which makes the connection subject to man-in-the-middle attacks,
+
+  and unsafe to run over untrusted and/or public networks.'
+references: {cis: '1.1.4,1.1.31'}
+severity: high
+template: null
+title: Configure the kubelet Certificate Authority for the API Server
+warnings: []

@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify User Who Owns The OpenShift Master Configuration File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80626-5
+    - configure_strategy
+    - file_owner_master_openshift_conf
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/master/master-config.yaml
+      stat:
+        path: /etc/origin/master/master-config.yaml
+      register: file_exists
+
+    - name: Ensure owner 0 on /etc/origin/master/master-config.yaml
+      file:
+        path: /etc/origin/master/master-config.yaml
+        owner: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - rlogin.service"
+  command: systemctl list-unit-files rlogin.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service rlogin
+  systemd:
+    name: "rlogin.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rlogin.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - rlogin.socket"
+  command: systemctl list-unit-files rlogin.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket rlogin
+  systemd:
+    name: "rlogin.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rlogin.socket" in socket_file_exists.stdout_lines[1]'

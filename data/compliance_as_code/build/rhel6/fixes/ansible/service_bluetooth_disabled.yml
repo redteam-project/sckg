@@ -1,0 +1,44 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop bluetooth
+  command: /sbin/service 'bluetooth' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_bluetooth_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27081-9
+    - DISA-STIG-RHEL-06-000331
+    - NIST-800-171-3.1.16
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-AC-18(a)
+    - NIST-800-53-AC-18(d)
+    - NIST-800-53-AC-18(3)
+    - NIST-800-53-CM-7
+    - NIST-800-53-MP-7
+
+- name: Switch off bluetooth
+  command: /sbin/chkconfig --level 0123456 'bluetooth' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_bluetooth_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27081-9
+    - DISA-STIG-RHEL-06-000331
+    - NIST-800-171-3.1.16
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-AC-18(a)
+    - NIST-800-53-AC-18(d)
+    - NIST-800-53-AC-18(3)
+    - NIST-800-53-CM-7
+    - NIST-800-53-MP-7

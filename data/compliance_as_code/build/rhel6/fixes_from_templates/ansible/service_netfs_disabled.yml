@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop netfs
+  command: /sbin/service 'netfs' stop
+- name: Switch off netfs
+  command: /sbin/chkconfig --level 0123456 'netfs' off

@@ -1,0 +1,74 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - cpupower.service
+  command: systemctl list-unit-files cpupower.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cpupower_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80256-1
+    - NIST-800-53-CM-7
+
+- name: Disable service cpupower
+  systemd:
+    name: cpupower.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"cpupower.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cpupower_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80256-1
+    - NIST-800-53-CM-7
+
+- name: Unit Socket Exists - cpupower.socket
+  command: systemctl list-unit-files cpupower.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cpupower_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80256-1
+    - NIST-800-53-CM-7
+
+- name: Disable socket cpupower
+  systemd:
+    name: cpupower.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"cpupower.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cpupower_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80256-1
+    - NIST-800-53-CM-7

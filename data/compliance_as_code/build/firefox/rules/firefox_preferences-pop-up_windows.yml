@@ -1,0 +1,25 @@
+description: 'The pop-up blocker can be enabled by setting
+
+  <tt>dom.disable_window_open_feature.status</tt> to <tt>true</tt>.'
+identifiers: {}
+ocil: 'To verify that pop-up blocker is enabled,
+
+  run the following command:
+
+  <pre>$ grep ''dom.disable_window_open_feature.status'' <i>FIREFOX_INSTALL_DIR</i>/*.cfg</pre>
+
+  The output should return:
+
+  <pre>lockPref("dom.disable_window_open_feature.status", "true");</pre>'
+ocil_clause: it is not enabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Popup windows may be used to launch an attack within a new browser window
+
+  with altered settings.'
+references: {nist: ECSC-1, stigid: FIREFOX-DTBF180}
+severity: medium
+template: null
+title: Enable Firefox Pop-up Blocker
+warnings: []

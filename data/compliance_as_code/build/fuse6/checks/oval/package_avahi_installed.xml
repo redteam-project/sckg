@@ -1,0 +1,17 @@
+<def-group>
+  <definition class="compliance" id="package_avahi_installed"
+  version="1">
+    <metadata>
+      <title>Package avahi Installed</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The  package avahi should be installed.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="package avahi is installed"
+      test_ref="test_package_avahi_installed" />
+    </criteria>
+  </definition>
+
+</def-group>

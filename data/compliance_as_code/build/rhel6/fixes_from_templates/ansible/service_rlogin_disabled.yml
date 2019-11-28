@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop rlogin
+  command: /sbin/service 'rlogin' stop
+- name: Switch off rlogin
+  command: /sbin/chkconfig --level 0123456 'rlogin' off

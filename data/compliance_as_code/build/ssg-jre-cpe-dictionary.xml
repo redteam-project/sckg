@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<ns0:cpe-list xmlns:ns0="http://cpe.mitre.org/dictionary/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cpe.mitre.org/dictionary/2.0 http://cpe.mitre.org/files/cpe-dictionary_2.1.xsd">
+  <ns0:cpe-item name="cpe:/a:oracle:jre">
+    <ns0:title xml:lang="en-us">Oracle's Java Runtime Environment</ns0:title>
+    <ns0:check href="ssg-jre-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_app_is_java:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:ibm:jre">
+    <ns0:title xml:lang="en-us">IBM Java Runtime Environment</ns0:title>
+    <ns0:check href="ssg-jre-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_app_is_java:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:redhat:openjdk">
+    <ns0:title xml:lang="en-us">OpenJDK Java Runtime Environment</ns0:title>
+    <ns0:check href="ssg-jre-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_app_is_java:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:sun:jre">
+    <ns0:title xml:lang="en-us">Sun Java Runtime Environment</ns0:title>
+    <ns0:check href="ssg-jre-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_app_is_java:def:1</ns0:check>
+  </ns0:cpe-item>
+</ns0:cpe-list>

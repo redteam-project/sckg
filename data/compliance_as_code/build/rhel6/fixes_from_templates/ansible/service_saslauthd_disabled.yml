@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop saslauthd
+  command: /sbin/service 'saslauthd' stop
+- name: Switch off saslauthd
+  command: /sbin/chkconfig --level 0123456 'saslauthd' off

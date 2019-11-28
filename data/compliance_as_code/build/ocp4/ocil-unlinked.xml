@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<ocil xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://scap.nist.gov/schema/ocil/2.0" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <generator>
+    <product_name>xccdf-create-ocil.xslt from SCAP Security Guide</product_name>
+    <product_version>ssg: 0.1.47</product_version>
+    <schema_version>2.0</schema_version>
+    <timestamp>2019-11-28T04:47:22Z</timestamp>
+  </generator>
+  <questionnaires>
+    <questionnaire id="file_permissions_node_config_ocil">
+      <title>Verify Permissions on the OpenShift Node Configuration File</title>
+      <actions>
+        <test_action_ref>file_permissions_node_config_action</test_action_ref>
+      </actions>
+    </questionnaire>
+  </questionnaires>
+  <test_actions>
+    <boolean_question_test_action id="file_permissions_node_config_action" question_ref="file_permissions_node_config_question">
+      <when_true>
+        <result>PASS</result>
+      </when_true>
+      <when_false>
+        <result>FAIL</result>
+      </when_false>
+    </boolean_question_test_action>
+  </test_actions>
+  <questions>
+    <boolean_question id="file_permissions_node_config_question">
+      <question_text>To check the permissions of /etc/origin/node/node-config.yaml, run the command:
+$ ls -l /etc/origin/node/node-config.yaml
+If properly configured, the output should indicate the following permissions:
+-rw-------
+      Is it the case that /etc/origin/node/node-config.yaml has unix mode -rw-------?
+      </question_text>
+    </boolean_question>
+  </questions>
+</ocil>

@@ -1,0 +1,31 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify /etc/grub.conf User Ownership
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-26995-1
+    - DISA-STIG-RHEL-06-000065
+    - NIST-800-53-AC-6(7)
+    - PCI-DSS-Req-7.1
+    - configure_strategy
+    - file_owner_grub_conf
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /boot/grub/grub.conf
+      stat:
+        path: /boot/grub/grub.conf
+      register: file_exists
+
+    - name: Ensure owner 0 on /boot/grub/grub.conf
+      file:
+        path: /boot/grub/grub.conf
+        owner: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

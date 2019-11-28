@@ -1,0 +1,363 @@
+# platform = Red Hat Enterprise Linux 7,Oracle Linux 7,multi_platform_rhv
+# complexity = high
+# reboot = true
+# disruption = medium
+# strategy = restrict
+- name: check prelink binary installed
+  stat:
+    path: /usr/sbin/prelink
+  register: prelink_exists
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: disable prelink
+  lineinfile:
+    dest: /etc/sysconfig/prelink
+    regexp: ^#?PRELINKING
+    line: PRELINKING=no
+  when:
+    - prelink_exists.stat.exists
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: revert prelinking binaries
+  command: /usr/sbin/prelink -ua
+  when:
+    - prelink_exists.stat.exists
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: Check if system supports AES-NI
+  command: grep -q -m1 -o aes /proc/cpuinfo
+  failed_when: aesni_supported.rc > 1
+  register: aesni_supported
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: Ensure dracut-fips-aesni is installed
+  package:
+    name: dracut-fips-aesni
+    state: present
+  when:
+    - aesni_supported.rc == 0
+    - ansible_distribution == 'RedHat'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: install dracut-fips
+  package:
+    name: dracut-fips
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: Rebuild initramfs
+  command: dracut -f
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: check fips argument exists
+  command: grep 'GRUB_CMDLINE_LINUX.*fips=' /etc/default/grub
+  failed_when: false
+  register: fipsargcheck
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: replace existing fips argument
+  replace:
+    path: /etc/default/grub
+    regexp: fips=.
+    replace: fips=1
+  when:
+    - fipsargcheck.rc == 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: add fips argument
+  replace:
+    path: /etc/default/grub
+    regexp: (GRUB_CMDLINE_LINUX=.*)"
+    replace: \1 fips=1"
+  when:
+    - fipsargcheck.rc != 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: get boot device uuid
+  command: findmnt --noheadings --output uuid --target /boot
+  register: bootuuid
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: check boot argument exists
+  command: grep 'GRUB_CMDLINE_LINUX.*boot=' /etc/default/grub
+  failed_when: false
+  register: bootargcheck
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: replace existing boot argument
+  replace:
+    path: /etc/default/grub
+    regexp: boot=\w*-\w*-\w*-\w*-\w*
+    replace: boot={{ bootuuid.stdout }}
+  when:
+    - bootargcheck.rc == 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: add boot argument
+  replace:
+    path: /etc/default/grub
+    regexp: (GRUB_CMDLINE_LINUX=.*)"
+    replace: \1 boot=UUID={{ bootuuid.stdout }}"
+  when:
+    - bootargcheck.rc != 0
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2
+
+- name: update bootloader menu
+  command: /sbin/grubby --update-kernel=ALL --args="fips=1 boot=UUID={{ bootuuid.stdout
+    }}"
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - grub2_enable_fips_mode
+    - high_severity
+    - restrict_strategy
+    - high_complexity
+    - medium_disruption
+    - reboot_required
+    - CCE-80359-3
+    - DISA-STIG-RHEL-07-021350
+    - NIST-800-171-3.13.8
+    - NIST-800-171-3.13.11
+    - NIST-800-53-IA-5
+    - NIST-800-53-SC-13
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - CJIS-5.10.1.2

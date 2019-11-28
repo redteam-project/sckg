@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Enable service iptables
+  block:
+
+    - name: Gather the package facts
+      package_facts:
+        manager: auto
+
+    - name: Enable service iptables
+      service:
+        name: iptables
+        enabled: 'yes'
+        state: started
+      when:
+        - '"iptables" in ansible_facts.packages'
+  tags:
+    - service_iptables_enabled
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-53-AC-4
+    - NIST-800-53-CA-3(c)
+    - NIST-800-53-CM-7

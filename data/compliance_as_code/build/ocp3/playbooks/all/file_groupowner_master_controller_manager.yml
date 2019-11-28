@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns The OpenShift Controller Manager Specification File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80612-5
+    - configure_strategy
+    - file_groupowner_master_controller_manager
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/pods/controller.yaml
+      stat:
+        path: /etc/origin/node/pods/controller.yaml
+      register: file_exists
+
+    - name: Ensure group owner 0 on /etc/origin/node/pods/controller.yaml
+      file:
+        path: /etc/origin/node/pods/controller.yaml
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

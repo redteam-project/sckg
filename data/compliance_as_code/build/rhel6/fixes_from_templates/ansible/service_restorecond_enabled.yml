@@ -1,0 +1,18 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = enable
+# complexity = low
+# disruption = low
+- name: Enable service restorecond
+  block:
+  - name: Gather the package facts
+    package_facts:
+      manager: auto
+
+  - name: Enable service restorecond
+    service:
+      name: "restorecond"
+      enabled: "yes"
+      state: "started"
+    when:
+    - '"policycoreutils" in ansible_facts.packages'

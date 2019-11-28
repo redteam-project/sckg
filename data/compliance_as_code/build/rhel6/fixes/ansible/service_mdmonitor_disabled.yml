@@ -1,0 +1,30 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop mdmonitor
+  command: /sbin/service 'mdmonitor' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_mdmonitor_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27193-2
+    - NIST-800-53-CM-7
+
+- name: Switch off mdmonitor
+  command: /sbin/chkconfig --level 0123456 'mdmonitor' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_mdmonitor_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27193-2
+    - NIST-800-53-CM-7

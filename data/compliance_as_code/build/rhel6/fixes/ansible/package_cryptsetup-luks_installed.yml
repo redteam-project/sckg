@@ -1,0 +1,17 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Ensure cryptsetup-luks is installed
+  package:
+    name: cryptsetup-luks
+    state: present
+  tags:
+    - package_cryptsetup-luks_installed
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82997-8

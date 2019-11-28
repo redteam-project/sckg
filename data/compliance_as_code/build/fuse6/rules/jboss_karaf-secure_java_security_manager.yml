@@ -1,0 +1,25 @@
+description: 'The Java Security Manager is a crucial piece of the Java
+
+  security infrastructure. JBoss Fuse should be configured to load a Java
+
+  security policy that has been vetted for use in the environment.'
+identifiers: {}
+ocil: null
+ocil_clause: no policy file exists or has been configured
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'A weak, default, or incomplete Java Security Manager policy file can
+
+  completely compromise the security of a Java installation by granting
+
+  excessive permissions to applications running within the sandbox. These
+
+  permissions can be leveraged (maliciously or not) to run code against the
+
+  operating system.'
+references: {nist: SA-13}
+severity: medium
+template: null
+title: Configure Java Security Manager To Use An Environment Policy
+warnings: []

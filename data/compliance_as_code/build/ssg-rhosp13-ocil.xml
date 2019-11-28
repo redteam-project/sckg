@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<ns0:ocil xmlns:ns0="http://scap.nist.gov/schema/ocil/2.0">
+  <ns0:generator>
+    <ns0:product_name>xccdf-create-ocil.xslt from SCAP Security Guide</ns0:product_name>
+    <ns0:product_version>ssg: 0.1.47</ns0:product_version>
+    <ns0:schema_version>2.0</ns0:schema_version>
+    <ns0:timestamp>2019-11-28T04:48:17Z</ns0:timestamp>
+  </ns0:generator>
+  <ns0:questionnaires>
+    <ns0:questionnaire id="ocil:ssg-container_horizon_csrf_cookie_secure_ocil:questionnaire:1">
+      <ns0:title>Cross-Site Request Forgery Prevention: Enable CSRF_COOKIE_SECURE (containerized deployments)</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-container_horizon_csrf_cookie_secure_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-container_keystone_disable_user_account_days_inactive_ocil:questionnaire:1">
+      <ns0:title>Set Maximum Inactivity Period</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-container_keystone_disable_user_account_days_inactive_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-container_keystone_lockout_duration_ocil:questionnaire:1">
+      <ns0:title>Set Account Lockout Duration</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-container_keystone_lockout_duration_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-container_keystone_lockout_failure_attempts_ocil:questionnaire:1">
+      <ns0:title>Set Maximum Number of Failed Authentication Attempts</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-container_keystone_lockout_failure_attempts_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-keystone_lockout_duration_ocil:questionnaire:1">
+      <ns0:title>Set Account Lockout Duration</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-keystone_lockout_duration_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-keystone_lockout_failure_attempts_ocil:questionnaire:1">
+      <ns0:title>Set Maximum Number of Failed Authentication Attempts</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-keystone_lockout_failure_attempts_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-keystone_disable_user_account_days_inactive_ocil:questionnaire:1">
+      <ns0:title>Set Maximum Inactivity Period</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-keystone_disable_user_account_days_inactive_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-horizon_csrf_cookie_secure_ocil:questionnaire:1">
+      <ns0:title>Cross-Site Request Forgery Prevention: Enable CSRF_COOKIE_SECURE (non-containerized deployments)</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-horizon_csrf_cookie_secure_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+  </ns0:questionnaires>
+  <ns0:test_actions>
+    <ns0:boolean_question_test_action id="ocil:ssg-container_horizon_csrf_cookie_secure_action:testaction:1" question_ref="ocil:ssg-container_horizon_csrf_cookie_secure_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-container_keystone_disable_user_account_days_inactive_action:testaction:1" question_ref="ocil:ssg-container_keystone_disable_user_account_days_inactive_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-container_keystone_lockout_duration_action:testaction:1" question_ref="ocil:ssg-container_keystone_lockout_duration_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-container_keystone_lockout_failure_attempts_action:testaction:1" question_ref="ocil:ssg-container_keystone_lockout_failure_attempts_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-keystone_lockout_duration_action:testaction:1" question_ref="ocil:ssg-keystone_lockout_duration_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-keystone_lockout_failure_attempts_action:testaction:1" question_ref="ocil:ssg-keystone_lockout_failure_attempts_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-keystone_disable_user_account_days_inactive_action:testaction:1" question_ref="ocil:ssg-keystone_disable_user_account_days_inactive_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-horizon_csrf_cookie_secure_action:testaction:1" question_ref="ocil:ssg-horizon_csrf_cookie_secure_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+  </ns0:test_actions>
+  <ns0:questions>
+    <ns0:boolean_question id="ocil:ssg-container_horizon_csrf_cookie_secure_question:question:1">
+      <ns0:question_text>Check the file /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings and ensure the
+following line appears:
+CSRF_COOKIE_SECURE True
+      Is it the case that CSRF_COOKIE_SECURE is set to False?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-container_keystone_disable_user_account_days_inactive_question:question:1">
+      <ns0:question_text>Run the following command to see what the maximum authentication
+attempts is:
+
+$ grep disable_user_account_days_inactive /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+disable_user_account_days_inactive = 
+      Is it the case that disable_user_account_days_inactive is commented out or not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-container_keystone_lockout_duration_question:question:1">
+      <ns0:question_text>Run the following command to see what the account lockout
+duration is:
+
+$ grep lockout_duration /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+lockout_duration=
+      Is it the case that lockout_duration is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-container_keystone_lockout_failure_attempts_question:question:1">
+      <ns0:question_text>Run the following command to see what the maximum authentication
+attempts is:
+
+$ grep lockout_failure_attempts /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+lockout_failure_attempts=
+      Is it the case that lockout_failure_attempts is commented out or not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-keystone_lockout_duration_question:question:1">
+      <ns0:question_text>Run the following command to see what the account lockout
+duration is:
+
+$ grep lockout_duration /etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+lockout_duration=
+      Is it the case that lockout_duration is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-keystone_lockout_failure_attempts_question:question:1">
+      <ns0:question_text>Run the following command to see what the maximum authentication
+attempts is:
+
+$ grep lockout_failure_attempts /etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+lockout_failure_attempts=
+      Is it the case that lockout_failure_attempts is commented out or not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-keystone_disable_user_account_days_inactive_question:question:1">
+      <ns0:question_text>Run the following command to see what the maximum authentication
+attempts is:
+
+$ grep disable_user_account_days_inactive /etc/keystone/keystone.conf
+
+If properly configured, the output should be:
+disable_user_account_days_inactive = 
+      Is it the case that disable_user_account_days_inactive is commented out or not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-horizon_csrf_cookie_secure_question:question:1">
+      <ns0:question_text>Check the file /etc/openstack-dashboard/local_settings and ensure the
+following line appears:
+CSRF_COOKIE_SECURE True
+      Is it the case that CSRF_COOKIE_SECURE is set to False?
+      </ns0:question_text>
+    </ns0:boolean_question>
+  </ns0:questions>
+</ns0:ocil>

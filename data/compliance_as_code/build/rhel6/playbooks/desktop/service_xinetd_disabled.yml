@@ -1,0 +1,31 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable xinetd Service
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27046-2
+    - DISA-STIG-RHEL-06-000203
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - service_xinetd_disabled
+  tasks:
+
+    - name: Stop xinetd
+      command: /sbin/service 'xinetd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off xinetd
+      command: /sbin/chkconfig --level 0123456 'xinetd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

@@ -1,0 +1,24 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install the opensc Package For Multifactor Authentication
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80846-9
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_opensc_installed
+  tasks:
+
+    - name: Ensure opensc is installed
+      package:
+        name: opensc
+        state: present
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

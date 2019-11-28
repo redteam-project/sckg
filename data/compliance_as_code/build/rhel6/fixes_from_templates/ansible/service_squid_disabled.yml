@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop squid
+  command: /sbin/service 'squid' stop
+- name: Switch off squid
+  command: /sbin/chkconfig --level 0123456 'squid' off

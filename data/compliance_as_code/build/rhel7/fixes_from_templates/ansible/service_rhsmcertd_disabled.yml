@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - rhsmcertd.service"
+  command: systemctl list-unit-files rhsmcertd.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service rhsmcertd
+  systemd:
+    name: "rhsmcertd.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rhsmcertd.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - rhsmcertd.socket"
+  command: systemctl list-unit-files rhsmcertd.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket rhsmcertd
+  systemd:
+    name: "rhsmcertd.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rhsmcertd.socket" in socket_file_exists.stdout_lines[1]'

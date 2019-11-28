@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - rpcbind.service"
+  command: systemctl list-unit-files rpcbind.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service rpcbind
+  systemd:
+    name: "rpcbind.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rpcbind.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - rpcbind.socket"
+  command: systemctl list-unit-files rpcbind.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket rpcbind
+  systemd:
+    name: "rpcbind.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rpcbind.socket" in socket_file_exists.stdout_lines[1]'

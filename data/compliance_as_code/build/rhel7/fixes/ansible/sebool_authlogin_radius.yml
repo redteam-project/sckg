@@ -1,0 +1,37 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- (xccdf-var var_authlogin_radius)
+
+- name: Ensure libsemanage-python installed
+  package:
+    name: libsemanage-python
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_authlogin_radius
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80426-0
+    - NIST-800-171-3.7.2
+
+- name: Set SELinux boolean authlogin_radius accordingly
+  seboolean:
+    name: authlogin_radius
+    state: '{{ var_authlogin_radius }}'
+    persistent: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_authlogin_radius
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80426-0
+    - NIST-800-171-3.7.2

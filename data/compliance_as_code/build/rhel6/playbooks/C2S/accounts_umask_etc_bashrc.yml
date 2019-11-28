@@ -1,0 +1,27 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Ensure the Default Bash Umask is Set Correctly
+  hosts: '@@HOSTS@@'
+  become: true
+  vars:
+    var_accounts_user_umask: '027'
+  tags:
+    - CCE-26917-5
+    - DISA-STIG-RHEL-06-000342
+    - NIST-800-53-SA-8
+    - accounts_umask_etc_bashrc
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - restrict_strategy
+    - unknown_severity
+  tasks:
+
+    - name: Set user umask in /etc/bashrc
+      replace:
+        path: /etc/bashrc
+        regexp: umask.*
+        replace: umask {{ var_accounts_user_umask }}

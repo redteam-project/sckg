@@ -1,0 +1,21 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install openscap-scanner Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_openscap-scanner_installed
+  tasks:
+
+    - name: Ensure openscap-scanner is installed
+      package:
+        name: openscap-scanner
+        state: present

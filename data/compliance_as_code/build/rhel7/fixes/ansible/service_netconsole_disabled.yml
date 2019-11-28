@@ -1,0 +1,78 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - netconsole.service
+  command: systemctl list-unit-files netconsole.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80261-1
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Disable service netconsole
+  systemd:
+    name: netconsole.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"netconsole.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80261-1
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Unit Socket Exists - netconsole.socket
+  command: systemctl list-unit-files netconsole.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80261-1
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Disable socket netconsole
+  systemd:
+    name: netconsole.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"netconsole.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80261-1
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7

@@ -1,0 +1,17 @@
+description: 'The server must utilize cryptography to protect the
+
+  confidentiality of remote access management sessions.'
+identifiers: {}
+ocil: null
+ocil_clause: remote access is not secured
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'If cryptography is not used, then the session data traversing the
+
+  remote connection could be intercepted and compromised.'
+references: {}
+severity: medium
+template: null
+title: Secure Remote Access Via SSH
+warnings: []

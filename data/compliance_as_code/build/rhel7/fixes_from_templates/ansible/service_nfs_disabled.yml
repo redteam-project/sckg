@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - nfs.service"
+  command: systemctl list-unit-files nfs.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service nfs
+  systemd:
+    name: "nfs.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"nfs.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - nfs.socket"
+  command: systemctl list-unit-files nfs.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket nfs
+  systemd:
+    name: "nfs.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"nfs.socket" in socket_file_exists.stdout_lines[1]'

@@ -1,0 +1,17 @@
+description: 'The server must utilize cryptography to protect the
+
+  confidentiality of remote access management sessions.'
+identifiers: {}
+ocil: null
+ocil_clause: SSL is not enabled on the web brower
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'If cryptography is not used, then the session data traversing the
+
+  remote connection could be intercepted and compromised.'
+references: {}
+severity: medium
+template: null
+title: Enable SSL On The Web Console
+warnings: []

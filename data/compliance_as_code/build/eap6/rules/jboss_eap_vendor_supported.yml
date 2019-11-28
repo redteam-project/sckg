@@ -1,0 +1,37 @@
+description: Obtain vendor support from Red Hat.
+identifiers: {cce: 80495-5}
+ocil: 'Interview the system admin and have them either show documented proof of
+
+  current support, or have them demonstrate their ability to access the Red Hat
+
+  Enterprise Support portal.
+
+  <br /><br />
+
+  Verify Red Hat support includes coverage for the
+
+  JBoss product.
+
+  <br /><br />
+
+  If there is no current and active support from the vendor, this
+
+  is a finding.'
+ocil_clause: it is not
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'The JBoss product is available as Open Source; however, the Red Hat vendor
+
+  provides updates, patches and support for the JBoss product. It is imperative
+
+  that patches and updates be applied to JBoss in a timely manner as many attacks
+
+  against JBoss focus on unpatched systems. It is critical that support be
+
+  obtained and made available.'
+references: {disa: '2605', srg: SRG-APP-000456-AS-000266, stigid: EAP6-JBOS-AS-000680}
+severity: high
+template: null
+title: JBoss Version Is Vendor Supported
+warnings: []

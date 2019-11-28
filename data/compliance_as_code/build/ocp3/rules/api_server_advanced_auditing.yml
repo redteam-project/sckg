@@ -1,0 +1,32 @@
+description: "To ensure advanced auditing is not disabled, edit the API\nserver pod\
+  \ specification file\n<tt>/etc/origin/master/master-config.yaml</tt> and set the\n\
+  parameters below:\n<pre>kubernetesMasterConfig:\n  apiServerArguments:\n    feature-gates:\n\
+  \    - AdvancedAuditing=true</pre>"
+identifiers: {}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ sudo grep AdvancedAuditing /etc/origin/master/master-config.yaml</pre>
+
+  The output should return <pre>AdvancedAuditing=true</pre>.'
+ocil_clause: <tt>feature-gates</tt> is set to a value that includes <tt>AdvancedAuditing=false</tt>
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: '<tt>AdvancedAuditing</tt> enables a much more general API auditing
+
+  pipeline, which includes support for pluggable output backends and an
+
+  audit policy specifying how different requests should be audited.
+
+  Additionally, this enables auditing of failed authentication,
+
+  authorization, and login attempts which could prove crucial for
+
+  protecting your production clusters. It is recommended not to disable
+
+  advanced auditing.'
+references: {cis: 1.1.36}
+severity: medium
+template: null
+title: Enable Advanced Auditing for the API Server
+warnings: []

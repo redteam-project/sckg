@@ -1,0 +1,24 @@
+description: 'The JBoss process owner should not have interactive console
+
+  login access.'
+identifiers: {}
+ocil: null
+ocil_clause: the JBoss process owner has console access
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'In order to limit access in the event of an exploitation of the Jboss
+  or
+
+  one of its deployed applications, the account owning the Jboss process should
+
+  be limited in its ability to interact with the supporting operating system
+
+  where possible. Thus, the JBoss process owner account should not have
+
+  interactive console access.'
+references: {nist: AC-6}
+severity: medium
+template: null
+title: Deny JBoss Process Owner Console Access
+warnings: []

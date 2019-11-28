@@ -1,0 +1,17 @@
+<def-group>
+  <definition class="compliance" id="package_samba-common_removed"
+  version="1">
+    <metadata>
+      <title>Package samba-common Removed</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The  package samba-common should be removed.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="package samba-common is removed"
+      test_ref="test_package_samba-common_removed" />
+    </criteria>
+  </definition>
+
+</def-group>

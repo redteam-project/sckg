@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns The OpenShift Node Service File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80620-8
+    - configure_strategy
+    - file_groupowner_openshift_node_service
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/systemd/system/atomic-openshift-node.service
+      stat:
+        path: /etc/systemd/system/atomic-openshift-node.service
+      register: file_exists
+
+    - name: Ensure group owner 0 on /etc/systemd/system/atomic-openshift-node.service
+      file:
+        path: /etc/systemd/system/atomic-openshift-node.service
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

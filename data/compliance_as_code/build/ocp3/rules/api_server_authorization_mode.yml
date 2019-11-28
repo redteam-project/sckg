@@ -1,0 +1,29 @@
+description: "By default, unauthenticated/unauthorized users have no access to OpenShift\
+  \ nodes\nand the API Server <tt>authorization-mode</tt> is set to <tt>Webhook</tt>.\n\
+  To ensure that the API server requires authorization for API requests,\nvalidate\
+  \ that <tt>authorization-mode</tt> is configured to <tt>Webhook</tt>\nin <tt>/etc/origin/master/master-config.yaml</tt>:\n\
+  <pre>kubernetesMasterConfig:\n  apiServerArguments:\n    authorization-mode:\n \
+  \   - Webhook</pre>"
+identifiers: {}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ sudo grep -A1 authorization-mode /etc/origin/master/master-config.yaml</pre>
+
+  Verify that there is no output, or the output is set to <tt>Webhook</tt>.'
+ocil_clause: <tt>authorization-mode</tt> is not configured to <tt>Webhook</tt>
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'Ensuring <tt>authorization-mode</tt> is set to <tt>Webhook</tt> helps
+  enforce that
+
+  unauthenticated/unauthorized users have no access to OpenShift nodes.'
+references: {cis: 1.1.31}
+severity: medium
+template: null
+title: Ensure API Server authorization-mode is set to Webhook
+warnings:
+- {functionality: 'If <tt>authorization-mode</tt> is not configured to <tt>Webhook</tt>,
+    the node
+
+    systemd service (<tt>atomic-openshift-node</tt>) will not start.'}

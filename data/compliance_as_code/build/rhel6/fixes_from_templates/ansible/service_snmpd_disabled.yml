@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop snmpd
+  command: /sbin/service 'snmpd' stop
+- name: Switch off snmpd
+  command: /sbin/chkconfig --level 0123456 'snmpd' off

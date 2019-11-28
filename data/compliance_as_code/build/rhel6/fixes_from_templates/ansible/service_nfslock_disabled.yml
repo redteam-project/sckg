@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop nfslock
+  command: /sbin/service 'nfslock' stop
+- name: Switch off nfslock
+  command: /sbin/chkconfig --level 0123456 'nfslock' off

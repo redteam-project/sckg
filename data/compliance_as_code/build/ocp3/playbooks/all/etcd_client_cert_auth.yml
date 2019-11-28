@@ -1,0 +1,24 @@
+# platform = multi_platform_ocp
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Enable The Client Certificate Authentication
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80579-6
+    - etcd_client_cert_auth
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - restrict_strategy
+  tasks:
+
+    - name: '@RULE_TITLE@'
+      lineinfile:
+        path: /etc/etcd/etcd.conf
+        regexp: ^ETCD_CLIENT_CERT_AUTH=
+        line: ETCD_CLIENT_CERT_AUTH=true
+        create: true

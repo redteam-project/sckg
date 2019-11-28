@@ -1,0 +1,31 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: Test for existence /etc/systemd/system/atomic-openshift-node.service
+  stat:
+    path: /etc/systemd/system/atomic-openshift-node.service
+  register: file_exists
+  tags:
+    - file_groupowner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80620-8
+
+- name: Ensure group owner 0 on /etc/systemd/system/atomic-openshift-node.service
+  file:
+    path: /etc/systemd/system/atomic-openshift-node.service
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_openshift_node_service
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80620-8

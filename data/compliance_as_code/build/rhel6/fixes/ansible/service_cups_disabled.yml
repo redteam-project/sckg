@@ -1,0 +1,30 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop cups
+  command: /sbin/service 'cups' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cups_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26899-5
+    - NIST-800-53-CM-7
+
+- name: Switch off cups
+  command: /sbin/chkconfig --level 0123456 'cups' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_cups_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26899-5
+    - NIST-800-53-CM-7

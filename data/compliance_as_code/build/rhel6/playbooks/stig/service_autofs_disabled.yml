@@ -1,0 +1,33 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable the Automounter
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-26976-1
+    - DISA-STIG-RHEL-06-000526
+    - NIST-800-171-3.4.6
+    - NIST-800-53-AC-19(a)
+    - NIST-800-53-AC-19(d)
+    - NIST-800-53-AC-19(e)
+    - NIST-800-53-IA-3
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - service_autofs_disabled
+  tasks:
+
+    - name: Stop autofs
+      command: /sbin/service 'autofs' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off autofs
+      command: /sbin/chkconfig --level 0123456 'autofs' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

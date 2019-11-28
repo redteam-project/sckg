@@ -1,0 +1,113 @@
+<def-group>
+
+  <definition class="compliance" id="service_crond_enabled"
+  version="1">
+    <metadata>
+      <title>Service crond Enabled</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The crond service should be enabled if possible.</description>
+    </metadata>
+    <criteria comment="package cronie installed and service crond is configured to start" operator="AND">
+    <criterion comment="cronie installed" test_ref="test_service_crond_package_cronie_installed" />
+    <criteria operator="OR" comment="service crond is configured to start">
+      <criterion comment="crond runlevel 0" test_ref="test_runlevel0_crond_on" />
+      <criterion comment="crond runlevel 1" test_ref="test_runlevel1_crond_on" />
+      <criterion comment="crond runlevel 2" test_ref="test_runlevel2_crond_on" />
+      <criterion comment="crond runlevel 3" test_ref="test_runlevel3_crond_on" />
+      <criterion comment="crond runlevel 4" test_ref="test_runlevel4_crond_on" />
+      <criterion comment="crond runlevel 5" test_ref="test_runlevel5_crond_on" />
+      <criterion comment="crond runlevel 6" test_ref="test_runlevel6_crond_on" />
+    </criteria>
+    </criteria>
+  </definition>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel0_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel0_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel1_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel1_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel2_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel2_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel3_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel3_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel4_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel4_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel5_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel5_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel6_crond_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel6_crond_on" />
+    <unix:state state_ref="state_service_crond_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_object id="obj_runlevel0_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">0</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel1_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">1</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel2_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">2</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel3_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">3</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel4_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">4</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel5_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">5</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel6_crond_on" version="1">
+    <unix:service_name>crond</unix:service_name>
+    <unix:runlevel operation="equals">6</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_state comment="configured to start" id="state_service_crond_on" version="1">
+    <unix:start datatype="boolean">true</unix:start>
+    <unix:kill datatype="boolean">false</unix:kill>
+  </unix:runlevel_state>
+
+
+
+  <linux:rpminfo_test check="all" check_existence="all_exist"
+  id="test_service_crond_package_cronie_installed" version="1"
+  comment="package cronie is installed">
+    <linux:object object_ref="obj_test_service_crond_package_cronie_installed" />
+    
+  </linux:rpminfo_test>
+  <linux:rpminfo_object id="obj_test_service_crond_package_cronie_installed" version="1">
+    <linux:name>cronie</linux:name>
+  </linux:rpminfo_object>
+  
+
+</def-group>

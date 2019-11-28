@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - rexec.service"
+  command: systemctl list-unit-files rexec.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service rexec
+  systemd:
+    name: "rexec.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rexec.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - rexec.socket"
+  command: systemctl list-unit-files rexec.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket rexec
+  systemd:
+    name: "rexec.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rexec.socket" in socket_file_exists.stdout_lines[1]'

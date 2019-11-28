@@ -1,0 +1,19 @@
+description: "Chromium has the ability to bypass and ignore the system firewall. This\n\
+  ability should be disabled. To disable this setting, set \n<tt>RemoteAccessHostFirewallTraversal</tt>\
+  \ to <tt>false</tt> in the \nChromium policy file."
+identifiers: {}
+ocil: "To verify that Chromium's abililty to traverse the system firewall is \ndisabled,\
+  \ run the following command:\n<pre>$ grep RemoteAccessHostFirewallTraversal /etc/chromium/policies/managed/*.json</pre>\n\
+  The output should contain:\n<pre>\"RemoteAccessHostFirewallTraversal\": false,</pre>"
+ocil_clause: it is not disabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Remote connections should never be allowed to bypass the system firewall
+
+  as there is no way to verify if they can be trusted.'
+references: {stigid: CHROMIUM-DTBC0001}
+severity: unknown
+template: null
+title: Disable Chromium's Ability to Traverse Firewalls
+warnings: []

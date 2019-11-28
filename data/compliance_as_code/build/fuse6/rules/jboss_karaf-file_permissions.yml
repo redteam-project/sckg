@@ -1,0 +1,19 @@
+description: 'All JBoss files within the installation directory should be
+
+  readable by the JBoss process owner and JBoss administrators only.'
+identifiers: {}
+ocil: null
+ocil_clause: JBoss file permissions are not correct
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'To prevent unauthorized modification or disclosure of JBoss configuration
+
+  settings, access to all files within the installation directory should be
+
+  restricted to the JBoss process owner account and Jboss administrators.'
+references: {nist: 'AC-3,AC-6'}
+severity: medium
+template: null
+title: Ensure JBoss Files Have Correct Permissions
+warnings: []

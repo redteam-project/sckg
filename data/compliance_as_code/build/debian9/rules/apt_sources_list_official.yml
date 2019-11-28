@@ -1,0 +1,17 @@
+description: Check that official Debian repositories, including security repository,
+  are configured in apt.
+identifiers: {}
+ocil: null
+ocil_clause: null
+oval_external_content: null
+platform: null
+prodtype: debian8,debian9
+rationale: "The Debian distribution deliver DSA (Debian Security Announce), through\
+  \ the official\n    Debian security repository, to correct various vulnerabilities\
+  \ impacting the Debian\n    packages. Using the official repositories is the best\
+  \ way to ensure that the Debian\n    updates are integrated soon enough."
+references: {anssi: NT28(R15)}
+severity: unknown
+template: null
+title: Ensure that official distribution repositories are used
+warnings: []

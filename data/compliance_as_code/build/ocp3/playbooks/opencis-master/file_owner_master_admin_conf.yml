@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify User Who Owns The OpenShift Admin Kubeconfig File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80622-4
+    - configure_strategy
+    - file_owner_master_admin_conf
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/master/admin.kubeconfig
+      stat:
+        path: /etc/origin/master/admin.kubeconfig
+      register: file_exists
+
+    - name: Ensure owner 0 on /etc/origin/master/admin.kubeconfig
+      file:
+        path: /etc/origin/master/admin.kubeconfig
+        owner: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

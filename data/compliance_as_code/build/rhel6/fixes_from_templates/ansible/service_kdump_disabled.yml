@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop kdump
+  command: /sbin/service 'kdump' stop
+- name: Switch off kdump
+  command: /sbin/chkconfig --level 0123456 'kdump' off

@@ -1,0 +1,30 @@
+description: "Profiling should be disabled if not needed. To disable profiling,\n\
+  edit the Scheduler pod specification file\n<tt>/etc/origin/master/master-config.yaml</tt>\
+  \ file on the master\nnode and set the below parameter:\n<pre>kubernetesMasterConfig:\n\
+  \  schedulerArguments:\n    profiling:\n    - false</pre>"
+identifiers: {cce: 80609-1}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ sudo grep -A2 profiling /etc/origin/master/master-config.yaml</pre>
+
+  The output should return <tt>false</tt>.'
+ocil_clause: profiling is not being used and is not disabled
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'Profiling allows for the identification of specific performance
+
+  bottlenecks. It generates a significant amount of program data that could
+
+  potentially be exploited to uncover system and program details. If you are
+
+  not experiencing any bottlenecks and do not need the profiler for
+
+  troubleshooting purposes, it is recommended to turn it off to reduce the
+
+  potential attack surface.'
+references: {cis: '1.2.1,1.1.8'}
+severity: low
+template: null
+title: Disable Scheduler Profiling
+warnings: []

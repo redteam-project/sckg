@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Red Hat Subscription Manager Daemon (rhsmcertd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27262-5
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_rhsmcertd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop rhsmcertd
+      command: /sbin/service 'rhsmcertd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off rhsmcertd
+      command: /sbin/chkconfig --level 0123456 'rhsmcertd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

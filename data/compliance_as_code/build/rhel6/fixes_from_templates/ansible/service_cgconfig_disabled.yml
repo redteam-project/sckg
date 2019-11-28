@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop cgconfig
+  command: /sbin/service 'cgconfig' stop
+- name: Switch off cgconfig
+  command: /sbin/chkconfig --level 0123456 'cgconfig' off

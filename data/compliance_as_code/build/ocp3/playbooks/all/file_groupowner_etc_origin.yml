@@ -1,0 +1,27 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns The OpenShift Configuration Directory
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - configure_strategy
+    - file_groupowner_etc_origin
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/
+      stat:
+        path: /etc/origin/
+      register: file_exists
+
+    - name: Ensure group owner 0 on /etc/origin/
+      file:
+        path: /etc/origin/
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

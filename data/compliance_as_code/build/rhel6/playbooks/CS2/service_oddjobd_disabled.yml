@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Odd Job Daemon (oddjobd)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27257-5
+    - DISA-STIG-RHEL-06-000266
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - service_oddjobd_disabled
+  tasks:
+
+    - name: Stop oddjobd
+      command: /sbin/service 'oddjobd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off oddjobd
+      command: /sbin/chkconfig --level 0123456 'oddjobd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

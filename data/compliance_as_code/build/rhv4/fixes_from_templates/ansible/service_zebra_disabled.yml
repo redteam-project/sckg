@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - zebra.service"
+  command: systemctl list-unit-files zebra.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service zebra
+  systemd:
+    name: "zebra.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"zebra.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - zebra.socket"
+  command: systemctl list-unit-files zebra.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket zebra
+  systemd:
+    name: "zebra.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"zebra.socket" in socket_file_exists.stdout_lines[1]'

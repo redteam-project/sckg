@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns OpenShift Node Certificate File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80619-0
+    - configure_strategy
+    - file_groupowner_openshift_node_client_crt
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/client-ca.crt
+      stat:
+        path: /etc/origin/node/client-ca.crt
+      register: file_exists
+
+    - name: Ensure group owner 0 on /etc/origin/node/client-ca.crt
+      file:
+        path: /etc/origin/node/client-ca.crt
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

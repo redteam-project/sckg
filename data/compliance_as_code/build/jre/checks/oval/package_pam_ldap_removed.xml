@@ -1,0 +1,17 @@
+<def-group>
+  <definition class="compliance" id="package_pam_ldap_removed"
+  version="1">
+    <metadata>
+      <title>Package pam_ldap Removed</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The  package pam_ldap should be removed.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="package pam_ldap is removed"
+      test_ref="test_package_pam_ldap_removed" />
+    </criteria>
+  </definition>
+
+</def-group>

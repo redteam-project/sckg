@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - ssh.service"
+  command: systemctl list-unit-files ssh.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service sshd
+  systemd:
+    name: "ssh.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"ssh.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - ssh.socket"
+  command: systemctl list-unit-files ssh.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket sshd
+  systemd:
+    name: "ssh.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"ssh.socket" in socket_file_exists.stdout_lines[1]'

@@ -1,0 +1,90 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - rlogin.service
+  command: systemctl list-unit-files rlogin.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rlogin_disabled
+    - high_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27336-7
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-IA-5(1)(c)
+
+- name: Disable service rlogin
+  systemd:
+    name: rlogin.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"rlogin.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rlogin_disabled
+    - high_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27336-7
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-IA-5(1)(c)
+
+- name: Unit Socket Exists - rlogin.socket
+  command: systemctl list-unit-files rlogin.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rlogin_disabled
+    - high_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27336-7
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-IA-5(1)(c)
+
+- name: Disable socket rlogin
+  systemd:
+    name: rlogin.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"rlogin.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_rlogin_disabled
+    - high_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27336-7
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - NIST-800-53-IA-5(1)(c)

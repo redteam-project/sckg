@@ -1,0 +1,25 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="ansible" system="urn:xccdf:fix:script:ansible" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_node_config" strategy="configure">- name: Test for existence /etc/origin/node/node-config.yaml
+  stat:
+    path: /etc/origin/node/node-config.yaml
+  register: file_exists
+  tags:
+    - file_permissions_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+
+- name: Ensure permission 0600 on /etc/origin/node/node-config.yaml
+  file:
+    path: /etc/origin/node/node-config.yaml
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_node_config
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+</fix></fix-group></fix-content>

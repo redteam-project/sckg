@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Permissions on the OpenShift Scheduler Configuration File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80639-8
+    - configure_strategy
+    - file_permissions_master_scheduler_conf
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/master/scheduler.json
+      stat:
+        path: /etc/origin/master/scheduler.json
+      register: file_exists
+
+    - name: Ensure permission 0600 on /etc/origin/master/scheduler.json
+      file:
+        path: /etc/origin/master/scheduler.json
+        mode: '0600'
+      when: file_exists.stat is defined and file_exists.stat.exists

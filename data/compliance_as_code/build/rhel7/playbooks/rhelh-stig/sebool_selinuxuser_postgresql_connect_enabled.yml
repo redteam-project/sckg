@@ -1,0 +1,34 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Disable the selinuxuser_postgresql_connect_enabled SELinux Boolean
+  hosts: '@@HOSTS@@'
+  become: true
+  vars:
+    var_selinuxuser_postgresql_connect_enabled: 'false'
+  tags:
+    - CCE-82319-5
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - sebool_selinuxuser_postgresql_connect_enabled
+  tasks:
+
+    - name: Ensure libsemanage-python installed
+      package:
+        name: libsemanage-python
+        state: present
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Set SELinux boolean selinuxuser_postgresql_connect_enabled accordingly
+      seboolean:
+        name: selinuxuser_postgresql_connect_enabled
+        state: '{{ var_selinuxuser_postgresql_connect_enabled }}'
+        persistent: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

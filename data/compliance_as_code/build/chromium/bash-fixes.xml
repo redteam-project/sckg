@@ -1,0 +1,471 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="bash" system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix rule="chromium_disable_session_cookies">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="CookiesSessionOnlyForUrls"
+POL_SETTING_VAL="none"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": \["'${POL_SETTING_VAL}'"\],' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": \[\"'${POL_SETTING_VAL}'\"\],/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_search_suggestions">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="SearchSuggestEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_default_search_provider_name">populate var_default_search_provider_name
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultSearchProviderName"
+POL_SETTING_VAL=$(echo ${var_default_search_provider_name} | sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${var_default_search_provider_name}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'\".*/\"'${POL_SETTING}'\": \"'${POL_SETTING_VAL}'\",/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_enable_browser_history">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="SavingBrowserHistoryDisabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_3d_graphics_api">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="Disable3DAPIs"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_background_processing">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="BackgroundModeEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_plugin_blacklist">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DisabledPlugins"
+POL_SETTING_VAL="\[\"*\"\]"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_default_search_provider">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultSearchProviderEnabled"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_policy_file">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+
+if [ ! -d ${CHROME_POL_DIR} ] ; then
+   mkdir -p -m 755 ${CHROME_POL_DIR}
+fi
+
+if [ ! -f ${CHROME_POL_DIR}/${CHROME_POL_FILE} ] ; then
+   touch ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+   chmod 644 ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+
+grep -q -E '^\{' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+if ! [ $? -eq 0 ] ; then
+   if [ -s ${CHROME_POL_DIR}/${CHROME_POL_FILE} ] ; then
+      sed -i '1s/^/\{\n/' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+   else
+      echo -e "{" &gt;&gt; ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+   fi
+fi
+
+tail -1 ${CHROME_POL_DIR}/${CHROME_POL_FILE} | grep -q -E '^\}'
+if ! [ $? -eq 0 ] ; then
+   echo -e "}" &gt;&gt; ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi 
+</fix><fix rule="chromium_disable_automatic_installation">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DisablePluginFinder"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_enable_approved_plugins">populate var_enable_approved_plugins
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="EnabledPlugins"
+POL_SETTING_VAL=$(echo ${var_enable_approved_plugins} | sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": \['${var_enable_approved_plugins}'\],' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'\".*/\"'${POL_SETTING}'\": \['${POL_SETTING_VAL}'\],/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disallow_location_tracking">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultGeolocationSetting"
+POL_SETTING_VAL="2"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_trusted_home_page">populate var_trusted_home_page
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="HomepageLocation"
+POL_SETTING_VAL=$(echo ${var_trusted_home_page} | sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${var_trusted_home_page}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'\".*/\"'${POL_SETTING}'\": \"'${POL_SETTING_VAL}'\",/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_whitelist_plugin_urls">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="PluginsAllowedForUrls"
+POL_SETTING_VAL="none"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${POL_SETTING_VAL}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'\".*/\"'${POL_SETTING}'\": \"'${POL_SETTING_VAL}'\",/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_saved_passwords">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="ImportSavedPasswords"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_popups">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultPopupsSetting"
+POL_SETTING_VAL="2"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_incognito_mode">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="IncognitoModeAvailability"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_firewall_traversal">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="RemoteAccessHostFirewallTraversal"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_http_authentication">populate var_auth_schemes
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="AuthSchemes"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${var_auth_schemes}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": \"'${var_auth_schemes}'\",/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_enable_safe_browsing">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="SafeBrowsingEnabled"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_cleartext_passwords">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="PasswordManagerAllowShowPasswords"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_default_block_plugins">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultPluginsSetting"
+POL_SETTING_VAL="3"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_enable_encrypted_searching">populate var_enable_encrypted_searching
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultSearchProviderSearchURL"
+POL_SETTING_VAL=$(echo ${var_enable_encrypted_searching} | sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${var_enable_encrypted_searching}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's;\"'${POL_SETTING}'\".*;\"'${POL_SETTING}'\": \"'${POL_SETTING_VAL}'\",;g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_outdated_plugins">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="AllowOutdatedPlugins"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_extension_whitelist">populate var_extension_whitelist
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="ExtensionInstallWhitelist"
+POL_SETTING_VAL=$(echo ${var_extension_whitelist} | sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": "'${var_extension_whitelist}'",' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'\".*/\"'${POL_SETTING}'\": \"'${POL_SETTING_VAL}'\",/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_autocomplete">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="AutoFillEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_check_cert_revocation">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="EnableOnlineRevocationChecks"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_block_desktop_notifications">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DefaultNotificationsSetting"
+POL_SETTING_VAL="2"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_google_sync">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="SyncDisabled"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_thirdparty_cookies">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="BlockThirdPartyCookies"
+POL_SETTING_VAL="true"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_metrics_reporting">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="MetricsReportingEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_protocol_schemas">populate var_url_blacklist
+
+CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="URLBlacklist"
+POL_SETTING_VAL=$(echo ${var_url_blacklist}| sed 's/\//\\\/\\/')
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": \["'${var_url_blacklist}'"\],' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": \[\"'${POL_SETTING_VAL}'\"\],/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_password_manager">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="PasswordManagerEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_blacklist_extension_installation">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="ExtensionInstallBlacklist"
+POL_SETTING_VAL="\[\"*\"\]"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_network_prediction">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="DnsPrefetchingEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_disable_cloud_print_sharing">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="CloudPringProxyEnabled"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix><fix rule="chromium_plugins_require_authorization">CHROME_POL_FILE="chrome_stig_policy.json"
+CHROME_POL_DIR="/etc/chromium/policies/managed/"
+POL_SETTING="AlwaysAuthorizePlugins"
+POL_SETTING_VAL="false"
+
+grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+
+if ! [ $? -eq 0 ] ; then
+   sed -i -e '/{/a \  "'${POL_SETTING}'": '${POL_SETTING_VAL}',' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+else
+   sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
+fi
+</fix></fix-group></fix-content>

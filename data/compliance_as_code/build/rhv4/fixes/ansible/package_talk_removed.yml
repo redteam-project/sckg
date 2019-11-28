@@ -1,0 +1,16 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Ensure talk is removed
+  package:
+    name: talk
+    state: absent
+  tags:
+    - package_talk_removed
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed

@@ -1,0 +1,44 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Network File Systems (netfs)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_netfs_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Unit Service Exists - netfs.service
+      command: systemctl list-unit-files netfs.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable service netfs
+      systemd:
+        name: netfs.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"netfs.service" in service_file_exists.stdout_lines[1]'
+
+    - name: Unit Socket Exists - netfs.socket
+      command: systemctl list-unit-files netfs.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable socket netfs
+      systemd:
+        name: netfs.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"netfs.socket" in socket_file_exists.stdout_lines[1]'

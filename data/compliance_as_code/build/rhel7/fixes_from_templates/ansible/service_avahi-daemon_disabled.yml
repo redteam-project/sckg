@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - avahi-daemon.service"
+  command: systemctl list-unit-files avahi-daemon.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service avahi-daemon
+  systemd:
+    name: "avahi-daemon.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"avahi-daemon.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - avahi-daemon.socket"
+  command: systemctl list-unit-files avahi-daemon.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket avahi-daemon
+  systemd:
+    name: "avahi-daemon.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"avahi-daemon.socket" in socket_file_exists.stdout_lines[1]'

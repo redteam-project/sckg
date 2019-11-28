@@ -1,0 +1,32 @@
+description: 'Firefox can be set to automatically update as new updates. This can
+  be
+
+  disabled by setting <tt>app.update.enable</tt> to <tt>false</tt>.'
+identifiers: {}
+ocil: 'To verify that Firefox cannot auto-update,
+
+  run the following command:
+
+  <pre>$ grep ''app.update.enable'' <i>FIREFOX_INSTALL_DIR</i>/*.cfg</pre>
+
+  The output should return:
+
+  <pre>lockPref("app.update.enable", false);</pre>'
+ocil_clause: it is not disabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Allowing software updates from non-trusted sites can introduce settings
+
+  that will override a secured installation of the application. This can
+
+  place DoD information at risk. If this setting is enabled, then there are
+
+  many other default settings which point to untrusted sites which must be
+
+  changed to point to an authorized update site that is not publicly accessible.'
+references: {nist: ECSC-1, stigid: FIREFOX-DTBF080}
+severity: medium
+template: null
+title: Disable Firefox Auto-Update Capability
+warnings: []

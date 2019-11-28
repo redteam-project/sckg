@@ -1,0 +1,27 @@
+description: 'The <tt>openssh</tt> package should be installed.
+
+  The <code>openssh</code> package can be installed with the following command:
+
+  <pre>
+
+  $ sudo yum install openssh</pre>'
+identifiers: {}
+ocil: 'Run the following command to determine if the <code>openssh</code> package
+  is installed: <pre>$ rpm -q openssh</pre>'
+ocil_clause: the package is not installed
+oval_external_content: null
+platform: machine
+prodtype: opensuse,sle11,sle12
+rationale: 'Without protection of the transmitted information, confidentiality, and
+
+  integrity may be compromised because unprotected communications can be
+
+  intercepted and either read or altered.'
+references: {disa: '2418,2420,2421,2422', nist: SC-8, srg: SRG-OS-000423-GPOS-00187}
+severity: medium
+template:
+  backends: {}
+  name: package_installed
+  vars: {pkgname: openssh}
+title: Install the OpenSSH Client and Server Package
+warnings: []

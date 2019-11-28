@@ -1,0 +1,35 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: Test for existence /boot/grub/grub.conf
+  stat:
+    path: /boot/grub/grub.conf
+  register: file_exists
+  tags:
+    - file_permissions_grub_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26949-8
+    - DISA-STIG-RHEL-06-000067
+    - NIST-800-53-AC-6(7)
+
+- name: Ensure permission 0600 on /boot/grub/grub.conf
+  file:
+    path: /boot/grub/grub.conf
+    mode: '0600'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_permissions_grub_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26949-8
+    - DISA-STIG-RHEL-06-000067
+    - NIST-800-53-AC-6(7)

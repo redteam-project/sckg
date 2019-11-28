@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify User Who Owns The OpenShift Node Configuration File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80629-9
+    - configure_strategy
+    - file_owner_node_config
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/node-config.yaml
+      stat:
+        path: /etc/origin/node/node-config.yaml
+      register: file_exists
+
+    - name: Ensure owner 0 on /etc/origin/node/node-config.yaml
+      file:
+        path: /etc/origin/node/node-config.yaml
+        owner: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

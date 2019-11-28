@@ -1,0 +1,18 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Ensure httpd is removed
+  package:
+    name: httpd
+    state: absent
+  tags:
+    - package_httpd_removed
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27133-8
+    - NIST-800-53-CM-7

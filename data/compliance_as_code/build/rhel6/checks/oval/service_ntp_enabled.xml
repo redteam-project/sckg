@@ -1,0 +1,113 @@
+<def-group>
+
+  <definition class="compliance" id="service_ntp_enabled"
+  version="1">
+    <metadata>
+      <title>Service ntp Enabled</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The ntp service should be enabled if possible.</description>
+    </metadata>
+    <criteria comment="package ntp installed and service ntp is configured to start" operator="AND">
+    <criterion comment="ntp installed" test_ref="test_service_ntp_package_ntp_installed" />
+    <criteria operator="OR" comment="service ntp is configured to start">
+      <criterion comment="ntp runlevel 0" test_ref="test_runlevel0_ntp_on" />
+      <criterion comment="ntp runlevel 1" test_ref="test_runlevel1_ntp_on" />
+      <criterion comment="ntp runlevel 2" test_ref="test_runlevel2_ntp_on" />
+      <criterion comment="ntp runlevel 3" test_ref="test_runlevel3_ntp_on" />
+      <criterion comment="ntp runlevel 4" test_ref="test_runlevel4_ntp_on" />
+      <criterion comment="ntp runlevel 5" test_ref="test_runlevel5_ntp_on" />
+      <criterion comment="ntp runlevel 6" test_ref="test_runlevel6_ntp_on" />
+    </criteria>
+    </criteria>
+  </definition>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel0_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel0_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel1_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel1_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel2_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel2_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel3_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel3_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel4_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel4_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel5_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel5_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_test check="all" check_existence="any_exist"
+  comment="Runlevel test" id="test_runlevel6_ntp_on"
+  version="2">
+    <unix:object object_ref="obj_runlevel6_ntp_on" />
+    <unix:state state_ref="state_service_ntp_on" />
+  </unix:runlevel_test>
+  <unix:runlevel_object id="obj_runlevel0_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">0</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel1_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">1</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel2_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">2</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel3_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">3</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel4_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">4</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel5_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">5</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_object id="obj_runlevel6_ntp_on" version="1">
+    <unix:service_name>ntp</unix:service_name>
+    <unix:runlevel operation="equals">6</unix:runlevel>
+  </unix:runlevel_object>
+  <unix:runlevel_state comment="configured to start" id="state_service_ntp_on" version="1">
+    <unix:start datatype="boolean">true</unix:start>
+    <unix:kill datatype="boolean">false</unix:kill>
+  </unix:runlevel_state>
+
+
+
+  <linux:rpminfo_test check="all" check_existence="all_exist"
+  id="test_service_ntp_package_ntp_installed" version="1"
+  comment="package ntp is installed">
+    <linux:object object_ref="obj_test_service_ntp_package_ntp_installed" />
+    
+  </linux:rpminfo_test>
+  <linux:rpminfo_object id="obj_test_service_ntp_package_ntp_installed" version="1">
+    <linux:name>ntp</linux:name>
+  </linux:rpminfo_object>
+  
+
+</def-group>

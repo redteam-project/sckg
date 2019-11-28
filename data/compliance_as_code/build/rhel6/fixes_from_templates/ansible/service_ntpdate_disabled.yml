@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop ntpdate
+  command: /sbin/service 'ntpdate' stop
+- name: Switch off ntpdate
+  command: /sbin/chkconfig --level 0123456 'ntpdate' off

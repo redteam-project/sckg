@@ -1,0 +1,70 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - httpd.service
+  command: systemctl list-unit-files httpd.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_httpd_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-53-CM-7
+
+- name: Disable service httpd
+  systemd:
+    name: httpd.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"httpd.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_httpd_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-53-CM-7
+
+- name: Unit Socket Exists - httpd.socket
+  command: systemctl list-unit-files httpd.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_httpd_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-53-CM-7
+
+- name: Disable socket httpd
+  systemd:
+    name: httpd.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"httpd.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_httpd_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-53-CM-7

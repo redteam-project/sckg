@@ -1,0 +1,19 @@
+description: 'Logging should be configured to maintain logs for
+
+  a organization defined continuous number of days.'
+identifiers: {}
+ocil: null
+ocil_clause: JBoss logs are not configured to retain for a defined period of days
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'If adequate online audit storage capacity is not maintained,
+
+  intrusion monitoring, security investigations, and forensic
+
+  analysis can be negatively affected.'
+references: {}
+severity: medium
+template: null
+title: Configure JBoss Logs Number of Days Retained
+warnings: []

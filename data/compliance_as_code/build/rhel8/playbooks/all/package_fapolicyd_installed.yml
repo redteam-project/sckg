@@ -1,0 +1,24 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install fapolicyd Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82191-8
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_fapolicyd_installed
+  tasks:
+
+    - name: Ensure fapolicyd is installed
+      package:
+        name: fapolicyd
+        state: present
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

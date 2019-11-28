@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop cpuspeed
+  command: /sbin/service 'cpuspeed' stop
+- name: Switch off cpuspeed
+  command: /sbin/chkconfig --level 0123456 'cpuspeed' off

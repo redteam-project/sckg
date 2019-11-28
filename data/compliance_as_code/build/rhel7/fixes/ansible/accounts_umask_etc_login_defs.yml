@@ -1,0 +1,24 @@
+# platform = multi_platform_rhel,multi_platform_fedora
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- (xccdf-var var_accounts_user_umask)
+
+- name: Ensure the Default UMASK is Set Correctly
+  lineinfile:
+    create: true
+    dest: /etc/login.defs
+    regexp: ^UMASK
+    line: UMASK {{ var_accounts_user_umask }}
+  tags:
+    - accounts_umask_etc_login_defs
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80205-8
+    - DISA-STIG-RHEL-07-020240
+    - NIST-800-53-CM-6(b)
+    - NIST-800-53-SA-8

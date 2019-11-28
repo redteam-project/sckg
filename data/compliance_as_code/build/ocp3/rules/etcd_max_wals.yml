@@ -1,0 +1,21 @@
+description: "To ensure the <tt>etcd</tt> service is not auto-rotating logs,\nedit\
+  \ the <tt>etcd</tt> configuration file \n<tt>/etc/etcd/etcd.conf</tt> on the master\
+  \ node and set\n<tt>ETCD_MAX_WALS</tt> to <tt>0</tt>:\n<pre>ETCD_MAX_WALS=0</pre>"
+identifiers: {cce: 80584-6}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ grep ETCD_MAX_WALS /etc/etcd/etcd.conf</pre>
+
+  The output should return <tt>0</tt>.'
+ocil_clause: the etcd auto log rotation is not disabled
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'Ensure data integrity by preventing logs from being overwritten which
+
+  allows reconstructing events should the data be compromised. '
+references: {cis: 1.5.8}
+severity: medium
+template: null
+title: Disable etcd Auto Log Rotation
+warnings: []

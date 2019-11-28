@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns The OpenShift API Specification File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80576-2
+    - configure_strategy
+    - file_groupowner_master_api_server
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/pods/apiserver.yaml
+      stat:
+        path: /etc/origin/node/pods/apiserver.yaml
+      register: file_exists
+
+    - name: Ensure group owner 0 on /etc/origin/node/pods/apiserver.yaml
+      file:
+        path: /etc/origin/node/pods/apiserver.yaml
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

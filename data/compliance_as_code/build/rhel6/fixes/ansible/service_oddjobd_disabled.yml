@@ -1,0 +1,32 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop oddjobd
+  command: /sbin/service 'oddjobd' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_oddjobd_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27257-5
+    - DISA-STIG-RHEL-06-000266
+    - NIST-800-53-CM-7
+
+- name: Switch off oddjobd
+  command: /sbin/chkconfig --level 0123456 'oddjobd' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_oddjobd_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27257-5
+    - DISA-STIG-RHEL-06-000266
+    - NIST-800-53-CM-7

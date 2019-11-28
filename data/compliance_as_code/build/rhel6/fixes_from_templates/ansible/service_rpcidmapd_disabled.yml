@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop rpcidmapd
+  command: /sbin/service 'rpcidmapd' stop
+- name: Switch off rpcidmapd
+  command: /sbin/chkconfig --level 0123456 'rpcidmapd' off

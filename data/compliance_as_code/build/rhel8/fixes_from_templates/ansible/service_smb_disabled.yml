@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - smb.service"
+  command: systemctl list-unit-files smb.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service smb
+  systemd:
+    name: "smb.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"smb.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - smb.socket"
+  command: systemctl list-unit-files smb.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket smb
+  systemd:
+    name: "smb.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"smb.socket" in socket_file_exists.stdout_lines[1]'

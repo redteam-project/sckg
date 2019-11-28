@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Certmonger Service (certmonger)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27267-4
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_certmonger_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop certmonger
+      command: /sbin/service 'certmonger' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off certmonger
+      command: /sbin/chkconfig --level 0123456 'certmonger' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

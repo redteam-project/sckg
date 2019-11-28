@@ -1,0 +1,21 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Ensure screen is installed
+  package:
+    name: screen
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - package_screen_installed
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26940-7
+    - DISA-STIG-RHEL-06-000071
+    - NIST-800-171-3.1.10
+    - NIST-800-53-AC-11(a)

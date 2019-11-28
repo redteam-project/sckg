@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install sssd-ipa Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-82993-7
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_sssd-ipa_installed
+  tasks:
+
+    - name: Ensure sssd-ipa is installed
+      package:
+        name: sssd-ipa
+        state: present

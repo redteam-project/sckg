@@ -1,0 +1,877 @@
+<?xml version="1.0"?>
+<oval:oval_definitions xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:ns4="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <oval:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:46:57</ns2:timestamp>
+  </oval:generator>
+  <oval:definitions>
+    <oval:definition class="compliance" id="oval:ssg-chromium_blacklist_extension_installation:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Blacklist Extension Installation</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Extensions installation must be blacklisted by default.</oval:description>
+        <oval:reference ref_id="chromium_blacklist_extension_installation" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium blacklist extension installation" test_ref="oval:ssg-test_chromium_extension_installation:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_block_desktop_notifications:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Block Desktop Notifications</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Sites ability for showing desktop notifications must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_block_desktop_notifications" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium block desktop notifications" test_ref="oval:ssg-test_chromium_block_notifications:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_check_cert_revocation:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Check Certificate Revocation</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Online revocation checks must be done.</oval:description>
+        <oval:reference ref_id="chromium_check_cert_revocation" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium check certificate revocation" test_ref="oval:ssg-test_chromium_check_cert_revocation:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_default_block_plugins:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Block Plugin Execution By Default</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Default behavior must block webpages from automatically running plugins.</oval:description>
+        <oval:reference ref_id="chromium_default_block_plugins" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium block plugin execution" test_ref="oval:ssg-test_chromium_default_block_plugins:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_default_search_provider:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Enable Default Search Provider</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Default search provider must be enabled.</oval:description>
+        <oval:reference ref_id="chromium_default_search_provider" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium enable default search provider" test_ref="oval:ssg-test_chromium_default_search_provider:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_default_search_provider_name:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Set Default Search Provider Name</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The default search providers name must be set.</oval:description>
+        <oval:reference ref_id="chromium_default_search_provider_name" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium set default search provider" test_ref="oval:ssg-test_chromium_search_provider_name:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_3d_graphics_api:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable 3D Graphics APIs</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>3D Graphics APIs must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_3d_graphics_api" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable 3D graphics apis" test_ref="oval:ssg-test_chromium_disable_3d_graphics_api:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_autocomplete:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Autocomplete For Forms</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>AutoFill must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_autocomplete" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable autocomplete for forms" test_ref="oval:ssg-test_chromium_disable_autocomplete:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_automatic_installation:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Automatic Plugin Search And Installation</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Automated installation of missing plugins must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_automatic_installation" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable automatic plugin search and installation" test_ref="oval:ssg-test_chromium_disable_automatic_installation:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_background_processing:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Background Processing</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Background processing must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_background_processing" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable background processing" test_ref="oval:ssg-test_chromium_disable_background_processing:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_cleartext_passwords:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Cleartext Passwords</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Cleartext passwords in the Password Manager must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_cleartext_passwords" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable cleartext passwords" test_ref="oval:ssg-test_chromium_disable_cleartext_passwords:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_cloud_print_sharing:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Cloud Print Sharing</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Cloud print sharing must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_cloud_print_sharing" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable cloud pring sharing" test_ref="oval:ssg-test_chromium_disable_cloud_print_sharing:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_firewall_traversal:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Firewall Traversal</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Firewall traversal from remote host must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_firewall_traversal" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Test Chromium firewall traversal policy" test_ref="oval:ssg-test_chromium_firewall_traversal:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_google_sync:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Google Data Synchronization</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Google Data Synchronization must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_google_sync" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable Google data sync" test_ref="oval:ssg-test_chromium_disable_google_sync:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_incognito_mode:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Incognito Mode</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Incognito mode must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_incognito_mode" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable incognito mode" test_ref="oval:ssg-test_chromium_disable_incognito_mode:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_metrics_reporting:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Metrics Reporting</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Metrics reporting to Google must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_metrics_reporting" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable metrics reporting" test_ref="oval:ssg-test_chromium_disable_metrics_reporting:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_network_prediction:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Network Prediction</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Network prediction must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_network_prediction" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable network prediction" test_ref="oval:ssg-test_chromium_disable_network_prediction:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_outdated_plugins:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Outdated Plugins</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The running of outdated plugins must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_outdated_plugins" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable outdated plugins" test_ref="oval:ssg-test_chromium_disable_outdated_plugins:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_password_manager:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Password Manager</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The Password Manager must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_password_manager" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable password manager" test_ref="oval:ssg-test_chromium_disable_password_manager:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_plugin_blacklist:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Blacklist Plugins</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Plugins must be disabled by default.</oval:description>
+        <oval:reference ref_id="chromium_disable_plugin_blacklist" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable plugins by default" test_ref="oval:ssg-test_chromium_plugin_blacklist:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_popups:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Pop-ups</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Sites ability to show pop-ups must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_popups" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable pop-ups" test_ref="oval:ssg-test_chromium_disable_popups:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_protocol_schemas:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Javascript URL Protocol Schemas</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The URL protocol schema javascript must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_protocol_schemas" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable URL protocol schemas" test_ref="oval:ssg-test_chromium_disable_protocol_schemas:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_saved_passwords:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Importing Saved Passwords</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Importing of saved passwords must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_saved_passwords" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable importing saved passwords" test_ref="oval:ssg-test_chromium_disable_saved_passwords:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_search_suggestions:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Search Suggestopms</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Search suggestions must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_search_suggestions" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable search suggestions" test_ref="oval:ssg-test_chromium_disable_search_suggestions:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_session_cookies:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Per Session Cookies</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Session only based cookies must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disable_session_cookies" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disable per session cookies" test_ref="oval:ssg-test_chromium_disable_session_cookies:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disable_thirdparty_cookies:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disable Third Party Cookies</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Third party cookies must be blocked.</oval:description>
+        <oval:reference ref_id="chromium_disable_thirdparty_cookies" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium block third party cookies" test_ref="oval:ssg-test_chromium_disable_thirdparty_cookies:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_disallow_location_tracking:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Disallow Location Tracking</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Site tracking users location must be disabled.</oval:description>
+        <oval:reference ref_id="chromium_disallow_location_tracking" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium disallow location tracking" test_ref="oval:ssg-test_chromium_location_tracking:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_enable_approved_plugins:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Enable Approved Plugins</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Plugins approved for use must be enabled.</oval:description>
+        <oval:reference ref_id="chromium_enable_approved_plugins" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium enable approved plugins" test_ref="oval:ssg-test_chromium_enable_approved_plugins:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_enable_browser_history:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Enable Browser History</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Browser history must be saved.</oval:description>
+        <oval:reference ref_id="chromium_enable_browser_history" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium enable browser history" test_ref="oval:ssg-test_chromium_enable_browser_history:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_enable_encrypted_searching:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Enable Encrypted Searching</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The default search provider URL must be set to perform encrypted searches.</oval:description>
+        <oval:reference ref_id="chromium_enable_encrypted_searching" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium enable encrypted searching" test_ref="oval:ssg-test_chromium_encrypted_search:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_enable_safe_browsing:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Enable Safe Browsing</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Safe Browsing must be enabled.</oval:description>
+        <oval:reference ref_id="chromium_enable_safe_browsing" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromiumi enable safe browsing" test_ref="oval:ssg-test_chromium_enable_safe_browsing:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_extension_whitelist:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Extension Whitelist</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Extensions that are approved for use must be whitelisted.</oval:description>
+        <oval:reference ref_id="chromium_extension_whitelist" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium whitelist extension" test_ref="oval:ssg-test_chromium_extension_whitelist:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_http_authentication:def:1" version="1">
+      <oval:metadata>
+        <oval:title>HTTP Authentication</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The HTTP Authentication must be set to negotiate.</oval:description>
+        <oval:reference ref_id="chromium_http_authentication" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium check HTTP authentication" test_ref="oval:ssg-test_chromium_http_authentication:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_plugins_require_authorization:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Plugins Require Authentication</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>Plugins requiring authorization must ask for user permission.</oval:description>
+        <oval:reference ref_id="chromium_plugins_require_authorization" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium require plugin authorization" test_ref="oval:ssg-test_chromium_plugins_require_authorization:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_policy_file:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Chromium Policy File Exists</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The Chromium policy file must exist and be configured correctly.</oval:description>
+        <oval:reference ref_id="chromium_policy_file" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium policy file" test_ref="oval:ssg-test_chromium_policy_file:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_trusted_home_page:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Set Trusted Homepage URL</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The homepage must be set to a trusted site.</oval:description>
+        <oval:reference ref_id="chromium_trusted_home_page" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium set trusted homepage URL" test_ref="oval:ssg-test_chromium_trusted_home_page:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="oval:ssg-chromium_whitelist_plugin_urls:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Configure Whitelisted Plugins For Use</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>URLs must be whitelisted for plugin use.</oval:description>
+        <oval:reference ref_id="chromium_whitelist_plugin_urls" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Chromium whitelist plugin urls" test_ref="oval:ssg-test_chromium_whitelist_plugin_urls:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="oval:ssg-installed_app_is_chromium:def:1" version="2">
+      <oval:metadata>
+        <oval:title>Google Chromium Browser</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:google:chromium-browser" source="CPE"/>
+        <oval:description>The application installed on the system is the Google Chromium Browser</oval:description>
+        <oval:reference ref_id="installed_app_is_chromium" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="oval:ssg-installed_OS_is_part_of_Unix_family:def:1"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="Chromium is installed" test_ref="oval:ssg-test_chromium-browser_installed:tst:1"/>
+          <oval:criterion comment="Chromium is installed" test_ref="oval:ssg-test_chromium_installed:tst:1"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="oval:ssg-installed_OS_is_part_of_Unix_family:def:1" version="1">
+      <oval:metadata>
+        <oval:title>Installed operating system is part of the Unix family</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Chromium</oval:product>
+        </oval:affected>
+        <oval:description>The operating system installed on the system is part of the Unix OS family</oval:description>
+        <oval:reference ref_id="installed_OS_is_part_of_Unix_family" source="ssg"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="oval:ssg-test_unix_family:tst:1"/>
+      </oval:criteria>
+    </oval:definition>
+  </oval:definitions>
+  <oval:tests>
+    <ns3:textfilecontent54_test check="all" comment="Chromium blacklist extension installation" id="oval:ssg-test_chromium_extension_installation:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_extension_installation:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium block desktop notifications" id="oval:ssg-test_chromium_block_notifications:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_block_notifications:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium check certificate revocation" id="oval:ssg-test_chromium_check_cert_revocation:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_check_cert_revocation:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium block plugin execution" id="oval:ssg-test_chromium_default_block_plugins:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_default_block_plugins:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium enable default search provider" id="oval:ssg-test_chromium_default_search_provider:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_default_search_provider:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium set default search provider" id="oval:ssg-test_chromium_search_provider_name:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_search_provider_name:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_search_provider_name:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable 3D graphics apis" id="oval:ssg-test_chromium_disable_3d_graphics_api:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_3d_graphics_api:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable autocomplete for forms" id="oval:ssg-test_chromium_disable_autocomplete:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_autocomplete:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable automatic plugin search and installation" id="oval:ssg-test_chromium_disable_automatic_installation:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_automatic_installation:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable background processing" id="oval:ssg-test_chromium_disable_background_processing:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_background_processing:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable cleartext passwords" id="oval:ssg-test_chromium_disable_cleartext_passwords:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_cleartext_passwords:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable cloud pring sharing" id="oval:ssg-test_chromium_disable_cloud_print_sharing:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_cloud_print_sharing:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Test Chromium firewall traversal policy" id="oval:ssg-test_chromium_firewall_traversal:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_firewall_traversal:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable Google data sync" id="oval:ssg-test_chromium_disable_google_sync:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_google_sync:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable incognito mode" id="oval:ssg-test_chromium_disable_incognito_mode:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_incognito_mode:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable metrics reporting" id="oval:ssg-test_chromium_disable_metrics_reporting:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_metrics_reporting:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable network prediction" id="oval:ssg-test_chromium_disable_network_prediction:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_network_prediction:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable outdated plugins" id="oval:ssg-test_chromium_disable_outdated_plugins:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_outdated_plugins:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable password manager" id="oval:ssg-test_chromium_disable_password_manager:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_password_manager:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable plugins by default" id="oval:ssg-test_chromium_plugin_blacklist:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_plugin_blacklist:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable pop-ups" id="oval:ssg-test_chromium_disable_popups:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_popups:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable URL protocol schemas" id="oval:ssg-test_chromium_disable_protocol_schemas:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_protocol_schemas:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_disable_protocol_schemas:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable importing saved passwords" id="oval:ssg-test_chromium_disable_saved_passwords:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_saved_passwords:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable search suggestions" id="oval:ssg-test_chromium_disable_search_suggestions:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_search_suggestions:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disable per session cookies" id="oval:ssg-test_chromium_disable_session_cookies:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_session_cookies:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium block third party cookies" id="oval:ssg-test_chromium_disable_thirdparty_cookies:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_disable_thirdparty_cookies:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium disallow location tracking" id="oval:ssg-test_chromium_location_tracking:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_location_tracking:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium enable approved plugins" id="oval:ssg-test_chromium_enable_approved_plugins:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_enable_approved_plugins:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium enable browser history" id="oval:ssg-test_chromium_enable_browser_history:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_enable_browser_history:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium enable encrypted searching" id="oval:ssg-test_chromium_encrypted_search:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_encrypted_search:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_encrypted_search:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromiumi enable safe browsing" id="oval:ssg-test_chromium_enable_safe_browsing:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_enable_safe_browsing:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium whitelist extension" id="oval:ssg-test_chromium_extension_whitelist:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_extension_whitelist:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_extension_whitelist:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium check HTTP authentication" id="oval:ssg-test_chromium_http_authentication:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_http_authentication:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_http_authentication:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium require plugin authorization" id="oval:ssg-test_chromium_plugins_require_authorization:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_plugins_require_authorization:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium policy file" id="oval:ssg-test_chromium_policy_file:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_policy_file:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium set trusted homepage URL" id="oval:ssg-test_chromium_trusted_home_page:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_trusted_home_page:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_chromium_trusted_home_page:ste:1"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Chromium whitelist plugin urls" id="oval:ssg-test_chromium_whitelist_plugin_urls:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_chromium_whitelist_plugin_urls:obj:1"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="Chromium is installed" id="oval:ssg-test_chromium-browser_installed:tst:1" version="1">
+      <ns4:object object_ref="oval:ssg-obj_chromium-browser_installed:obj:1"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="Chromium is installed" id="oval:ssg-test_chromium_installed:tst:1" version="1">
+      <ns4:object object_ref="oval:ssg-obj_chromium_installed:obj:1"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="Test installed OS is part of the unix family" id="oval:ssg-test_unix_family:tst:1" version="1">
+      <ns3:object object_ref="oval:ssg-object_unix_family:obj:1"/>
+      <ns3:state state_ref="oval:ssg-state_unix_family:ste:1"/>
+    </ns3:family_test>
+  </oval:tests>
+  <oval:objects>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_extension_installation:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"ExtensionInstallBlacklist\"\:[\s]+\[\"\*\"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_block_notifications:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DefaultNotificationsSetting\"\:[\s]+2,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_check_cert_revocation:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"EnableOnlineRevocationChecks\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_default_block_plugins:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DefaultPluginsSetting\"\:[\s]+3,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_default_search_provider:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DefaultSearchProviderEnabled\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_search_provider_name:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+"DefaultSearchProviderName"\:[\s]+"(\S+)",$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_3d_graphics_api:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"Disable3DAPIs\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_autocomplete:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"AutoFillEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_automatic_installation:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DisablePluginFinder\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_background_processing:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"BackgroundModeEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_cleartext_passwords:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"PasswordManagerAllowShowPasswords\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_cloud_print_sharing:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"CloudPrintProxyEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_firewall_traversal:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"RemoteAccessHostFirewallTraversal\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_google_sync:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"SyncDisabled\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_incognito_mode:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"IncognitoModeAvailability\"\:[\s]+1,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_metrics_reporting:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"MetricsReportingEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_network_prediction:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DnsPrefetchingEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_outdated_plugins:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"AllowOutdatedPlugins\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_password_manager:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"PasswordManagerEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_plugin_blacklist:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DisabledPlugins\"\:[\s]+\[\"\*\"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_popups:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DefaultPopupsSetting\"\:[\s]+2,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_protocol_schemas:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"URLBlacklist\"\:[\s]+\[\"(\S+)"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_saved_passwords:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"ImportSavedPasswords\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_search_suggestions:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"SearchSuggestEnabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_session_cookies:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"CookiesSessionOnlyForUrls\"\:[\s]+\[\"(none|)"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_disable_thirdparty_cookies:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"BlockThirdPartyCookies\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_location_tracking:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"DefaultGeolocationSetting\"\:[\s]+2,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_enable_approved_plugins:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"EnabledPlugins\"\:[\s]+\[\"((none|[a-zA-Z]*)|!*)\"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_enable_browser_history:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"SavingBrowserHistoryDisabled\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_encrypted_search:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"DefaultSearchProviderSearchURL\"\:[\s]+\"(\S+)",</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_enable_safe_browsing:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"SafeBrowsingEnabled\"\:[\s]+true,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_extension_whitelist:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"ExtensionInstallWhitelist\"\:[\s]+\[\"(\S+)\"],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_http_authentication:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"AuthSchemes\"\:[\s]+\"(\S+)\",</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_plugins_require_authorization:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\"AlwaysAuthorizePlugins\"\:[\s]+false,</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_policy_file:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\{([^\n]*\n+)+[\s]+\".*\"\:[\s]+.*,([^\n]*\n+)+\}</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_trusted_home_page:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"HomepageLocation\"\:[\s]+\"(\S+)\",</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="oval:ssg-object_chromium_whitelist_plugin_urls:obj:1" version="1">
+      <ns3:filepath operation="pattern match">^/etc/chromium/policies/managed/.*\.json$</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]+\"PluginsAllowedForUrls\"\:[\s]+\[\"(none|!*)\"\],</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="oval:ssg-obj_chromium-browser_installed:obj:1" version="1">
+      <ns4:name>chromium-browser</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="oval:ssg-obj_chromium_installed:obj:1" version="1">
+      <ns4:name>chromium</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="oval:ssg-object_unix_family:obj:1" version="1"/>
+  </oval:objects>
+  <oval:states>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_search_provider_name:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_default_search_provider_name:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_disable_protocol_schemas:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_url_blacklist:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_encrypted_search:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_enable_encrypted_searching:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_extension_whitelist:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_extension_whitelist:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_http_authentication:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_auth_schema:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="oval:ssg-state_chromium_trusted_home_page:ste:1" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="oval:ssg-var_trusted_home_page:var:1"/>
+    </ns3:textfilecontent54_state>
+    <ns3:family_state id="oval:ssg-state_unix_family:ste:1" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+  </oval:states>
+  <oval:variables>
+    <oval:external_variable comment="Expected search provider name" datatype="string" id="oval:ssg-var_default_search_provider_name:var:1" version="1"/>
+    <oval:external_variable comment="Expected URL protocol schema" datatype="string" id="oval:ssg-var_url_blacklist:var:1" version="1"/>
+    <oval:external_variable comment="Expected search provider name" datatype="string" id="oval:ssg-var_enable_encrypted_searching:var:1" version="1"/>
+    <oval:external_variable comment="Expected approved extensions" datatype="string" id="oval:ssg-var_extension_whitelist:var:1" version="1"/>
+    <oval:external_variable comment="Expected HTTP authentication type" datatype="string" id="oval:ssg-var_auth_schema:var:1" version="1"/>
+    <oval:external_variable comment="Expected home page" datatype="string" id="oval:ssg-var_trusted_home_page:var:1" version="1"/>
+  </oval:variables>
+</oval:oval_definitions>

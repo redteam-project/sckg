@@ -1,0 +1,19 @@
+# platform = multi_platform_ocp
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_WAL_DIR=
+    line: ETCD_WAL_DIR=/var/lib/etcd/member/wal
+    create: true
+  tags:
+    - etcd_wal_dir
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80586-1

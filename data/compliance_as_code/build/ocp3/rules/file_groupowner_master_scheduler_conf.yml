@@ -1,0 +1,24 @@
+description: ' To properly set the group owner of <code>/etc/origin/master/scheduler.json</code>,
+  run the command: <pre>$ sudo chgrp root /etc/origin/master/scheduler.json</pre>'
+identifiers: {cce: 80616-6}
+ocil: 'To check the group ownership of <code>/etc/origin/master/scheduler.json</code>,
+  run the command: <pre>$ ls -lL /etc/origin/master/scheduler.json</pre> If properly
+  configured, the output should indicate the following group-owner: <code>root</code>'
+ocil_clause: /etc/origin/master/scheduler.json has group owner root
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'The <tt>/etc/origin/master/scheduler.json</tt> file contains information
+  about the configuration of the
+
+  OpenShift scheduler that is configured on the system. Protection of this file is
+
+  critical for OpenShift security.'
+references: {cis: 1.4.16}
+severity: medium
+template:
+  backends: {}
+  name: file_groupowner
+  vars: {filegid: '0', filepath: /etc/origin/master/scheduler.json}
+title: Verify Group Who Owns The OpenShift Scheduler Configuration File
+warnings: []

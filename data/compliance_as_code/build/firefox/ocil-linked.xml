@@ -1,0 +1,660 @@
+<ns0:ocil xmlns:ns0="http://scap.nist.gov/schema/ocil/2.0">
+  <ns0:generator>
+    <ns0:product_name>xccdf-create-ocil.xslt from SCAP Security Guide</ns0:product_name>
+    <ns0:product_version>ssg: 0.1.47</ns0:product_version>
+    <ns0:schema_version>2.0</ns0:schema_version>
+    <ns0:timestamp>2019-11-28T04:47:15Z</ns0:timestamp>
+  </ns0:generator>
+  <ns0:questionnaires>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-ssl_protocol_tls_ocil:questionnaire:1">
+      <ns0:title>Enable TLS Usage in Firefox</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-ssl_protocol_tls_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-home_page_ocil:questionnaire:1">
+      <ns0:title>Default Firefox Home Page Configured</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-home_page_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-shell_protocol_ocil:questionnaire:1">
+      <ns0:title>Disable Firefox Access to Shell Protocols</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-shell_protocol_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-auto-download_actions_ocil:questionnaire:1">
+      <ns0:title>Disable Automatic Downloads of MIME Types</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-auto-download_actions_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-search_update_ocil:questionnaire:1">
+      <ns0:title>Disable Installed Search Plugins Update Checking</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-search_update_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-addons_plugin_updates_ocil:questionnaire:1">
+      <ns0:title>Disable Addons Plugin Updates</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-addons_plugin_updates_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-open_confirmation_ocil:questionnaire:1">
+      <ns0:title>Enable Downloading and Opening File Confirmation</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-open_confirmation_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-javascript_window_resizing_ocil:questionnaire:1">
+      <ns0:title>Disable JavaScript's Moving Or Resizing Windows Capability</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-javascript_window_resizing_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-verification_ocil:questionnaire:1">
+      <ns0:title>Enable Certificate Verification</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-verification_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-pop-up_windows_ocil:questionnaire:1">
+      <ns0:title>Enable Firefox Pop-up Blocker</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-pop-up_windows_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-ssl_version_2_ocil:questionnaire:1">
+      <ns0:title>Disable SSL Version 2.0 in Firefox</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-ssl_version_2_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-ssl_version_3_ocil:questionnaire:1">
+      <ns0:title>Disable SSL Version 3.0 in Firefox</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-ssl_version_3_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-auto-update_of_firefox_ocil:questionnaire:1">
+      <ns0:title>Disable Firefox Auto-Update Capability</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-auto-update_of_firefox_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-javascript_window_changes_ocil:questionnaire:1">
+      <ns0:title>Disable JavaScript's Raise Or Lower Windows Capability</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-javascript_window_changes_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-javascript_context_menus_ocil:questionnaire:1">
+      <ns0:title>Disable JavaScript Context Menus</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-javascript_context_menus_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-javascript_status_bar_changes_ocil:questionnaire:1">
+      <ns0:title>Disable JavaScript's Ability To Change The Status Bar</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-javascript_status_bar_changes_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-installed_firefox_version_supported_ocil:questionnaire:1">
+      <ns0:title>Supported Version of Firefox Installed</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-installed_firefox_version_supported_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-autofill_passwords_ocil:questionnaire:1">
+      <ns0:title>Disable User Ability To Autofill Passwords</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-autofill_passwords_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-non-secure_page_warning_ocil:questionnaire:1">
+      <ns0:title>Enable Non-Secure Page Warnings</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-non-secure_page_warning_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-autofill_forms_ocil:questionnaire:1">
+      <ns0:title>Disable Autofill Form Assistance</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-autofill_forms_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-password_store_ocil:questionnaire:1">
+      <ns0:title>Disable the Firefox Password Store</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-password_store_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-javascript_status_bar_text_ocil:questionnaire:1">
+      <ns0:title>Disable JavaScript's Ability To Modify The Browser Appearance</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-javascript_status_bar_text_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-cookies_user_notice_ocil:questionnaire:1">
+      <ns0:title>Disable User Prompt When Data Is Cleared</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-cookies_user_notice_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-cookies_clear_ocil:questionnaire:1">
+      <ns0:title>Clear Data When Firefox Closes</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-cookies_clear_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-lock_settings_obscure_ocil:questionnaire:1">
+      <ns0:title>Disable Firefox Configuration File ROT-13 Encoding</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-lock_settings_obscure_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-lock_settings_config_file_ocil:questionnaire:1">
+      <ns0:title>Set Firefox Configuration File Location</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-lock_settings_config_file_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-dod_root_certificate_installed_ocil:questionnaire:1">
+      <ns0:title>The DoD Root Certificate Exists</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-dod_root_certificate_installed_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-firefox_preferences-enable_ca_trust_ocil:questionnaire:1">
+      <ns0:title>Enable Shared System Certificates</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-firefox_preferences-enable_ca_trust_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+  </ns0:questionnaires>
+  <ns0:test_actions>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-ssl_protocol_tls_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-ssl_protocol_tls_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-home_page_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-home_page_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-shell_protocol_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-shell_protocol_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-auto-download_actions_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-auto-download_actions_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-search_update_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-search_update_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-addons_plugin_updates_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-addons_plugin_updates_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-open_confirmation_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-open_confirmation_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-javascript_window_resizing_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-javascript_window_resizing_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-verification_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-verification_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-pop-up_windows_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-pop-up_windows_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-ssl_version_2_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-ssl_version_2_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-ssl_version_3_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-ssl_version_3_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-auto-update_of_firefox_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-auto-update_of_firefox_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-javascript_window_changes_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-javascript_window_changes_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-javascript_context_menus_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-javascript_context_menus_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-javascript_status_bar_changes_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-javascript_status_bar_changes_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-installed_firefox_version_supported_action:testaction:1" question_ref="ocil:ssg-installed_firefox_version_supported_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-autofill_passwords_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-autofill_passwords_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-non-secure_page_warning_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-non-secure_page_warning_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-autofill_forms_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-autofill_forms_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-password_store_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-password_store_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-javascript_status_bar_text_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-javascript_status_bar_text_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-cookies_user_notice_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-cookies_user_notice_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-cookies_clear_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-cookies_clear_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-lock_settings_obscure_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-lock_settings_obscure_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-lock_settings_config_file_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-lock_settings_config_file_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-dod_root_certificate_installed_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-dod_root_certificate_installed_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-firefox_preferences-enable_ca_trust_action:testaction:1" question_ref="ocil:ssg-firefox_preferences-enable_ca_trust_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+  </ns0:test_actions>
+  <ns0:questions>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-ssl_protocol_tls_question:question:1">
+      <ns0:question_text>To verify that TLS is enabled, run the following command:
+$ grep 'security.enable_tls' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("security.enable_tls", "true");
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-home_page_question:question:1">
+      <ns0:question_text>To verify that default home page is set,
+run the following command:
+$ grep 'browser.startup.homepage' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("browser.startup.homepage", "");
+      Is it the case that it is not configured?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-shell_protocol_question:question:1">
+      <ns0:question_text>To verify that the shell protocol access is disabled,
+run the following command:
+$ grep 'network.protocol-handler.external.shell' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("network.protocol-handler.external.shell", "false");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-auto-download_actions_question:question:1">
+      <ns0:question_text>To verify that user interaction is required for the downloading of MIME types,
+run the following command:
+$ grep 'browser.helperApps.alwaysAsk.force' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("browser.helperApps.alwaysAsk.force", "true");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-search_update_question:question:1">
+      <ns0:question_text>To verify that search plugins cannot automatically update,
+run the following command:
+$ grep 'browser.search.update' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("browser.search.update", "false");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-addons_plugin_updates_question:question:1">
+      <ns0:question_text>To verify that add-ons and plugins cannot automatically update,
+run the following command:
+$ grep 'extensions.update.enabled' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("extensions.update.enabled", false);
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-open_confirmation_question:question:1">
+      <ns0:question_text>To verify that downloading and opening file confirmation is enabled,
+run the following command:
+$ grep 'plugin.disable_full_page_plugin_for_types' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("plugin.disable_full_page_plugin_for_types", "");
+      Is it the case that it is not set or application listing is incorrect?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-javascript_window_resizing_question:question:1">
+      <ns0:question_text>To verify that JavaScript cannot change windows sizing,
+run the following command:
+$ grep 'dom.disable_window_move_resize' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.disable_window_move_resize", "true");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-verification_question:question:1">
+      <ns0:question_text>To verify that certificate verification is enabled, run the following command:
+$ grep 'security.default_personal_cert' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("security.default_personal_cert", "Ask Every Time");
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-pop-up_windows_question:question:1">
+      <ns0:question_text>To verify that pop-up blocker is enabled,
+run the following command:
+$ grep 'dom.disable_window_open_feature.status' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.disable_window_open_feature.status", "true");
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-ssl_version_2_question:question:1">
+      <ns0:question_text>To verify that SSL version 2.0 is disabled,
+run the following command:
+$ grep 'security.enable_ssl2' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("security.enable_ssl2", "false");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-ssl_version_3_question:question:1">
+      <ns0:question_text>To verify that SSL version 3 is disabled,
+run the following command:
+$ grep 'security.enable_ssl3' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("security.enable_ssl3", "false");
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-auto-update_of_firefox_question:question:1">
+      <ns0:question_text>To verify that Firefox cannot auto-update,
+run the following command:
+$ grep 'app.update.enable' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("app.update.enable", false);
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-javascript_window_changes_question:question:1">
+      <ns0:question_text>To verify that JavaScript cannot change windows sizing,
+run the following command:
+$ grep 'dom.disable_window_flip' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.disable_window_flip", "true");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-javascript_context_menus_question:question:1">
+      <ns0:question_text>To verify that JavaScript cannot change context menus,
+run the following command:
+$ grep 'dom.event.contextmenu.enabled' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.event.contextmenu.enabled", "false");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-javascript_status_bar_changes_question:question:1">
+      <ns0:question_text>To verify that JavaScript cannot change the status bar,
+run the following command:
+$ grep 'dom.disable_window_status_change' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.disable_window_status_change", "true");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-installed_firefox_version_supported_question:question:1">
+      <ns0:question_text>If the system is joined to the Red Hat Network, a Red Hat Satellite Server, or
+a yum server which provides updates, invoking the following command will
+indicate if updates are available:
+$ sudo yum check-update
+If the system is not configured to update from one of these sources,
+run the following command to list when each package was last updated:
+$ rpm -qa -last
+Compare this to Red Hat Security Advisories (RHSA) listed at
+
+    https://access.redhat.com/security/updates/active/https://access.redhat.com/security/updates/active/
+to determine if the system is missing applicable updates.
+      Is it the case that it is not updated?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-autofill_passwords_question:question:1">
+      <ns0:question_text>To verify that password autofill is disabled,
+run the following command:
+$ grep 'signon.prefillForms' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("signon.prefillForms", false);
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-non-secure_page_warning_question:question:1">
+      <ns0:question_text>To verify that non-secure page warnings are enabled,
+run the following command:
+$ grep 'security.warn_leaving_secure' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("security.warn_leaving_secure", "true");
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-autofill_forms_question:question:1">
+      <ns0:question_text>To verify that Autofill Form Assistance is disabled,
+run the following command:
+$ grep 'browser.formfill.enable' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("browser.formfill.enable", false);
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-password_store_question:question:1">
+      <ns0:question_text>To verify that the password store is disabled,
+run the following command:
+$ grep 'signon.rememberSignons' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("signon.rememberSignons", "false");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-javascript_status_bar_text_question:question:1">
+      <ns0:question_text>To verify that JavaScript cannot change the browser appearance,
+run the following command:
+$ grep 'dom.disable_window_open_feature.status' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("dom.disable_window_open_feature.status", "true");
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-cookies_user_notice_question:question:1">
+      <ns0:question_text>To verify that Firefox does not prompt users about data being cleared,
+run the following command:
+$ grep 'privacy.sanitize.promptOnSanitize' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("privacy.sanitize.promptOnSanitize", false);
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-cookies_clear_question:question:1">
+      <ns0:question_text>To verify that Firefox clears data on exit,
+run the following command:
+$ grep 'privacy.sanitize.sanitizeOnShutdown' FIREFOX_INSTALL_DIR/*.cfg
+The output should return:
+lockPref("privacy.sanitize.sanitizeOnShutdown", true);
+      Is it the case that it is not set to clear?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-lock_settings_obscure_question:question:1">
+      <ns0:question_text>To verify that ROT-13 encoding is disabled, run the following command:
+$ grep 'obscure_value' FIREFOX_INSTALL_DIR/defaults/preferences/*.js
+The output should return something similar to:
+pref("general.config.obscure_value", 0);
+      Is it the case that users can change mandatory settings?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-lock_settings_config_file_question:question:1">
+      <ns0:question_text>To verify that configuration filename is set, run the following command:
+$ grep 'filename' FIREFOX_INSTALL_DIR/defaults/preferences/*.js
+The output should return something similar to:
+pref("general.config.filename", "mozilla.cfg");
+      Is it the case that users can change mandatory settings?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-dod_root_certificate_installed_question:question:1">
+      <ns0:question_text>To verify that the DoD root certificate is installed,
+list all certificates in /etc/pki/ca-trust/source/anchors
+and compare them to the DoD root certificate. If there is a match
+to the DoD root certificate, then the DoD root certificate is 
+installed.
+      Is it the case that it is not installed?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-firefox_preferences-enable_ca_trust_question:question:1">
+      <ns0:question_text>To verify that the central system cerificate authority store is enabled,
+run the following command:
+$ ls -l /etc/alternatives/libnssckbi.so.x86_64
+The output should return something similar to:
+lrwxrwxrwx. 1 root root 34 Apr 30 09:19 /etc/alternatives/libnssckbi.so.x86_64 -&gt; /usr/lib64/pkcs11/p11-kit-trust.so
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+  </ns0:questions>
+</ns0:ocil>

@@ -1,0 +1,44 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable Network File System Lock Service (nfslock)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_nfslock_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Unit Service Exists - nfslock.service
+      command: systemctl list-unit-files nfslock.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable service nfslock
+      systemd:
+        name: nfslock.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"nfslock.service" in service_file_exists.stdout_lines[1]'
+
+    - name: Unit Socket Exists - nfslock.socket
+      command: systemctl list-unit-files nfslock.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+
+    - name: Disable socket nfslock
+      systemd:
+        name: nfslock.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when: '"nfslock.socket" in socket_file_exists.stdout_lines[1]'

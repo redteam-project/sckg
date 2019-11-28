@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop mdmonitor
+  command: /sbin/service 'mdmonitor' stop
+- name: Switch off mdmonitor
+  command: /sbin/chkconfig --level 0123456 'mdmonitor' off

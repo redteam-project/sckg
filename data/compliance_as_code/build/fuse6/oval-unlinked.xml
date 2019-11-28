@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<oval:oval_definitions xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <oval:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:47:16</ns2:timestamp>
+  </oval:generator>
+  <oval:definitions>
+    <oval:definition class="compliance" id="jboss_karaf-vender_supported_version" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Fuse 6</oval:title>
+        <oval:affected family="unix">
+          <oval:product>JBoss Fuse 6</oval:product>
+        </oval:affected>
+        <oval:description>Fuse 6 is a vendor supported version.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_vender_supported_version"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_fuse6" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Fuse 6</oval:title>
+        <oval:affected family="unix">
+          <oval:product>JBoss Fuse 6</oval:product>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_fuse:6.0" source="CPE"/>
+        <oval:description>The application installed is Fuse 6.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_installed_app_is_fuse6"/>
+      </oval:criteria>
+    </oval:definition>
+  </oval:definitions>
+  <oval:tests>
+    <ns3:textfilecontent54_test check="all" check_existence="all_exist" comment="Check Fuse Version" id="test_vender_supported_version" version="1">
+      <ns3:object object_ref="obj_vender_supported_version"/>
+      <ns3:state state_ref="state_vender_supported_version"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="all_exist" comment="Check Fuse Version" id="test_installed_app_is_fuse6" version="1">
+      <ns3:object object_ref="obj_installed_app_is_fuse6"/>
+      <ns3:state state_ref="state_installed_app_is_fuse6"/>
+    </ns3:textfilecontent54_test>
+  </oval:tests>
+  <oval:objects>
+    <ns3:environmentvariable58_object id="env_obj_fuse_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>FUSE_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:textfilecontent54_object id="obj_vender_supported_version" version="1">
+      <ns3:path var_ref="local_var_vender_supported_version"/>
+      <ns3:filename>config.properties</ns3:filename>
+      <ns3:pattern operation="pattern match">karaf\.framework\.felix=.*org\.apache\.felix\.framework-([0-9a-z\.-]{18})\.jar</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:environmentvariable58_object id="obj_env_fuse_installed_app_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>FUSE_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:textfilecontent54_object id="obj_installed_app_is_fuse6" version="1">
+      <ns3:path var_ref="local_var_installed_app_is_fuse6"/>
+      <ns3:filename>config.properties</ns3:filename>
+      <ns3:pattern operation="pattern match">karaf\.framework\.felix=.*org\.apache\.felix\.framework-([0-9a-z\.-]{18})\.jar</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+  </oval:objects>
+  <oval:states>
+    <ns3:textfilecontent54_state id="state_vender_supported_version" version="1">
+      <ns3:subexpression>4.0.3.redhat-60024</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="state_installed_app_is_fuse6" version="1">
+      <ns3:subexpression>4.0.3.redhat-60024</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+  </oval:states>
+  <oval:variables>
+    <oval:local_variable comment="log location" datatype="string" id="local_var_vender_supported_version" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="env_obj_fuse_home"/>
+        <oval:literal_component>/etc/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="log location" datatype="string" id="local_var_installed_app_is_fuse6" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_fuse_installed_app_home"/>
+        <oval:literal_component>/etc</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+  </oval:variables>
+</oval:oval_definitions>

@@ -1,0 +1,24 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install the pcsc-lite package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80993-9
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_pcsc-lite_installed
+  tasks:
+
+    - name: Ensure pcsc-lite is installed
+      package:
+        name: pcsc-lite
+        state: present
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

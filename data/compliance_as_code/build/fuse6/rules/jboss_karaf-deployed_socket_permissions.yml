@@ -1,0 +1,28 @@
+description: 'Deployed applications must not be granted any socket permissions.
+
+  These permissions are enforced by the Java Security Manager and the policies
+
+  it loads at startup. These permissions can be assigned or restricted in an
+
+  application-specific, granular manner.'
+identifiers: {}
+ocil: null
+ocil_clause: proper permissions are not set for java.net.SocketPermission for deployed
+  applications
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Java permissions for deployed applications should be carefully restricted
+
+  to enforce the least privilege principle. Most well-designed applications
+
+  will not need to directly manipulate sockets for network access (access to
+
+  datasources should be handled through datasources, which can be
+
+  assigned SocketPermission.'
+references: {nist: AC-6}
+severity: medium
+template: null
+title: Disable Socket Permissions for Deployed Applications
+warnings: []

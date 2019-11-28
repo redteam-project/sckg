@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - dhcpd.service"
+  command: systemctl list-unit-files dhcpd.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service dhcpd
+  systemd:
+    name: "dhcpd.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"dhcpd.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - dhcpd.socket"
+  command: systemctl list-unit-files dhcpd.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket dhcpd
+  systemd:
+    name: "dhcpd.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"dhcpd.socket" in socket_file_exists.stdout_lines[1]'

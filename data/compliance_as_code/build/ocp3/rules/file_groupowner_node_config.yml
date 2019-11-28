@@ -1,0 +1,24 @@
+description: ' To properly set the group owner of <code>/etc/origin/node/node-config.yaml</code>,
+  run the command: <pre>$ sudo chgrp root /etc/origin/node/node-config.yaml</pre>'
+identifiers: {cce: 80617-4}
+ocil: 'To check the group ownership of <code>/etc/origin/node/node-config.yaml</code>,
+  run the command: <pre>$ ls -lL /etc/origin/node/node-config.yaml</pre> If properly
+  configured, the output should indicate the following group-owner: <code>root</code>'
+ocil_clause: /etc/origin/node/node-config.yaml has group owner root
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'The <tt>/etc/origin/node/node-config.yaml</tt> file contains information
+  about the configuration of the
+
+  OpenShift node that is configured on the system. Protection of this file is
+
+  critical for OpenShift security.'
+references: {cis: 2.2.2}
+severity: medium
+template:
+  backends: {}
+  name: file_groupowner
+  vars: {filegid: '0', filepath: /etc/origin/node/node-config.yaml}
+title: Verify Group Who Owns The OpenShift Node Configuration File
+warnings: []

@@ -1,0 +1,2888 @@
+<?xml version="1.0"?>
+<oval:oval_definitions xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:ns4="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:ns5="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <oval:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:48:15</ns2:timestamp>
+  </oval:generator>
+  <oval:definitions>
+    <oval:definition class="compliance" id="cinder_glance_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is glance_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is glance_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is glance_api_insecure parameter set to False?" operator="AND">
+        <oval:criterion comment="Check glance_api_insecure in /etc/cinder/cinder.conf" test_ref="test_cinder_glance_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="cinder_nas_secure_file_operations" version="1">
+      <oval:metadata>
+        <oval:title>Is nas_secure_file_operations parameter set to auto?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is nas_secure_file_operations parameter set to auto?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is nas_secure_file_operations parameter set to auto?" operator="AND">
+        <oval:criterion comment="Check nas_secure_file_operations in /etc/cinder/cinder.conf" test_ref="test_cinder_nas_secure_file_operations"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="cinder_nova_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is nova_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is nova_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is nova_api_insecure parameter set to False?" operator="AND">
+        <oval:criterion comment="Check nova_api_insecure in /etc/cinder/cinder.conf" test_ref="test_cinder_nova_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="cinder_osapi_max_request_body_size" version="1">
+      <oval:metadata>
+        <oval:title>Is osapi_max_request_body_size parameter set to 114688?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is osapi_max_request_body_size parameter set to 114688?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is osapi_max_request_body_size parameter set to 114688?" operator="AND">
+        <oval:criterion comment="Check osapi_max_request_body_size in /etc/cinder/cinder.conf" test_ref="test_cinder_osapi_max_request_body_size"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="cinder_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="AND">
+        <oval:criterion comment="Check auth_protocol in /etc/cinder/cinder.conf" test_ref="test_cinder_auth_protocol"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="cinder_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /etc/cinder/cinder.conf" test_ref="test_cinder_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_glance_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is glance_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is glance_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is glance_api_insecure parameter set to False?" operator="AND">
+        <oval:criterion comment="Check glance_api_insecure in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_glance_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_nas_secure_file_operations" version="1">
+      <oval:metadata>
+        <oval:title>Is nas_secure_file_operations parameter set to auto?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is nas_secure_file_operations parameter set to auto?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is nas_secure_file_operations parameter set to auto?" operator="AND">
+        <oval:criterion comment="Check nas_secure_file_operations in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_nas_secure_file_operations"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_nova_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is nova_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is nova_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is nova_api_insecure parameter set to False?" operator="AND">
+        <oval:criterion comment="Check nova_api_insecure in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_nova_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_osapi_max_request_body_size" version="1">
+      <oval:metadata>
+        <oval:title>Is osapi_max_request_body_size parameter set to 114688?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is osapi_max_request_body_size parameter set to 114688?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is osapi_max_request_body_size parameter set to 114688?" operator="AND">
+        <oval:criterion comment="Check osapi_max_request_body_size in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_osapi_max_request_body_size"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="AND">
+        <oval:criterion comment="Check auth_protocol in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_auth_protocol"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_cinder_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf" test_ref="test_container_cinder_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_csrf_cookie_secure" version="1">
+      <oval:metadata>
+        <oval:title>Is CSRF_COOKIE_SECURE parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is CSRF_COOKIE_SECURE parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is CSRF_COOKIE_SECURE parameter set to True?" operator="AND">
+        <oval:criterion comment="Check CSRF_COOKIE_SECURE in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_csrf_cookie_secure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_disable_password_reveal" version="1">
+      <oval:metadata>
+        <oval:title>Is disable_password_reveal parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is disable_password_reveal parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is disable_password_reveal parameter set to True?" operator="AND">
+        <oval:criterion comment="Check disable_password_reveal in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_disable_password_reveal"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_password_autocomplete" version="1">
+      <oval:metadata>
+        <oval:title>Is password_autocomplete parameter set to off?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is password_autocomplete parameter set to off?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is password_autocomplete parameter set to off?" operator="AND">
+        <oval:criterion comment="Check password_autocomplete in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_password_autocomplete"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_session_cookie_httponly" version="1">
+      <oval:metadata>
+        <oval:title>Is SESSION_COOKIE_HTTPONLY parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is SESSION_COOKIE_HTTPONLY parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is SESSION_COOKIE_HTTPONLY parameter set to True?" operator="AND">
+        <oval:criterion comment="Check SESSION_COOKIE_HTTPONLY in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_session_cookie_httponly"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_session_cookie_secure" version="1">
+      <oval:metadata>
+        <oval:title>Is SESSION_COOKIE_SECURE parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is SESSION_COOKIE_SECURE parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is SESSION_COOKIE_SECURE parameter set to True?" operator="AND">
+        <oval:criterion comment="Check SESSION_COOKIE_SECURE in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_session_cookie_secure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="horizon_use_ssl" version="1">
+      <oval:metadata>
+        <oval:title>Is USE_SSL parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is USE_SSL parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is USE_SSL parameter set to True?" operator="AND">
+        <oval:criterion comment="Check USE_SSL in /etc/openstack-dashboard/local_settings" test_ref="test_horizon_use_ssl"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_csrf_cookie_secure" version="1">
+      <oval:metadata>
+        <oval:title>Is CSRF_COOKIE_SECURE parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is CSRF_COOKIE_SECURE parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is CSRF_COOKIE_SECURE parameter set to True?" operator="AND">
+        <oval:criterion comment="Check CSRF_COOKIE_SECURE in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_csrf_cookie_secure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_disable_password_reveal" version="1">
+      <oval:metadata>
+        <oval:title>Is disable_password_reveal parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is disable_password_reveal parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is disable_password_reveal parameter set to True?" operator="AND">
+        <oval:criterion comment="Check disable_password_reveal in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_disable_password_reveal"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_password_autocomplete" version="1">
+      <oval:metadata>
+        <oval:title>Is password_autocomplete parameter set to off?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is password_autocomplete parameter set to off?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is password_autocomplete parameter set to off?" operator="AND">
+        <oval:criterion comment="Check password_autocomplete in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_password_autocomplete"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_session_cookie_httponly" version="1">
+      <oval:metadata>
+        <oval:title>Is SESSION_COOKIE_HTTPONLY parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is SESSION_COOKIE_HTTPONLY parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is SESSION_COOKIE_HTTPONLY parameter set to True?" operator="AND">
+        <oval:criterion comment="Check SESSION_COOKIE_HTTPONLY in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_session_cookie_httponly"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_session_cookie_secure" version="1">
+      <oval:metadata>
+        <oval:title>Is SESSION_COOKIE_SECURE parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is SESSION_COOKIE_SECURE parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is SESSION_COOKIE_SECURE parameter set to True?" operator="AND">
+        <oval:criterion comment="Check SESSION_COOKIE_SECURE in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_session_cookie_secure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_horizon_use_ssl" version="1">
+      <oval:metadata>
+        <oval:title>Is USE_SSL parameter set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is USE_SSL parameter set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is USE_SSL parameter set to True?" operator="AND">
+        <oval:criterion comment="Check USE_SSL in /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings" test_ref="test_container_horizon_use_ssl"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_hash_algorithm" version="1">
+      <oval:metadata>
+        <oval:title>Is hash_algorithm parameter set to SHA256?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is hash_algorithm parameter set to SHA256?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is hash_algorithm parameter set to SHA256?" operator="AND">
+        <oval:criterion comment="Check hash_algorithm in /etc/keystone/keystone.conf" test_ref="test_keystone_hash_algorithm"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_admin_token" version="1">
+      <oval:metadata>
+        <oval:title>Is admin_token parameter set to disabled?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is admin_token parameter set to disabled?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is admin_token parameter set to disabled?" operator="AND">
+        <oval:criterion comment="Check admin_token in /etc/keystone/keystone-paste.ini" test_ref="test_keystone_admin_token"/>
+        <oval:criterion comment="Check AdminTokenAuthMiddleware does not exist in /etc/keystone/keystone-paste.ini" test_ref="test_keystone_admin_token_auth_middleware"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_disable_user_account_days_inactive" version="1">
+      <oval:metadata>
+        <oval:title>Is disable_user_account_days_inactive parameter set to 90?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is disable_user_account_days_inactive parameter set to 90?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is disable_user_account_days_inactive parameter set to 90?" operator="AND">
+        <oval:criterion comment="Check disable_user_account_days_inactive in /etc/keystone/keystone.conf" test_ref="test_keystone_disable_user_account_days_inactive"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_lockout_duration" version="1">
+      <oval:metadata>
+        <oval:title>Is lockout_duration parameter set to 900?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is lockout_duration parameter set to 900?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is lockout_duration parameter set to 900?" operator="AND">
+        <oval:criterion comment="Check lockout_duration in /etc/keystone/keystone.conf" test_ref="test_keystone_lockout_duration"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_lockout_failure_attempts" version="1">
+      <oval:metadata>
+        <oval:title>Is lockout_failure_attempts parameter set to 3?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is lockout_failure_attempts parameter set to 3?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is lockout_failure_attempts parameter set to 3?" operator="AND">
+        <oval:criterion comment="Check lockout_failure_attempts in /etc/keystone/keystone.conf" test_ref="test_keystone_lockout_failure_attempts"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_max_request_body_size" version="1">
+      <oval:metadata>
+        <oval:title>Is max_request_body_size parameter set to 114688?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is max_request_body_size parameter set to 114688?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is max_request_body_size parameter set to 114688?" operator="AND">
+        <oval:criterion comment="Check max_request_body_size in /etc/keystone/keystone.conf" test_ref="test_keystone_max_request_body_size"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="keystone_ssl_enable" version="1">
+      <oval:metadata>
+        <oval:title>Is enable parameter in the [ssl] section set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is enable parameter in the [ssl] section set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is enable parameter in [ssl] section set to True?" operator="AND">
+        <oval:criterion comment="Check enable parameter of [ssl] section in /etc/keystone/keystone.conf" test_ref="test_keystone_ssl_enable"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_hash_algorithm" version="1">
+      <oval:metadata>
+        <oval:title>Is hash_algorithm parameter set to SHA256?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is hash_algorithm parameter set to SHA256?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is hash_algorithm parameter set to SHA256?" operator="AND">
+        <oval:criterion comment="Check hash_algorithm in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_hash_algorithm"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_admin_token" version="1">
+      <oval:metadata>
+        <oval:title>Is admin_token parameter set to disabled?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is admin_token parameter set to disabled?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is admin_token parameter set to disabled?" operator="AND">
+        <oval:criterion comment="Check admin_token in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini" test_ref="test_container_keystone_admin_token"/>
+        <oval:criterion comment="Check AdminTokenAuthMiddleware does not exist in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini" test_ref="test_container_keystone_admin_token_auth_middleware"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_disable_user_account_days_inactive" version="1">
+      <oval:metadata>
+        <oval:title>Is disable_user_account_days_inactive parameter set to 90?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is disable_user_account_days_inactive parameter set to 90?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is disable_user_account_days_inactive parameter set to 90?" operator="AND">
+        <oval:criterion comment="Check disable_user_account_days_inactive in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_disable_user_account_days_inactive"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_lockout_duration" version="1">
+      <oval:metadata>
+        <oval:title>Is lockout_duration parameter set to 900?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is lockout_duration parameter set to 900?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is lockout_duration parameter set to 900?" operator="AND">
+        <oval:criterion comment="Check lockout_duration in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_lockout_duration"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_lockout_failure_attempts" version="1">
+      <oval:metadata>
+        <oval:title>Is lockout_failure_attempts parameter set to 3?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is lockout_failure_attempts parameter set to 3?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is lockout_failure_attempts parameter set to 3?" operator="AND">
+        <oval:criterion comment="Check lockout_failure_attempts in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_lockout_failure_attempts"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_max_request_body_size" version="1">
+      <oval:metadata>
+        <oval:title>Is max_request_body_size parameter set to 114688?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is max_request_body_size parameter set to 114688?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is max_request_body_size parameter set to 114688?" operator="AND">
+        <oval:criterion comment="Check max_request_body_size in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_max_request_body_size"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_keystone_ssl_enable" version="1">
+      <oval:metadata>
+        <oval:title>Is enable parameter in the [ssl] section set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is enable parameter in the [ssl] section set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is enable parameter in [ssl] section set to True?" operator="AND">
+        <oval:criterion comment="Check enable parameter of [ssl] section in /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf" test_ref="test_container_keystone_ssl_enable"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="neutron_use_ssl" version="1">
+      <oval:metadata>
+        <oval:title>Is use_ssl parameter in the [DEFAULT] section set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is use_ssl parameter in the [DEFAULT] section set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is use_ssl parameter in [DEFAULT] section set to True?" operator="AND">
+        <oval:criterion comment="Check use_ssl parameter of [DEFAULT] section in /etc/neutron/neutron.conf" test_ref="test_neutron_use_ssl"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="neutron_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="OR">
+        <oval:criterion comment="Check auth_protocol parameter in /etc/neutron/neutron.conf" test_ref="test_neutron_auth_protocol"/>
+        <oval:criterion comment="Check identity_uri parameter in /etc/neutron/neutron.conf" test_ref="test_neutron_identity_uri"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="neutron_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /etc/neutron/neutron.conf" test_ref="test_neutron_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_neutron_use_ssl" version="1">
+      <oval:metadata>
+        <oval:title>Is use_ssl parameter in the [DEFAULT] section set to True?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is use_ssl parameter in the [DEFAULT] section set to True?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is use_ssl parameter in [DEFAULT] section set to True?" operator="AND">
+        <oval:criterion comment="Check use_ssl parameter of [DEFAULT] section in /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf" test_ref="test_container_neutron_use_ssl"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_neutron_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="OR">
+        <oval:criterion comment="Check auth_protocol parameter in /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf" test_ref="test_container_neutron_auth_protocol"/>
+        <oval:criterion comment="Check identity_uri parameter in /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf" test_ref="test_container_neutron_identity_uri"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_neutron_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf" test_ref="test_container_neutron_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="nova_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="OR">
+        <oval:criterion comment="Check auth_protocol parameter in /etc/nova/nova.conf" test_ref="test_nova_auth_protocol"/>
+        <oval:criterion comment="Check identity_uri parameter in /etc/nova/nova.conf" test_ref="test_nova_identity_uri"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="nova_glance_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is glance_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is glance_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is glance_api_insecure parameter set to False?" operator="OR">
+        <oval:criterion comment="Check glance_api_insecure in /etc/nova/nova.conf" test_ref="test_nova_glance_api_insecure"/>
+        <oval:criterion comment="Check glance_api_insecure in /etc/nova/nova.conf" test_ref="test_nova_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="nova_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /etc/nova/nova.conf" test_ref="test_nova_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_nova_auth_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_protocol parameter set to https?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_protocol parameter set to https?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_protocol parameter set to https?" operator="OR">
+        <oval:criterion comment="Check auth_protocol parameter in /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf" test_ref="test_container_nova_auth_protocol"/>
+        <oval:criterion comment="Check identity_uri parameter in /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf" test_ref="test_container_nova_identity_uri"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_nova_glance_api_insecure" version="1">
+      <oval:metadata>
+        <oval:title>Is glance_api_insecure parameter set to False?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is glance_api_insecure parameter set to False?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is glance_api_insecure parameter set to False?" operator="OR">
+        <oval:criterion comment="Check glance_api_insecure in /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf" test_ref="test_container_nova_glance_api_insecure"/>
+        <oval:criterion comment="Check api_insecure in /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf" test_ref="test_container_nova_api_insecure"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="container_nova_auth_strategy" version="1">
+      <oval:metadata>
+        <oval:title>Is auth_strategy parameter set to keystone?</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Is auth_strategy parameter set to keystone?</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="Is auth_strategy parameter set to keystone?" operator="AND">
+        <oval:criterion comment="Check auth_strategy in /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf" test_ref="test_container_nova_auth_strategy"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_GConf2_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package GConf2 Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package GConf2 should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package GConf2 is installed" test_ref="test_package_GConf2_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_avahi_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package avahi Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package avahi should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package avahi is installed" test_ref="test_package_avahi_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_dconf_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package dconf Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package dconf should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package dconf is installed" test_ref="test_package_dconf_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_esc_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package esc Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package esc should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package esc is installed" test_ref="test_package_esc_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_gdm_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package gdm Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package gdm should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package gdm is installed" test_ref="test_package_gdm_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_pam_ldap_removed" version="1">
+      <oval:metadata>
+        <oval:title>Package pam_ldap Removed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package pam_ldap should be removed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package pam_ldap is removed" test_ref="test_package_pam_ldap_removed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_pam_pkcs11_installed" version="1">
+      <oval:metadata>
+        <oval:title>Package pam_pkcs11 Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package pam_pkcs11 should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package pam_pkcs11 is installed" test_ref="test_package_pam_pkcs11_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_prelink_removed" version="1">
+      <oval:metadata>
+        <oval:title>Package prelink Removed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package prelink should be removed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package prelink is removed" test_ref="test_package_prelink_removed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="package_samba-common_removed" version="1">
+      <oval:metadata>
+        <oval:title>Package samba-common Removed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The RPM package samba-common should be removed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="package samba-common is removed" test_ref="test_package_samba-common_removed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="service_chronyd_enabled" version="1">
+      <oval:metadata>
+        <oval:title>Service chronyd Enabled</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The chronyd service should be enabled if possible.</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="package chrony installed and service chronyd is configured to start" operator="AND">
+        <oval:criterion comment="chrony installed" test_ref="test_service_chronyd_package_chrony_installed"/>
+        <oval:criteria comment="service chronyd is configured to start and is running" operator="AND">
+          <oval:criterion comment="chronyd is running" test_ref="test_service_running_chronyd"/>
+          <oval:criteria comment="service chronyd is configured to start" operator="OR">
+            <oval:criterion comment="multi-user.target wants chronyd" test_ref="test_multi_user_wants_chronyd"/>
+            <oval:criterion comment="multi-user.target wants chronyd socket" test_ref="test_multi_user_wants_chronyd_socket"/>
+          </oval:criteria>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="service_sssd_disabled" version="1">
+      <oval:metadata>
+        <oval:title>Service sssd Disabled</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The sssd service should be disabled if possible.</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="package sssd-common removed or service sssd is not configured to start" operator="OR">
+        <oval:criterion comment="sssd-common removed" test_ref="test_service_sssd_package_sssd-common_removed"/>
+        <oval:criteria comment="service sssd is not configured to start" operator="AND">
+          <oval:criterion comment="sssd is not running" test_ref="test_service_not_running_sssd"/>
+          <oval:criterion comment="Property LoadState of service sssd is masked" test_ref="test_service_loadstate_is_masked_sssd"/>
+          <oval:criterion comment="Property FragmentPath of service sssd is set to /dev/null" test_ref="test_service_fragmentpath_is_dev_null_sssd"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="auditd_conf_log_group_not_root" version="1">
+      <oval:metadata>
+        <oval:title>'log_group' Not Set To 'root' In /etc/audit/auditd.conf</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Verify 'log_group' is not set to 'root' in
+      /etc/audit/auditd.conf.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Verify 'log_group' not set to 'root' in /etc/audit/auditd.conf" test_ref="test_auditd_conf_log_group_not_root"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="grub2_default_exists" version="1">
+      <oval:metadata>
+        <oval:title>GRUB_CMDLINE_LINUX_DEFAULT existance check</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Check if GRUB_CMDLINE_LINUX_DEFAULT exists in /etc/default/grub.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:criterion comment="check for GRUB_CMDLINE_LINUX_DEFAULT exists in /etc/default/grub" test_ref="test_grub2_default_exists"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="install_mcafee_hbss" version="1">
+      <oval:metadata>
+        <oval:title>Install McAfee Host-Based Intrusion Detection Software (HBSS)</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>McAfee Host-Based Intrusion Detection Software (HBSS) software
+      should be installed.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="McAfee HBSS" definition_ref="install_mcafee_cma_rt"/>
+        <oval:extend_definition comment="McAfee HBSS" definition_ref="install_mcafee_hbss_accm"/>
+        <oval:extend_definition comment="McAfee HBSS" definition_ref="install_mcafee_hbss_hips"/>
+        <oval:extend_definition comment="McAfee HBSS" definition_ref="install_mcafee_hbss_pa"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_centos6" version="2">
+      <oval:metadata>
+        <oval:title>CentOS 6</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:centos:centos:6" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      CentOS 6</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="CentOS6 is installed" test_ref="test_centos6"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_centos7" version="2">
+      <oval:metadata>
+        <oval:title>CentOS 7</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:centos:centos:7" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      CentOS 7</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="CentOS7 is installed" test_ref="test_centos7"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_centos8" version="2">
+      <oval:metadata>
+        <oval:title>CentOS 8</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:centos:centos:8" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      CentOS 8</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="CentOS8 is installed" test_ref="test_centos8"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_debian" version="1">
+      <oval:metadata>
+        <oval:title>Debian</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The operating system installed is a Debian System</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="System is Debian" operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="Debian is installed" test_ref="test_debian"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_debian8" version="3">
+      <oval:metadata>
+        <oval:title>Debian 8</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:debian:debian_linux:8" source="CPE"/>
+        <oval:description>The operating system installed on the system is Debian 8</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current Debian version is Debian jessie" operator="AND">
+        <oval:extend_definition comment="Debian is installed" definition_ref="installed_OS_is_debian"/>
+        <oval:criterion comment="Debian8 is installed" test_ref="test_debian_8"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_debian9" version="3">
+      <oval:metadata>
+        <oval:title>Debian 9</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:debian:debian_linux:9" source="CPE"/>
+        <oval:description>The operating system installed on the system is Debian 9</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current Debian version is Debian Stretch" operator="AND">
+        <oval:extend_definition comment="Debian is installed" definition_ref="installed_OS_is_debian"/>
+        <oval:criterion comment="Debian9 is installed" test_ref="test_debian_9"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_fedora" version="3">
+      <oval:metadata>
+        <oval:title>Installed operating system is Fedora</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:fedoraproject:fedora:28" source="CPE"/>
+        <oval:description>The operating system installed on the system is Fedora</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="fedora-release RPM packages are installed" test_ref="test_fedora_release_rpm"/>
+        <oval:criterion comment="CPE vendor is 'fedoraproject' and product is 'fedora'" test_ref="test_fedora_vendor_product"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ol6_family" version="1">
+      <oval:metadata>
+        <oval:title>Oracle Linux 6</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:oracle:linux:6" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Oracle Linux 6</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="Oracle Linux 6 System is installed" test_ref="test_ol6_system"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ol7_family" version="1">
+      <oval:metadata>
+        <oval:title>Oracle Linux 7</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:oracle:linux:7" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Oracle Linux 7</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="Oracle Linux 7 System is installed" test_ref="test_ol7_system"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ol8_family" version="1">
+      <oval:metadata>
+        <oval:title>Oracle Linux 8</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:oracle:linux:8" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Oracle Linux 8</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="Oracle Linux 8 System is installed" test_ref="test_ol8_system"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_opensuse" version="1">
+      <oval:metadata>
+        <oval:title>openSUSE</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The operating system installed on the system is openSUSE.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="openSUSE is installed" test_ref="test_opensuse_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_opensuse_leap15" version="1">
+      <oval:metadata>
+        <oval:title>openSUSE Leap 15</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:opensuse:leap:15.0" source="CPE"/>
+        <oval:description>The operating system installed on the system is openSUSE Leap 15.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="openSUSE is installed" definition_ref="installed_OS_is_opensuse"/>
+        <oval:criterion comment="openSUSE Leap 15 is installed" test_ref="test_opensuse_leap15_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_opensuse_leap42" version="1">
+      <oval:metadata>
+        <oval:title>openSUSE Leap 42</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:opensuse:leap:42.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/o:opensuse:leap:42.2" source="CPE"/>
+        <oval:reference ref_id="cpe:/o:opensuse:leap:42.3" source="CPE"/>
+        <oval:description>The operating system installed on the system is openSUSE Leap 42.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="openSUSE is installed" definition_ref="installed_OS_is_opensuse"/>
+        <oval:criterion comment="openSUSE Leap 42 is installed" test_ref="test_opensuse_leap42_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_part_of_Unix_family" version="1">
+      <oval:metadata>
+        <oval:title>Installed operating system is part of the Unix family</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The operating system installed on the system is part of the Unix OS family</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_unix_family"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_rhel6" version="2">
+      <oval:metadata>
+        <oval:title>Red Hat Enterprise Linux 6</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:redhat:enterprise_linux:6" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Red Hat Enterprise Linux 6</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="RHEL 6 Client is installed" test_ref="test_rhel_client"/>
+          <oval:criterion comment="RHEL 6 Workstation is installed" test_ref="test_rhel_workstation"/>
+          <oval:criterion comment="RHEL 6 Server is installed" test_ref="test_rhel_server"/>
+          <oval:criterion comment="RHEL 6 Compute Node is installed" test_ref="test_rhel_computenode"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_rhel7" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat Enterprise Linux 7</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:redhat:enterprise_linux:7" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Red Hat Enterprise Linux 7</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_rhel7_unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="RHEL 7 Client is installed" test_ref="test_rhel7_client"/>
+          <oval:criterion comment="RHEL 7 Workstation is installed" test_ref="test_rhel7_workstation"/>
+          <oval:criterion comment="RHEL 7 Server is installed" test_ref="test_rhel7_server"/>
+          <oval:criterion comment="RHEL 7 Compute Node is installed" test_ref="test_rhel7_computenode"/>
+          <oval:criteria comment="Red Hat Enterpise Virtualization Host is installed" operator="AND">
+            <oval:criterion comment="redhat-release-virtualization-host RPM package is installed" test_ref="test_redhat_release_virtualization_host_rpm"/>
+            <oval:criterion comment="Red Hat Enterpise Virtualization Host is based on RHEL 7" test_ref="test_rhev_rhel_version"/>
+          </oval:criteria>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_rhel8" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat Enterprise Linux 8</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:redhat:enterprise_linux:8" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Red Hat Enterprise Linux 8</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_rhel8_unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="RHEL 8 is installed" test_ref="test_rhel8"/>
+          <oval:criterion comment="RHEL 8 CoreOS is installed" test_ref="test_rhel8_coreos"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_rhv4" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat Virtualization 4</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:redhat:virtualization:4" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Red Hat Virtualization Host 4 or Red Hat Enterprise Host.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="RHEL7 OS installed" definition_ref="installed_OS_is_rhel7"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="Red Hat Virtualization Host (RHVH)" test_ref="test_rhvh4_version"/>
+          <oval:criterion comment="Red Hat Virtualization Host is based on RHEL (RHELH)" test_ref="test_rhelh4_version"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_sl6" version="2">
+      <oval:metadata>
+        <oval:title>Scientific Linux 6</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:scientificlinux:scientificlinux:6" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Scientific Linux 6</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="Scientific Linux 6 is installed" test_ref="test_sl6"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_sl7" version="2">
+      <oval:metadata>
+        <oval:title>Scientific Linux 7</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:scientificlinux:scientificlinux:7" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Scientific Linux 7</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="Scientific Linux 7 is installed" test_ref="test_sl7"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_sle11" version="1">
+      <oval:metadata>
+        <oval:title>SUSE Linux Enterprise 11</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:suse:linux_enterprise_server:11" source="CPE"/>
+        <oval:reference ref_id="cpe:/o:suse:linux_enterprise_desktop:11" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      SUSE Linux Enterprise 11.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_sle11_unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="SLE 11 Desktop is installed" test_ref="test_sle11_desktop"/>
+          <oval:criterion comment="SLE 11 Server is installed" test_ref="test_sle11_server"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_sle12" version="1">
+      <oval:metadata>
+        <oval:title>SUSE Linux Enterprise 12</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:suse:linux_enterprise_server:12" source="CPE"/>
+        <oval:reference ref_id="cpe:/o:suse:linux_enterprise_desktop:12" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      SUSE Linux Enterprise 12.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_sle12_unix_family"/>
+        <oval:criteria operator="OR">
+          <oval:criterion comment="SLE 12 Desktop is installed" test_ref="test_sle12_desktop"/>
+          <oval:criterion comment="SLE 12 Server is installed" test_ref="test_sle12_server"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ubuntu" version="1">
+      <oval:metadata>
+        <oval:title>Ubuntu</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The operating system installed is an Ubuntu System</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="System is Ubuntu" operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="lsb-based distrib" test_ref="test_lsb"/>
+        <oval:criterion comment="Ubuntu is installed" test_ref="test_ubuntu"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ubuntu1404" version="1">
+      <oval:metadata>
+        <oval:title>Ubuntu 1404</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:canonical:ubuntu_linux:14.04" source="CPE"/>
+        <oval:description>The operating system installed on the system is Ubuntu 1404</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current Ubuntu version is Trusty" operator="AND">
+        <oval:extend_definition comment="Ubuntu is installed" definition_ref="installed_OS_is_ubuntu"/>
+        <oval:criterion comment="Trusty is installed" test_ref="test_ubuntu_trusty"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ubuntu1604" version="1">
+      <oval:metadata>
+        <oval:title>Ubuntu 1604</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:canonical:ubuntu_linux:16.04" source="CPE"/>
+        <oval:description>The operating system installed on the system is Ubuntu 1604</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current Ubuntu version is Xenial" operator="AND">
+        <oval:extend_definition comment="Ubuntu is installed" definition_ref="installed_OS_is_ubuntu"/>
+        <oval:criterion comment="Xenial is installed" test_ref="test_ubuntu_xenial"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_ubuntu1804" version="1">
+      <oval:metadata>
+        <oval:title>Ubuntu 1804</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:canonical:ubuntu_linux:18.04" source="CPE"/>
+        <oval:description>The operating system installed on the system is Ubuntu 1804</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current Ubuntu version is Bionic" operator="AND">
+        <oval:extend_definition comment="Ubuntu is installed" definition_ref="installed_OS_is_ubuntu"/>
+        <oval:criterion comment="Bionic is installed" test_ref="test_ubuntu_bionic"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_wrlinux1019" version="1">
+      <oval:metadata>
+        <oval:title>WRLinux 1019</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:windriver:wrlinux" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Wind River Linux 1019</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_unix_wrlinux1019"/>
+        <oval:criterion comment="Produce name is WRLinux" test_ref="test_wrlinux1019_name"/>
+        <oval:criterion comment="WRLinux version is 1019" test_ref="test_wrlinux1019_version"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_wrlinux8" version="1">
+      <oval:metadata>
+        <oval:title>WRLinux 8</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/o:windriver:wrlinux" source="CPE"/>
+        <oval:description>The operating system installed on the system is
+      Wind River Linux 8</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="current WRLinux version is WRLinux8" operator="AND">
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_unix_wrlinux8"/>
+        <oval:criterion comment="WRLinux 8 is installed" test_ref="test_wrlinux8_version"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_ocp3" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat OpenShift Container Platform</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:openshift_container_platform:3.10" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:openshift_container_platform:3.11" source="CPE"/>
+        <oval:description>The application installed installed on the system is
+      OpenShift 3.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="RHEL7 OS installed" definition_ref="installed_OS_is_rhel7"/>
+        <oval:criterion comment="OpenShift Node is installed" test_ref="test_ocp3_node"/>
+        <oval:criterion comment="OpenShift Hyperkube is installed" test_ref="test_ocp3_hyperkube"/>
+        <oval:criterion comment="Atomic OpenShift is installed" test_ref="test_ocp3_atomic"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_ocp4" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat OpenShift Container Platform</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:openshift_container_platform:4.1" source="CPE"/>
+        <oval:description>The application installed installed on the system is OpenShift 4.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="RHEL8 OS installed" definition_ref="installed_OS_is_rhel8"/>
+        <oval:criterion comment="OpenShift Node is installed" test_ref="test_ocp4_node"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_rhosp13" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat OpenStack Platform</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:openstack:13.0" source="CPE"/>
+        <oval:description>The application installed installed on the system is
+      Red Hat OpenStack Platform 13.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="RHEL7 OS installed" definition_ref="installed_OS_is_rhel7"/>
+        <oval:criterion comment="OpenStack is installed" test_ref="test_rhosp13_release"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_rhv4" version="1">
+      <oval:metadata>
+        <oval:title>Red Hat Virtualization 4</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:virtualization:4" source="CPE"/>
+        <oval:description>The application installed installed on the system is
+      Red Hat Virtualization 4.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="RHEL7 OS installed" definition_ref="installed_OS_is_rhel7"/>
+        <oval:criterion comment="Red Hat Virtualization Manager (RHVM)" test_ref="test_rhevm4_version"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_gdm_package" version="1">
+      <oval:metadata>
+        <oval:title>Package gdm is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package gdm is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:gdm" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package gdm is installed" test_ref="test_env_has_gdm_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_libuser_package" version="1">
+      <oval:metadata>
+        <oval:title>Package libuser is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package libuser is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:libuser" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package libuser is installed" test_ref="test_env_has_libuser_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_nss-pam-ldapd_package" version="1">
+      <oval:metadata>
+        <oval:title>Package nss-pam-ldapd is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package nss-pam-ldapd is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:nss-pam-ldapd" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package nss-pam-ldapd is installed" test_ref="test_env_has_nss-pam-ldapd_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_pam_package" version="1">
+      <oval:metadata>
+        <oval:title>Package pam is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package pam is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:pam" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package pam is installed" test_ref="test_env_has_pam_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_shadow-utils_package" version="1">
+      <oval:metadata>
+        <oval:title>Package shadow-utils is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package shadow-utils is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:shadow-utils" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package shadow-utils is installed" test_ref="test_env_has_shadow-utils_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_sssd-common_package" version="1">
+      <oval:metadata>
+        <oval:title>Package sssd-common is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package sssd-common is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:sssd" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package sssd-common is installed" test_ref="test_env_has_sssd-common_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_systemd_package" version="1">
+      <oval:metadata>
+        <oval:title>Package systemd is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package systemd is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:systemd" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package systemd is installed" test_ref="test_env_has_systemd_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_has_yum_package" version="1">
+      <oval:metadata>
+        <oval:title>Package yum is installed</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Checks if package yum is installed.</oval:description>
+        <oval:reference ref_id="cpe:/a:yum" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Package yum is installed" test_ref="test_env_has_yum_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_is_a_container" version="2">
+      <oval:metadata>
+        <oval:title>Check if the scan target is a container</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Check for presence of files characterizing container filesystems.</oval:description>
+        <oval:reference ref_id="cpe:/a:container" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria operator="OR">
+        <oval:criterion comment="Check if /.dockerenv exists" test_ref="test_installed_env_is_a_docker_container"/>
+        <oval:criterion comment="Check if /run/.containerenv exists" test_ref="test_installed_env_is_a_podman_container"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_env_is_a_machine" version="2">
+      <oval:metadata>
+        <oval:title>Check if the scan target is a machine</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Check for absence of files characterizing container filesystems.</oval:description>
+        <oval:reference ref_id="cpe:/a:machine" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="If environment is not a container, it is machine" definition_ref="installed_env_is_a_container" negate="true"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sshd_not_required_or_unset" version="1">
+      <oval:metadata>
+        <oval:title>SSHD is not required to be installed or requirement not set</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>If SSHD is not required, we check it is not installed. If SSH requirement is unset, we are good.</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="SSH not required or not set" operator="OR">
+        <oval:criterion test_ref="test_sshd_not_required"/>
+        <oval:extend_definition comment="SSH requirement is unset" definition_ref="sshd_requirement_unset"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sshd_required_or_unset" version="1">
+      <oval:metadata>
+        <oval:title>SSHD is required to be installed or requirement not set</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>If SSHD is required, we check it is installed. If SSH requirement is unset, we are good.</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="SSH required or not set" operator="OR">
+        <oval:criterion test_ref="test_sshd_required"/>
+        <oval:extend_definition comment="SSH requirement is unset" definition_ref="sshd_requirement_unset"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sshd_requirement_unset" version="1">
+      <oval:metadata>
+        <oval:title>It doesn't matter if sshd is installed or not</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Test if value sshd_required is 0.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:criterion test_ref="test_sshd_requirement_unset"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sshd_version_equal_or_higher_than_74" version="1">
+      <oval:metadata>
+        <oval:title>OpenSSH Server is 7.4 or newer</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Check if version of OpenSSH Server is equal or higher than 7.4</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="OpenSSH Server version is equal or higher than 7.4" operator="OR">
+        <oval:criterion comment="Check if OpenSSH Server is equal or higher than 7.4" test_ref="test_openssh-server_version"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sssd_conf_exists" version="1">
+      <oval:metadata>
+        <oval:title>Verify The SSSD Configuration File Exists</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>The /etc/sssd/sssd.conf file should exist if it is
+      in use.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Check if sssd_conf_exists" test_ref="test_sssd_conf_exists"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="sysctl_kernel_ipv6_disable" version="2">
+      <oval:metadata>
+        <oval:title>Kernel Runtime Parameter IPv6 Check</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Disables IPv6 for all network interfaces.</oval:description>
+      </oval:metadata>
+      <oval:criteria comment="IPv6 disabled or net.ipv6.conf.all.disable_ipv6 set correctly" operator="OR">
+        <oval:criteria operator="AND">
+          <oval:extend_definition comment="net.ipv6.conf.all.disable_ipv6 configuration setting check" definition_ref="sysctl_static_net_ipv6_conf_all_disable_ipv6"/>
+          <oval:extend_definition comment="net.ipv6.conf.all.disable_ipv6 runtime setting check" definition_ref="sysctl_runtime_net_ipv6_conf_all_disable_ipv6"/>
+        </oval:criteria>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_boot_mode_is_uefi" version="1">
+      <oval:metadata>
+        <oval:title>UEFI system boot mode check</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Check if system boot mode is UEFI.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:criterion comment="check if /sys/firmware/efi folder exists" test_ref="test_efi_dir_existence"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_info_architecture_64bit" version="1">
+      <oval:metadata>
+        <oval:title>Test for 64-bit Architecture</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Generic test for 64-bit architectures to be used by other tests</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="OR">
+        <oval:extend_definition comment="Generic test for x86_64 architecture" definition_ref="system_info_architecture_x86_64"/>
+        <oval:extend_definition comment="Generic test for ppc64 architecture" definition_ref="system_info_architecture_ppc_64"/>
+        <oval:extend_definition comment="Generic test for aarch64 architecture" definition_ref="system_info_architecture_aarch_64"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_info_architecture_aarch_64" version="1">
+      <oval:metadata>
+        <oval:title>Test for aarch_64 Architecture</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Generic test for aarch_64 architecture to be used by other tests</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Generic test for aarch_64 architecture" test_ref="test_system_info_architecture_aarch_64"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_info_architecture_ppc_64" version="1">
+      <oval:metadata>
+        <oval:title>Test for PPC and PPCLE Architecture</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Generic test for PPC PPC64LE architecture to be used by other tests</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="OR">
+        <oval:criterion comment="Generic test for ppc64 architecture" test_ref="test_system_info_architecture_ppc_64"/>
+        <oval:criterion comment="Generic test for ppcle64 architecture" test_ref="test_system_info_architecture_ppcle_64"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_info_architecture_x86" version="1">
+      <oval:metadata>
+        <oval:title>Test for x86 Architecture</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Generic test for x86 architecture to be used by other tests</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Generic test for x86 architecture" test_ref="test_system_info_architecture_x86"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="system_info_architecture_x86_64" version="1">
+      <oval:metadata>
+        <oval:title>Test for x86_64 Architecture</oval:title>
+        <oval:affected family="unix">
+          <oval:platform>Red Hat OpenStack Platform 13</oval:platform>
+        </oval:affected>
+        <oval:description>Generic test for x86_64 architecture to be used by other tests</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Generic test for x86_64 architecture" test_ref="test_system_info_architecture_x86_64"/>
+      </oval:criteria>
+    </oval:definition>
+  </oval:definitions>
+  <oval:tests>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the glance_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_glance_api_insecure" version="1">
+      <ns3:object object_ref="obj_cinder_glance_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the nas_secure_file_operations[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_nas_secure_file_operations" version="1">
+      <ns3:object object_ref="obj_cinder_nas_secure_file_operations"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the nova_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_nova_api_insecure" version="1">
+      <ns3:object object_ref="obj_cinder_nova_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the osapi_max_request_body_size[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_osapi_max_request_body_size" version="1">
+      <ns3:object object_ref="obj_cinder_osapi_max_request_body_size"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_auth_protocol" version="1">
+      <ns3:object object_ref="obj_cinder_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/cinder/cinder.conf file" id="test_cinder_auth_strategy" version="1">
+      <ns3:object object_ref="obj_cinder_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the glance_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_glance_api_insecure" version="1">
+      <ns3:object object_ref="obj_container_cinder_glance_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the nas_secure_file_operations[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_nas_secure_file_operations" version="1">
+      <ns3:object object_ref="obj_container_cinder_nas_secure_file_operations"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the nova_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_nova_api_insecure" version="1">
+      <ns3:object object_ref="obj_container_cinder_nova_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the osapi_max_request_body_size[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_osapi_max_request_body_size" version="1">
+      <ns3:object object_ref="obj_container_cinder_osapi_max_request_body_size"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_auth_protocol" version="1">
+      <ns3:object object_ref="obj_container_cinder_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf file" id="test_container_cinder_auth_strategy" version="1">
+      <ns3:object object_ref="obj_container_cinder_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the CSRF_COOKIE_SECURE[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_csrf_cookie_secure" version="1">
+      <ns3:object object_ref="obj_horizon_csrf_cookie_secure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the disable_password_reveal[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_disable_password_reveal" version="1">
+      <ns3:object object_ref="obj_horizon_disable_password_reveal"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the password_autocomplete[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_password_autocomplete" version="1">
+      <ns3:object object_ref="obj_horizon_password_autocomplete"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the SESSION_COOKIE_HTTPONLY[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_session_cookie_httponly" version="1">
+      <ns3:object object_ref="obj_horizon_session_cookie_httponly"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the SESSION_COOKIE_SECURE[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_session_cookie_secure" version="1">
+      <ns3:object object_ref="obj_horizon_session_cookie_secure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the USE_SSL[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/openstack-dashboard/local_settings file" id="test_horizon_use_ssl" version="1">
+      <ns3:object object_ref="obj_horizon_use_ssl"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the CSRF_COOKIE_SECURE[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_csrf_cookie_secure" version="1">
+      <ns3:object object_ref="obj_container_horizon_csrf_cookie_secure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the disable_password_reveal[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_disable_password_reveal" version="1">
+      <ns3:object object_ref="obj_container_horizon_disable_password_reveal"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the password_autocomplete[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_password_autocomplete" version="1">
+      <ns3:object object_ref="obj_container_horizon_password_autocomplete"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the SESSION_COOKIE_HTTPONLY[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_session_cookie_httponly" version="1">
+      <ns3:object object_ref="obj_container_horizon_session_cookie_httponly"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the SESSION_COOKIE_SECURE[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_session_cookie_secure" version="1">
+      <ns3:object object_ref="obj_container_horizon_session_cookie_secure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the USE_SSL[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings file" id="test_container_horizon_use_ssl" version="1">
+      <ns3:object object_ref="obj_container_horizon_use_ssl"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the hash_algorithm[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone.conf file" id="test_keystone_hash_algorithm" version="1">
+      <ns3:object object_ref="obj_keystone_hash_algorithm"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the admin_token[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone-paste.ini file" id="test_keystone_admin_token" version="1">
+      <ns3:object object_ref="obj_keystone_admin_token"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the admin_token[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone-paste.ini file" id="test_keystone_admin_token_auth_middleware" version="1">
+      <ns3:object object_ref="obj_keystone_admin_token_auth_middleware"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the disable_user_account_days_inactive[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone.conf file" id="test_keystone_disable_user_account_days_inactive" version="1">
+      <ns3:object object_ref="obj_keystone_disable_user_account_days_inactive"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the lockout_duration[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone.conf file" id="test_keystone_lockout_duration" version="1">
+      <ns3:object object_ref="obj_keystone_lockout_duration"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the lockout_failure_attempts[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone.conf file" id="test_keystone_lockout_failure_attempts" version="1">
+      <ns3:object object_ref="obj_keystone_lockout_failure_attempts"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the max_request_body_size[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/keystone/keystone.conf file" id="test_keystone_max_request_body_size" version="1">
+      <ns3:object object_ref="obj_keystone_max_request_body_size"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the enable parameneter in the ssl [\s]*(&lt;:nocomment:&gt;*) section of the /etc/keystone/keystone.conf file" id="test_keystone_ssl_enable" version="1">
+      <ns3:object object_ref="obj_keystone_ssl_enable"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the hash_algorithm[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_hash_algorithm" version="1">
+      <ns3:object object_ref="obj_container_keystone_hash_algorithm"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the admin_token[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini file" id="test_container_keystone_admin_token" version="1">
+      <ns3:object object_ref="obj_container_keystone_admin_token"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the admin_token[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini file" id="test_container_keystone_admin_token_auth_middleware" version="1">
+      <ns3:object object_ref="obj_container_keystone_admin_token_auth_middleware"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the disable_user_account_days_inactive[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_disable_user_account_days_inactive" version="1">
+      <ns3:object object_ref="obj_container_keystone_disable_user_account_days_inactive"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the lockout_duration[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_lockout_duration" version="1">
+      <ns3:object object_ref="obj_container_keystone_lockout_duration"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the lockout_failure_attempts[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_lockout_failure_attempts" version="1">
+      <ns3:object object_ref="obj_container_keystone_lockout_failure_attempts"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the max_request_body_size[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_max_request_body_size" version="1">
+      <ns3:object object_ref="obj_container_keystone_max_request_body_size"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the enable parameneter in the ssl [\s]*(&lt;:nocomment:&gt;*) section of the /var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf file" id="test_container_keystone_ssl_enable" version="1">
+      <ns3:object object_ref="obj_container_keystone_ssl_enable"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the use_ssl parameneter in the ssl [\s]*(&lt;:nocomment:&gt;*) section of the /etc/neutron/neutron.conf file" id="test_neutron_use_ssl" version="1">
+      <ns3:object object_ref="obj_neutron_use_ssl"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol parameneter in [\s]*(&lt;:nocomment:&gt;*) /etc/neutron/neutron.conf file" id="test_neutron_auth_protocol" version="1">
+      <ns3:object object_ref="obj_neutron_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the identity_uri parameneter in [\s]*(&lt;:nocomment:&gt;*) /etc/neutron/neutron.conf file" id="test_neutron_identity_uri" version="1">
+      <ns3:object object_ref="obj_neutron_identity_uri"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/neutron/neutron.conf file" id="test_neutron_auth_strategy" version="1">
+      <ns3:object object_ref="obj_neutron_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the use_ssl parameneter in the ssl [\s]*(&lt;:nocomment:&gt;*) section of the /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf file" id="test_container_neutron_use_ssl" version="1">
+      <ns3:object object_ref="obj_container_neutron_use_ssl"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol parameneter in [\s]*(&lt;:nocomment:&gt;*) /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf file" id="test_container_neutron_auth_protocol" version="1">
+      <ns3:object object_ref="obj_container_neutron_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the identity_uri parameneter in [\s]*(&lt;:nocomment:&gt;*) /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf file" id="test_container_neutron_identity_uri" version="1">
+      <ns3:object object_ref="obj_container_neutron_identity_uri"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf file" id="test_container_neutron_auth_strategy" version="1">
+      <ns3:object object_ref="obj_container_neutron_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol parameneter in [\s]*(&lt;:nocomment:&gt;*) /etc/nova/nova.conf file" id="test_nova_auth_protocol" version="1">
+      <ns3:object object_ref="obj_nova_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the identity_uri parameneter in [\s]*(&lt;:nocomment:&gt;*) /etc/nova/nova.conf file" id="test_nova_identity_uri" version="1">
+      <ns3:object object_ref="obj_nova_identity_uri"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the glance_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/nova/nova.conf file" id="test_nova_glance_api_insecure" version="1">
+      <ns3:object object_ref="obj_nova_glance_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/nova/nova.conf file" id="test_nova_api_insecure" version="1">
+      <ns3:object object_ref="obj_nova_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /etc/nova/nova.conf file" id="test_nova_auth_strategy" version="1">
+      <ns3:object object_ref="obj_nova_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_protocol parameneter in [\s]*(&lt;:nocomment:&gt;*) /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf file" id="test_container_nova_auth_protocol" version="1">
+      <ns3:object object_ref="obj_container_nova_auth_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the identity_uri parameneter in [\s]*(&lt;:nocomment:&gt;*) /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf file" id="test_container_nova_identity_uri" version="1">
+      <ns3:object object_ref="obj_container_nova_identity_uri"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the glance_api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf file" id="test_container_nova_glance_api_insecure" version="1">
+      <ns3:object object_ref="obj_container_nova_glance_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the api_insecure[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf file" id="test_container_nova_api_insecure" version="1">
+      <ns3:object object_ref="obj_container_nova_api_insecure"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="Tests the value of the auth_strategy[\s]*(&lt;:nocomment:&gt;*) setting in the /var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf file" id="test_container_nova_auth_strategy" version="1">
+      <ns3:object object_ref="obj_container_nova_auth_strategy"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package GConf2 is installed" id="test_package_GConf2_installed" version="1">
+      <ns4:object object_ref="obj_test_package_GConf2_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package avahi is installed" id="test_package_avahi_installed" version="1">
+      <ns4:object object_ref="obj_test_package_avahi_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package dconf is installed" id="test_package_dconf_installed" version="1">
+      <ns4:object object_ref="obj_test_package_dconf_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package esc is installed" id="test_package_esc_installed" version="1">
+      <ns4:object object_ref="obj_test_package_esc_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package gdm is installed" id="test_package_gdm_installed" version="1">
+      <ns4:object object_ref="obj_test_package_gdm_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="none_exist" comment="package pam_ldap is removed" id="test_package_pam_ldap_removed" version="1">
+      <ns4:object object_ref="obj_test_package_pam_ldap_removed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package pam_pkcs11 is installed" id="test_package_pam_pkcs11_installed" version="1">
+      <ns4:object object_ref="obj_test_package_pam_pkcs11_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="none_exist" comment="package prelink is removed" id="test_package_prelink_removed" version="1">
+      <ns4:object object_ref="obj_test_package_prelink_removed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="none_exist" comment="package samba-common is removed" id="test_package_samba-common_removed" version="1">
+      <ns4:object object_ref="obj_test_package_samba-common_removed"/>
+    </ns4:rpminfo_test>
+    <ns4:systemdunitdependency_test check="all" check_existence="any_exist" comment="systemd test" id="test_multi_user_wants_chronyd" version="1">
+      <ns4:object object_ref="object_multi_user_target_for_chronyd_enabled"/>
+      <ns4:state state_ref="state_systemd_chronyd_on"/>
+    </ns4:systemdunitdependency_test>
+    <ns4:systemdunitdependency_test check="all" check_existence="any_exist" comment="systemd test" id="test_multi_user_wants_chronyd_socket" version="1">
+      <ns4:object object_ref="object_multi_user_target_for_chronyd_socket_enabled"/>
+      <ns4:state state_ref="state_systemd_chronyd_socket_on"/>
+    </ns4:systemdunitdependency_test>
+    <ns4:systemdunitproperty_test check="at least one" check_existence="at_least_one_exists" comment="Test that the chronyd service is running" id="test_service_running_chronyd" version="1">
+      <ns4:object object_ref="obj_service_running_chronyd"/>
+      <ns4:state state_ref="state_service_running_chronyd"/>
+    </ns4:systemdunitproperty_test>
+    <ns4:rpminfo_test check="all" check_existence="all_exist" comment="package chrony is installed" id="test_service_chronyd_package_chrony_installed" version="1">
+      <ns4:object object_ref="obj_test_service_chronyd_package_chrony_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:systemdunitdependency_test check="all" check_existence="any_exist" comment="systemd test" id="test_sssd_not_wanted_by_multi_user_target" version="1">
+      <ns4:object object_ref="object_multi_user_target_for_sssd_disabled"/>
+      <ns4:state state_ref="state_systemd_sssd_off"/>
+    </ns4:systemdunitdependency_test>
+    <ns4:systemdunitdependency_test check="all" check_existence="any_exist" comment="systemd test" id="test_sssd_socket_not_wanted_by_multi_user_target" version="1">
+      <ns4:object object_ref="object_multi_user_target_for_sssd_socket_disabled"/>
+      <ns4:state state_ref="state_systemd_sssd_socket_off"/>
+    </ns4:systemdunitdependency_test>
+    <ns4:systemdunitproperty_test check="all" check_existence="any_exist" comment="Test that the sssd service is not running" id="test_service_not_running_sssd" version="1">
+      <ns4:object object_ref="obj_service_not_running_sssd"/>
+      <ns4:state state_ref="state_service_not_running_sssd"/>
+    </ns4:systemdunitproperty_test>
+    <ns4:systemdunitproperty_test check="all" check_existence="any_exist" comment="Test that the property LoadState from the service sssd is masked" id="test_service_loadstate_is_masked_sssd" version="1">
+      <ns4:object object_ref="obj_service_loadstate_is_masked_sssd"/>
+      <ns4:state state_ref="state_service_loadstate_is_masked_sssd"/>
+    </ns4:systemdunitproperty_test>
+    <ns4:systemdunitproperty_test check="all" check_existence="any_exist" comment="Test that the property FragmentPath from the service sssd is set to /dev/null" id="test_service_fragmentpath_is_dev_null_sssd" version="1">
+      <ns4:object object_ref="obj_service_fragmentpath_is_dev_null_sssd"/>
+      <ns4:state state_ref="state_service_fragmentpath_is_dev_null_sssd"/>
+    </ns4:systemdunitproperty_test>
+    <ns4:rpminfo_test check="all" check_existence="none_exist" comment="package sssd-common is removed" id="test_service_sssd_package_sssd-common_removed" version="1">
+      <ns4:object object_ref="obj_test_service_sssd_package_sssd-common_removed"/>
+    </ns4:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" check_existence="none_exist" comment="log_group = root" id="test_auditd_conf_log_group_not_root" version="1">
+      <ns3:object object_ref="object_auditd_conf_log_group_root"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="all_exist" comment="check for GRUB_CMDLINE_LINUX_DEFAULT in /etc/default/grub" id="test_grub2_default_exists" version="1">
+      <ns3:object object_ref="object_grub2_default_exists"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="centos-release is version 6" id="test_centos6" version="1">
+      <ns4:object object_ref="obj_centos6"/>
+      <ns4:state state_ref="state_centos6"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="centos-release is version 7" id="test_centos7" version="1">
+      <ns4:object object_ref="obj_centos7"/>
+      <ns4:state state_ref="state_centos7"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="centos-release is version 8" id="test_centos8" version="1">
+      <ns4:object object_ref="obj_centos8"/>
+      <ns4:state state_ref="state_centos8"/>
+    </ns4:rpminfo_test>
+    <ns5:file_test check="all" check_existence="all_exist" comment="/etc/debian_version exists" id="test_debian" version="1">
+      <ns5:object object_ref="obj_debian"/>
+    </ns5:file_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Debian version" id="test_debian_8" version="1">
+      <ns3:object object_ref="obj_debian_8"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Debian version" id="test_debian_9" version="1">
+      <ns3:object object_ref="obj_debian_9"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="fedora-release RPM packages are installed" id="test_fedora_release_rpm" version="1">
+      <ns4:object object_ref="object_fedora_release_rpm"/>
+    </ns4:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" comment="CPE vendor is 'fedoraproject' and 'product' is fedora" id="test_fedora_vendor_product" version="1">
+      <ns3:object object_ref="object_fedora_vendor_product"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="oraclelinux-release is version 6" id="test_ol6_system" version="1">
+      <ns4:object object_ref="obj_ol6_system"/>
+      <ns4:state state_ref="state_ol6_system"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="oraclelinux-release is version 7" id="test_ol7_system" version="1">
+      <ns4:object object_ref="obj_ol7_system"/>
+      <ns4:state state_ref="state_ol7_system"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="oraclelinux-release is version 8" id="test_ol8_system" version="1">
+      <ns4:object object_ref="obj_ol8_system"/>
+      <ns4:state state_ref="state_ol8_system"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="openSUSE is installed" id="test_opensuse_installed" version="1">
+      <ns4:object object_ref="obj_opensuse_installed"/>
+      <ns4:state state_ref="state_opensuse_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="openSUSE Leap 15 is installed" id="test_opensuse_leap15_installed" version="1">
+      <ns4:object object_ref="obj_opensuse_leap15_installed"/>
+      <ns4:state state_ref="state_opensuse_leap15_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="openSUSE Leap 42 is installed" id="test_opensuse_leap42_installed" version="1">
+      <ns4:object object_ref="obj_opensuse_leap42_installed"/>
+      <ns4:state state_ref="state_opensuse_leap42_installed"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="Test installed OS is part of the unix family" id="test_unix_family" version="1">
+      <ns3:object object_ref="object_unix_family"/>
+      <ns3:state state_ref="state_unix_family"/>
+    </ns3:family_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-client is version 6" id="test_rhel_client" version="1">
+      <ns4:object object_ref="obj_rhel_client"/>
+      <ns4:state state_ref="state_rhel_client"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-workstation is version 6" id="test_rhel_workstation" version="1">
+      <ns4:object object_ref="obj_rhel_workstation"/>
+      <ns4:state state_ref="state_rhel_workstation"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-server is version 6" id="test_rhel_server" version="1">
+      <ns4:object object_ref="obj_rhel_server"/>
+      <ns4:state state_ref="state_rhel_server"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-computenode is version 6" id="test_rhel_computenode" version="1">
+      <ns4:object object_ref="obj_rhel_computenode"/>
+      <ns4:state state_ref="state_rhel_computenode"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_rhel7_unix_family" version="1">
+      <ns3:object object_ref="obj_rhel7_unix_family"/>
+      <ns3:state state_ref="state_rhel7_unix_family"/>
+    </ns3:family_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-client is version 7" id="test_rhel7_client" version="1">
+      <ns4:object object_ref="obj_rhel7_client"/>
+      <ns4:state state_ref="state_rhel7_client"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-workstation is version 7" id="test_rhel7_workstation" version="1">
+      <ns4:object object_ref="obj_rhel7_workstation"/>
+      <ns4:state state_ref="state_rhel7_workstation"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-server is version 7" id="test_rhel7_server" version="1">
+      <ns4:object object_ref="obj_rhel7_server"/>
+      <ns4:state state_ref="state_rhel7_server"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-computenode is version 7" id="test_rhel7_computenode" version="1">
+      <ns4:object object_ref="obj_rhel7_computenode"/>
+      <ns4:state state_ref="state_rhel7_computenode"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="only_one_exists" comment="redhat-release-virtualization-host RPM package is installed" id="test_redhat_release_virtualization_host_rpm" version="1">
+      <ns4:object object_ref="obj_redhat_release_virtualization_host_rpm"/>
+    </ns4:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" comment="RHEVH base RHEL is version 7" id="test_rhev_rhel_version" version="1">
+      <ns3:object object_ref="obj_rhevh_rhel_version"/>
+      <ns3:state state_ref="state_rhevh_rhel_version"/>
+    </ns3:textfilecontent54_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_rhel8_unix_family" version="1">
+      <ns3:object object_ref="obj_rhel8_unix_family"/>
+      <ns3:state state_ref="state_rhel8_unix_family"/>
+    </ns3:family_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release is version 8" id="test_rhel8" version="1">
+      <ns4:object object_ref="obj_rhel8"/>
+      <ns4:state state_ref="state_rhel8"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="redhat-release-coreos is version 8" id="test_rhel8_coreos" version="1">
+      <ns4:object object_ref="obj_rhel8_coreos"/>
+      <ns4:state state_ref="state_rhel8_coreos"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="only_one_exists" comment="redhat-release-virtualization-host RPM package is installed" id="test_rhvh4_version" version="1">
+      <ns4:object object_ref="obj_rhvh4_version"/>
+      <ns4:state state_ref="state_rhvh4_version"/>
+    </ns4:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" comment="RHEVH base RHEL is version 7" id="test_rhelh4_version" version="1">
+      <ns3:object object_ref="obj_rhelh4_version"/>
+      <ns3:state state_ref="state_rhelh4_version"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sl-release is version 6" id="test_sl6" version="1">
+      <ns4:object object_ref="obj_sl6"/>
+      <ns4:state state_ref="state_sl6"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sl-release is version 7" id="test_sl7" version="1">
+      <ns4:object object_ref="obj_sl7"/>
+      <ns4:state state_ref="state_sl7"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_sle11_unix_family" version="1">
+      <ns3:object object_ref="obj_sle11_unix_family"/>
+      <ns3:state state_ref="state_sle11_unix_family"/>
+    </ns3:family_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sled-release is version 6" id="test_sle11_desktop" version="1">
+      <ns4:object object_ref="obj_sle11_desktop"/>
+      <ns4:state state_ref="state_sle11_desktop"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sles-release is version 6" id="test_sle11_server" version="1">
+      <ns4:object object_ref="obj_sle11_server"/>
+      <ns4:state state_ref="state_sle11_server"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_sle12_unix_family" version="1">
+      <ns3:object object_ref="obj_sle12_unix_family"/>
+      <ns3:state state_ref="state_sle12_unix_family"/>
+    </ns3:family_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sled-release is version 6" id="test_sle12_desktop" version="1">
+      <ns4:object object_ref="obj_sle12_desktop"/>
+      <ns4:state state_ref="state_sle12_desktop"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="sles-release is version 6" id="test_sle12_server" version="1">
+      <ns4:object object_ref="obj_sle12_server"/>
+      <ns4:state state_ref="state_sle12_server"/>
+    </ns4:rpminfo_test>
+    <ns5:file_test check="all" check_existence="all_exist" comment="/etc/lsb-release exists" id="test_lsb" version="1">
+      <ns5:object object_ref="obj_lsb"/>
+    </ns5:file_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Ubuntu" id="test_ubuntu" version="1">
+      <ns3:object object_ref="obj_ubuntu"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Ubuntu version" id="test_ubuntu_trusty" version="1">
+      <ns3:object object_ref="obj_ubuntu_trusty"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Ubuntu version" id="test_ubuntu_xenial" version="1">
+      <ns3:object object_ref="obj_ubuntu_xenial"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check Ubuntu version" id="test_ubuntu_bionic" version="1">
+      <ns3:object object_ref="obj_ubuntu_bionic"/>
+    </ns3:textfilecontent54_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_unix_wrlinux1019" version="1">
+      <ns3:object object_ref="obj_unix_wrlinux1019"/>
+      <ns3:state state_ref="state_unix_wrlinux1019"/>
+    </ns3:family_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check WRLinux10.19 version" id="test_wrlinux1019_name" version="1">
+      <ns3:object object_ref="obj_name_wrlinux1019"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check WRLinux10.19 version" id="test_wrlinux1019_version" version="1">
+      <ns3:object object_ref="obj_version_wrlinux1019"/>
+    </ns3:textfilecontent54_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="installed OS part of unix family" id="test_unix_wrlinux8" version="1">
+      <ns3:object object_ref="obj_unix_wrlinux8"/>
+      <ns3:state state_ref="state_unix_wrlinux8"/>
+    </ns3:family_test>
+    <ns3:textfilecontent54_test check="all" check_existence="at_least_one_exists" comment="Check WRLinux8 version" id="test_wrlinux8_version" version="1">
+      <ns3:object object_ref="obj_version_wrlinux8"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="atomic-openshift is version 3" id="test_ocp3_atomic" version="1">
+      <ns4:object object_ref="obj_ocp3_atomic"/>
+      <ns4:state state_ref="state_ocp3_atomic"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="atomic-openshift-node is version 3" id="test_ocp3_node" version="1">
+      <ns4:object object_ref="obj_ocp3_node"/>
+      <ns4:state state_ref="state_ocp3_node"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="atomic-openshift-hyperkube is version 3" id="test_ocp3_hyperkube" version="1">
+      <ns4:object object_ref="obj_ocp3_hyperkube"/>
+      <ns4:state state_ref="state_ocp3_hyperkube"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="atomic-openshift-node is version 4" id="test_ocp4_node" version="1">
+      <ns4:object object_ref="obj_ocp4_node"/>
+      <ns4:state state_ref="state_ocp4_node"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="OpenStack is version 13" id="test_rhosp13_release" version="1">
+      <ns4:object object_ref="obj_rhosp13_release"/>
+      <ns4:state state_ref="state_rhosp13_release"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="rhevm4-appliance is installed" id="test_rhevm4_version" version="1">
+      <ns4:object object_ref="obj_rhevm4_version"/>
+      <ns4:state state_ref="state_rhevm4_version"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package gdm installed" id="test_env_has_gdm_installed" version="1">
+      <ns4:object object_ref="obj_env_has_gdm_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package libuser installed" id="test_env_has_libuser_installed" version="1">
+      <ns4:object object_ref="obj_env_has_libuser_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package nss-pam-ldapd installed" id="test_env_has_nss-pam-ldapd_installed" version="1">
+      <ns4:object object_ref="obj_env_has_nss-pam-ldapd_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package pam installed" id="test_env_has_pam_installed" version="1">
+      <ns4:object object_ref="obj_env_has_pam_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package shadow-utils installed" id="test_env_has_shadow-utils_installed" version="1">
+      <ns4:object object_ref="obj_env_has_shadow-utils_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package sssd-common installed" id="test_env_has_sssd-common_installed" version="1">
+      <ns4:object object_ref="obj_env_has_sssd-common_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package systemd installed" id="test_env_has_systemd_installed" version="1">
+      <ns4:object object_ref="obj_env_has_systemd_installed"/>
+    </ns4:rpminfo_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="system has package yum installed" id="test_env_has_yum_installed" version="1">
+      <ns4:object object_ref="obj_env_has_yum_installed"/>
+    </ns4:rpminfo_test>
+    <ns5:file_test check="all" check_existence="all_exist" comment="Check if /.dockerenv exists" id="test_installed_env_is_a_docker_container" version="1">
+      <ns5:object object_ref="object_installed_env_is_a_docker_container"/>
+    </ns5:file_test>
+    <ns5:file_test check="all" check_existence="all_exist" comment="Check if /run/.containerenv exists" id="test_installed_env_is_a_podman_container" version="1">
+      <ns5:object object_ref="object_installed_env_is_a_podman_container"/>
+    </ns5:file_test>
+    <ns3:variable_test check="all" check_existence="at_least_one_exists" comment="Verify if Profile set Value sshd_required as not required" id="test_sshd_not_required" version="1">
+      <ns3:object object_ref="object_sshd_not_required"/>
+      <ns3:state state_ref="state_sshd_not_required"/>
+    </ns3:variable_test>
+    <ns3:variable_test check="all" check_existence="at_least_one_exists" comment="Verify if Profile set Value sshd_required as required" id="test_sshd_required" version="1">
+      <ns3:object object_ref="object_sshd_required"/>
+      <ns3:state state_ref="state_sshd_required"/>
+    </ns3:variable_test>
+    <ns3:variable_test check="all" check_existence="at_least_one_exists" comment="Verify if Value of sshd_required is the default" id="test_sshd_requirement_unset" version="1">
+      <ns3:object object_ref="object_sshd_requirement_unknown"/>
+      <ns3:state state_ref="state_sshd_requirement_unset"/>
+    </ns3:variable_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="OpenSSH is version 7.4 or higher" id="test_openssh-server_version" version="1">
+      <ns4:object object_ref="obj_openssh-server_version"/>
+      <ns4:state state_ref="state_openssh-server_version"/>
+    </ns4:rpminfo_test>
+    <ns5:file_test check="all" check_existence="all_exist" comment="Testing if /etc/sssd/sssd.conf exists" id="test_sssd_conf_exists" version="1">
+      <ns5:object object_ref="object_sssd_conf_exists"/>
+    </ns5:file_test>
+    <ns5:file_test check="all" check_existence="at_least_one_exists" comment="Verify if /sys/firmware/efi folder exists" id="test_efi_dir_existence" version="1">
+      <ns5:object object_ref="object_file_sys_firmware_efi"/>
+    </ns5:file_test>
+    <ns5:uname_test check="all" comment="64 bit architecture" id="test_system_info_architecture_aarch_64" version="1">
+      <ns5:object object_ref="object_system_info_architecture_aarch_64"/>
+      <ns5:state state_ref="state_system_info_architecture_aarch_64"/>
+    </ns5:uname_test>
+    <ns5:uname_test check="all" comment="64 bit architecture" id="test_system_info_architecture_ppc_64" version="1">
+      <ns5:object object_ref="object_system_info_architecture_ppc_64"/>
+      <ns5:state state_ref="state_system_info_architecture_ppc_64"/>
+    </ns5:uname_test>
+    <ns5:uname_test check="all" comment="64 bit architecture" id="test_system_info_architecture_ppcle_64" version="1">
+      <ns5:object object_ref="object_system_info_architecture_ppcle_64"/>
+      <ns5:state state_ref="state_system_info_architecture_ppcle_64"/>
+    </ns5:uname_test>
+    <ns5:uname_test check="all" comment="32 bit architecture" id="test_system_info_architecture_x86" version="1">
+      <ns5:object object_ref="object_system_info_architecture_x86"/>
+      <ns5:state state_ref="state_system_info_architecture_x86"/>
+    </ns5:uname_test>
+    <ns5:uname_test check="all" comment="64 bit architecture" id="test_system_info_architecture_x86_64" version="1">
+      <ns5:object object_ref="object_system_info_architecture_x86_64"/>
+      <ns5:state state_ref="state_system_info_architecture_x86_64"/>
+    </ns5:uname_test>
+  </oval:tests>
+  <oval:objects>
+    <ns3:textfilecontent54_object id="obj_cinder_glance_api_insecure" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)glance_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_cinder_nas_secure_file_operations" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)nas_secure_file_operations(?-i)[\s]+auto[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_cinder_nova_api_insecure" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)nova_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_cinder_osapi_max_request_body_size" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)osapi_max_request_body_size(?-i)[\s]+114688[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_cinder_auth_protocol" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_cinder_auth_strategy" version="2">
+      <ns3:filepath>/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_glance_api_insecure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)glance_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_nas_secure_file_operations" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)nas_secure_file_operations(?-i)[\s]+auto[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_nova_api_insecure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)nova_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_osapi_max_request_body_size" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)osapi_max_request_body_size(?-i)[\s]+114688[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_auth_protocol" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_cinder_auth_strategy" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_csrf_cookie_secure" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)CSRF_COOKIE_SECURE(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_disable_password_reveal" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)disable_password_reveal(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_password_autocomplete" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)password_autocomplete(?-i)[\s]+off[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_session_cookie_httponly" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)SESSION_COOKIE_HTTPONLY(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_session_cookie_secure" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)SESSION_COOKIE_SECURE(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_horizon_use_ssl" version="2">
+      <ns3:filepath>/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)USE_SSL(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_csrf_cookie_secure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)CSRF_COOKIE_SECURE(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_disable_password_reveal" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)disable_password_reveal(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_password_autocomplete" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)password_autocomplete(?-i)[\s]+off[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_session_cookie_httponly" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)SESSION_COOKIE_HTTPONLY(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_session_cookie_secure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)SESSION_COOKIE_SECURE(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_horizon_use_ssl" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/horizon/etc/openstack-dashboard/local_settings</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)USE_SSL(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_hash_algorithm" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)hash_algorithm(?-i)[\s]+SHA256[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_admin_token" version="2">
+      <ns3:filepath>/etc/keystone/keystone-paste.ini</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)admin_token(?-i)[\s]+disabled[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_admin_token_auth_middleware" version="2">
+      <ns3:filepath>/etc/keystone/keystone-paste.ini</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)AdminTokenAuthMiddleware(?-i)[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_disable_user_account_days_inactive" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)disable_user_account_days_inactive(?-i)[\s]+90[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_lockout_duration" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)lockout_duration(?-i)[\s]+900[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_lockout_failure_attempts" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)lockout_failure_attempts(?-i)[\s]+3[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_max_request_body_size" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)max_request_body_size(?-i)[\s]+114688[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_keystone_ssl_enable" version="2">
+      <ns3:filepath>/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)enable(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_hash_algorithm" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)hash_algorithm(?-i)[\s]+SHA256[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_admin_token" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)admin_token(?-i)[\s]+disabled[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_admin_token_auth_middleware" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone-paste.ini</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)AdminTokenAuthMiddleware(?-i)[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_disable_user_account_days_inactive" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)disable_user_account_days_inactive(?-i)[\s]+90[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_lockout_duration" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)lockout_duration(?-i)[\s]+900[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_lockout_failure_attempts" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)lockout_failure_attempts(?-i)[\s]+3[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_max_request_body_size" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)max_request_body_size(?-i)[\s]+114688[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_keystone_ssl_enable" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/keystone/etc/keystone/keystone.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)enable(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_neutron_use_ssl" version="2">
+      <ns3:filepath>/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)use_ssl(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_neutron_auth_protocol" version="2">
+      <ns3:filepath>/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_neutron_identity_uri" version="2">
+      <ns3:filepath>/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)identity_uri(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_neutron_auth_strategy" version="2">
+      <ns3:filepath>/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_neutron_use_ssl" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)use_ssl(?-i)[\s]+True[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_neutron_auth_protocol" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_neutron_identity_uri" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)identity_uri(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_neutron_auth_strategy" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_nova_auth_protocol" version="2">
+      <ns3:filepath>/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_nova_identity_uri" version="2">
+      <ns3:filepath>/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)identity_uri(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_nova_glance_api_insecure" version="2">
+      <ns3:filepath>/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)glance_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_nova_api_insecure" version="2">
+      <ns3:filepath>/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_nova_auth_strategy" version="2">
+      <ns3:filepath>/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_nova_auth_protocol" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_protocol(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_nova_identity_uri" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)identity_uri(?-i)[\s]+https[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_nova_glance_api_insecure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)glance_api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_nova_api_insecure" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)api_insecure(?-i)[\s]+False[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_container_nova_auth_strategy" version="2">
+      <ns3:filepath>/var/lib/config-data/puppet-generated/nova/etc/nova/nova.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[\s]*(?i)auth_strategy(?-i)[\s]+keystone[\s]*(?:#.*)?$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_test_package_GConf2_installed" version="1">
+      <ns4:name>GConf2</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_avahi_installed" version="1">
+      <ns4:name>avahi</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_dconf_installed" version="1">
+      <ns4:name>dconf</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_esc_installed" version="1">
+      <ns4:name>esc</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_gdm_installed" version="1">
+      <ns4:name>gdm</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_pam_ldap_removed" version="1">
+      <ns4:name>pam_ldap</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_pam_pkcs11_installed" version="1">
+      <ns4:name>pam_pkcs11</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_prelink_removed" version="1">
+      <ns4:name>prelink</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_test_package_samba-common_removed" version="1">
+      <ns4:name>samba-common</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:systemdunitdependency_object comment="list of dependencies of multi-user.target" id="object_multi_user_target_for_chronyd_enabled" version="1">
+      <ns4:unit>multi-user.target</ns4:unit>
+    </ns4:systemdunitdependency_object>
+    <ns4:systemdunitdependency_object comment="list of dependencies of multi-user.target" id="object_multi_user_target_for_chronyd_socket_enabled" version="1">
+      <ns4:unit>multi-user.target</ns4:unit>
+    </ns4:systemdunitdependency_object>
+    <ns4:systemdunitproperty_object comment="Retrieve the ActiveState property of chronyd" id="obj_service_running_chronyd" version="1">
+      <ns4:unit operation="pattern match">^chronyd\.(socket|service)$</ns4:unit>
+      <ns4:property>ActiveState</ns4:property>
+    </ns4:systemdunitproperty_object>
+    <ns4:rpminfo_object id="obj_test_service_chronyd_package_chrony_installed" version="1">
+      <ns4:name>chrony</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:systemdunitdependency_object comment="list of dependencies of multi-user.target" id="object_multi_user_target_for_sssd_disabled" version="1">
+      <ns4:unit>multi-user.target</ns4:unit>
+    </ns4:systemdunitdependency_object>
+    <ns4:systemdunitdependency_object comment="list of dependencies of multi-user.target" id="object_multi_user_target_for_sssd_socket_disabled" version="1">
+      <ns4:unit>multi-user.target</ns4:unit>
+    </ns4:systemdunitdependency_object>
+    <ns4:systemdunitproperty_object comment="Retrieve the ActiveState property of sssd" id="obj_service_not_running_sssd" version="1">
+      <ns4:unit operation="pattern match">^sssd\.(service|socket)$</ns4:unit>
+      <ns4:property>ActiveState</ns4:property>
+    </ns4:systemdunitproperty_object>
+    <ns4:systemdunitproperty_object comment="Retrieve the LoadState property of sssd" id="obj_service_loadstate_is_masked_sssd" version="1">
+      <ns4:unit operation="pattern match">^sssd\.(service|socket)$</ns4:unit>
+      <ns4:property>LoadState</ns4:property>
+    </ns4:systemdunitproperty_object>
+    <ns4:systemdunitproperty_object comment="Retrieve the FragmentPath property of sssd" id="obj_service_fragmentpath_is_dev_null_sssd" version="1">
+      <ns4:unit operation="pattern match">^sssd\.(service|socket)$</ns4:unit>
+      <ns4:property>FragmentPath</ns4:property>
+    </ns4:systemdunitproperty_object>
+    <ns4:rpminfo_object id="obj_test_service_sssd_package_sssd-common_removed" version="1">
+      <ns4:name>sssd-common</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:textfilecontent54_object comment="log_group = root" id="object_auditd_conf_log_group_root" version="1">
+      <ns3:filepath operation="equals">/etc/audit/auditd.conf</ns3:filepath>
+      <ns3:pattern operation="pattern match">^[ ]*log_group[ ]+=[ ]+root[ ]*$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_grub2_default_exists" version="1">
+      <ns3:filepath>/etc/default/grub</ns3:filepath>
+      <ns3:pattern operation="pattern match">^\s*GRUB_CMDLINE_LINUX_DEFAULT=.*$</ns3:pattern>
+      <ns3:instance datatype="int" operation="greater than or equal">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_centos6" version="1">
+      <ns4:name>centos-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_centos7" version="1">
+      <ns4:name>centos-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_centos8" version="1">
+      <ns4:name>centos-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns5:file_object comment="check /etc/debian_version file" id="obj_debian" version="1">
+      <ns5:filepath>/etc/debian_version</ns5:filepath>
+    </ns5:file_object>
+    <ns3:textfilecontent54_object comment="Check Debian version" id="obj_debian_8" version="1">
+      <ns3:filepath>/etc/debian_version</ns3:filepath>
+      <ns3:pattern operation="pattern match">^8.[0-9]+$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object comment="Check Debian version" id="obj_debian_9" version="1">
+      <ns3:filepath>/etc/debian_version</ns3:filepath>
+      <ns3:pattern operation="pattern match">^9.[0-9]+$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="object_fedora_release_rpm" version="1">
+      <ns4:name operation="pattern match">fedora-release.*</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:textfilecontent54_object id="object_fedora_vendor_product" version="1">
+      <ns3:filepath>/etc/system-release-cpe</ns3:filepath>
+      <ns3:pattern operation="pattern match">^cpe:\/o:fedoraproject:fedora:[\d]+$</ns3:pattern>
+      <ns3:instance datatype="int" operation="equals">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_ol6_system" version="1">
+      <ns4:name>oraclelinux-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_ol7_system" version="1">
+      <ns4:name>oraclelinux-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_ol8_system" version="1">
+      <ns4:name>oraclelinux-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_opensuse_installed" version="1">
+      <ns4:name>openSUSE-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_opensuse_leap15_installed" version="1">
+      <ns4:name>openSUSE-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_opensuse_leap42_installed" version="1">
+      <ns4:name>openSUSE-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="object_unix_family" version="1"/>
+    <ns4:rpminfo_object id="obj_rhel_client" version="1">
+      <ns4:name>redhat-release-client</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel_workstation" version="1">
+      <ns4:name>redhat-release-workstation</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel_server" version="1">
+      <ns4:name>redhat-release-server</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel_computenode" version="1">
+      <ns4:name>redhat-release-computenode</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="obj_rhel7_unix_family" version="1"/>
+    <ns4:rpminfo_object id="obj_rhel7_client" version="1">
+      <ns4:name>redhat-release-client</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel7_workstation" version="1">
+      <ns4:name>redhat-release-workstation</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel7_server" version="1">
+      <ns4:name>redhat-release-server</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel7_computenode" version="1">
+      <ns4:name>redhat-release-computenode</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_redhat_release_virtualization_host_rpm" version="1">
+      <ns4:name>redhat-release-virtualization-host</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:textfilecontent54_object id="obj_rhevh_rhel_version" version="1">
+      <ns3:filepath>/etc/redhat-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^Red Hat Enterprise Linux release (\d)\.\d+$</ns3:pattern>
+      <ns3:instance datatype="int" operation="greater than or equal">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:family_object id="obj_rhel8_unix_family" version="1"/>
+    <ns4:rpminfo_object id="obj_rhel8" version="1">
+      <ns4:name>redhat-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhel8_coreos" version="1">
+      <ns4:name>redhat-release-coreos</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhvh4_version" version="1">
+      <ns4:name>redhat-release-virtualization-host</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:textfilecontent54_object id="obj_rhelh4_version" version="1">
+      <ns3:filepath>/etc/redhat-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^Red Hat Enterprise Linux release (\d)\.\d+$</ns3:pattern>
+      <ns3:instance datatype="int" operation="greater than or equal">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_sl6" version="1">
+      <ns4:name>sl-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_sl7" version="1">
+      <ns4:name>sl-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="obj_sle11_unix_family" version="1"/>
+    <ns4:rpminfo_object id="obj_sle11_desktop" version="1">
+      <ns4:name>sled-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_sle11_server" version="1">
+      <ns4:name>sles-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="obj_sle12_unix_family" version="1"/>
+    <ns4:rpminfo_object id="obj_sle12_desktop" version="1">
+      <ns4:name>sled-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_sle12_server" version="1">
+      <ns4:name>sles-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns5:file_object comment="check /etc/lsb-release file" id="obj_lsb" version="1">
+      <ns5:filepath>/etc/lsb-release</ns5:filepath>
+    </ns5:file_object>
+    <ns3:textfilecontent54_object comment="Check Ubuntu" id="obj_ubuntu" version="1">
+      <ns3:filepath>/etc/lsb-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^DISTRIB_ID=Ubuntu$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object comment="Check Ubuntu version" id="obj_ubuntu_trusty" version="1">
+      <ns3:filepath>/etc/lsb-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^DISTRIB_CODENAME=trusty$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object comment="Check Ubuntu version" id="obj_ubuntu_xenial" version="1">
+      <ns3:filepath>/etc/lsb-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^DISTRIB_CODENAME=xenial$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object comment="Check Ubuntu version" id="obj_ubuntu_bionic" version="1">
+      <ns3:filepath>/etc/lsb-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^DISTRIB_CODENAME=bionic$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:family_object id="obj_unix_wrlinux1019" version="1"/>
+    <ns3:textfilecontent54_object comment="Check WRLinux1019 produce name" id="obj_name_wrlinux1019" version="1">
+      <ns3:filepath>/etc/os-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^NAME=.Wind[\s]+River[\s]+Linux.*$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object comment="Check WRLinux1019 version" id="obj_version_wrlinux1019" version="1">
+      <ns3:filepath>/etc/os-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^VERSION=.10\.19.*$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:family_object id="obj_unix_wrlinux8" version="1"/>
+    <ns3:textfilecontent54_object comment="Check WRLinux8 version" id="obj_version_wrlinux8" version="1">
+      <ns3:filepath>/etc/wrlinux-release</ns3:filepath>
+      <ns3:pattern operation="pattern match">^VERSION=.8\.0.*$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_ocp3_atomic" version="1">
+      <ns4:name>atomic-openshift</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_ocp3_node" version="1">
+      <ns4:name>atomic-openshift-node</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_ocp3_hyperkube" version="1">
+      <ns4:name>atomic-openshift-hyperkube</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_ocp4_node" version="1">
+      <ns4:name>atomic-openshift-node</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhosp13_release" version="1">
+      <ns4:name>rhosp-release</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_rhevm4_version" version="1">
+      <ns4:name>rhvm-appliance</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_gdm_installed" version="1">
+      <ns4:name>gdm</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_libuser_installed" version="1">
+      <ns4:name>libuser</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_nss-pam-ldapd_installed" version="1">
+      <ns4:name>nss-pam-ldapd</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_pam_installed" version="1">
+      <ns4:name>pam</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_shadow-utils_installed" version="1">
+      <ns4:name>shadow-utils</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_sssd-common_installed" version="1">
+      <ns4:name>sssd-common</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_systemd_installed" version="1">
+      <ns4:name>systemd</ns4:name>
+    </ns4:rpminfo_object>
+    <ns4:rpminfo_object id="obj_env_has_yum_installed" version="1">
+      <ns4:name>yum</ns4:name>
+    </ns4:rpminfo_object>
+    <ns5:file_object comment="Check file /.dockerenv" id="object_installed_env_is_a_docker_container" version="1">
+      <ns5:filepath datatype="string">/.dockerenv</ns5:filepath>
+    </ns5:file_object>
+    <ns5:file_object comment="Check file /run/.containerenv" id="object_installed_env_is_a_podman_container" version="1">
+      <ns5:filepath datatype="string">/run/.containerenv</ns5:filepath>
+    </ns5:file_object>
+    <ns3:variable_object id="object_sshd_not_required" version="1">
+      <ns3:var_ref>sshd_required</ns3:var_ref>
+    </ns3:variable_object>
+    <ns3:variable_object id="object_sshd_required" version="1">
+      <ns3:var_ref>sshd_required</ns3:var_ref>
+    </ns3:variable_object>
+    <ns3:variable_object id="object_sshd_requirement_unknown" version="1">
+      <ns3:var_ref>sshd_required</ns3:var_ref>
+    </ns3:variable_object>
+    <ns4:rpminfo_object id="obj_openssh-server_version" version="1">
+      <ns4:name>openssh-server</ns4:name>
+    </ns4:rpminfo_object>
+    <ns5:file_object comment="/etc/sssd/sssd.conf" id="object_sssd_conf_exists" version="1">
+      <ns5:filepath>/etc/sssd/sssd.conf</ns5:filepath>
+    </ns5:file_object>
+    <ns5:file_object comment="/sys/firmware/efi" id="object_file_sys_firmware_efi" version="1">
+      <ns5:path>/sys/firmware/efi</ns5:path>
+      <ns5:filename xsi:nil="true"/>
+    </ns5:file_object>
+    <ns5:uname_object comment="64 bit architecture" id="object_system_info_architecture_aarch_64" version="1"/>
+    <ns5:uname_object comment="64 bit architecture" id="object_system_info_architecture_ppc_64" version="1"/>
+    <ns5:uname_object comment="64 bit architecture" id="object_system_info_architecture_ppcle_64" version="1"/>
+    <ns5:uname_object comment="32 bit architecture" id="object_system_info_architecture_x86" version="1"/>
+    <ns5:uname_object comment="64 bit architecture" id="object_system_info_architecture_x86_64" version="1"/>
+  </oval:objects>
+  <oval:states>
+    <ns4:systemdunitdependency_state comment="chronyd listed at least once in the dependencies" id="state_systemd_chronyd_on" version="1">
+      <ns4:dependency entity_check="at least one">chronyd.service</ns4:dependency>
+    </ns4:systemdunitdependency_state>
+    <ns4:systemdunitdependency_state comment="chronyd listed at least once in the dependencies" id="state_systemd_chronyd_socket_on" version="1">
+      <ns4:dependency entity_check="at least one">chronyd.socket</ns4:dependency>
+    </ns4:systemdunitdependency_state>
+    <ns4:systemdunitproperty_state comment="chronyd is running" id="state_service_running_chronyd" version="1">
+      <ns4:value>active</ns4:value>
+    </ns4:systemdunitproperty_state>
+    <ns4:systemdunitdependency_state comment="sssd service is not listed in the dependencies" id="state_systemd_sssd_off" version="1">
+      <ns4:dependency entity_check="none satisfy">sssd.service</ns4:dependency>
+    </ns4:systemdunitdependency_state>
+    <ns4:systemdunitdependency_state comment="sssd socket is not listed in the dependencies" id="state_systemd_sssd_socket_off" version="1">
+      <ns4:dependency entity_check="none satisfy">sssd.socket</ns4:dependency>
+    </ns4:systemdunitdependency_state>
+    <ns4:systemdunitproperty_state comment="sssd is not running" id="state_service_not_running_sssd" version="1">
+      <ns4:value>inactive</ns4:value>
+    </ns4:systemdunitproperty_state>
+    <ns4:systemdunitproperty_state comment="LoadState is set to masked" id="state_service_loadstate_is_masked_sssd" version="1">
+      <ns4:value>masked</ns4:value>
+    </ns4:systemdunitproperty_state>
+    <ns4:systemdunitproperty_state comment="FragmentPath is set to /dev/null" id="state_service_fragmentpath_is_dev_null_sssd" version="1">
+      <ns4:value>/dev/null</ns4:value>
+    </ns4:systemdunitproperty_state>
+    <ns4:rpminfo_state id="state_centos6" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_centos7" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_centos8" version="1">
+      <ns4:version operation="pattern match">^8.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ol6_system" version="1">
+      <ns4:version operation="pattern match">^6Server$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ol7_system" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ol8_system" version="1">
+      <ns4:version operation="pattern match">^8.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_opensuse_installed" version="1">
+      <ns4:name operation="pattern match">openSUSE-release</ns4:name>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_opensuse_leap15_installed" version="1">
+      <ns4:version operation="pattern match">^15.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_opensuse_leap42_installed" version="1">
+      <ns4:version operation="pattern match">^42.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_rhel_client" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel_workstation" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel_server" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel_computenode" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_rhel7_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_rhel7_client" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel7_workstation" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel7_server" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel7_computenode" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:textfilecontent54_state id="state_rhevh_rhel_version" version="1">
+      <ns3:subexpression operation="pattern match">7</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+    <ns3:family_state id="state_rhel8_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_rhel8" version="1">
+      <ns4:version operation="pattern match">^8.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhel8_coreos" version="1">
+      <ns4:version operation="pattern match">^[0-9\.]*8.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhvh4_version" version="1">
+      <ns4:version operation="pattern match">^4.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:textfilecontent54_state id="state_rhelh4_version" version="1">
+      <ns3:subexpression operation="pattern match">7</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+    <ns4:rpminfo_state id="state_sl6" version="1">
+      <ns4:version operation="pattern match">^6.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_sl7" version="1">
+      <ns4:version operation="pattern match">^7.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_sle11_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_sle11_desktop" version="1">
+      <ns4:version operation="pattern match">^11.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_sle11_server" version="1">
+      <ns4:version operation="pattern match">^11.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_sle12_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_sle12_desktop" version="1">
+      <ns4:version operation="pattern match">^12.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_sle12_server" version="1">
+      <ns4:version operation="pattern match">^12.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_unix_wrlinux1019" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns3:family_state id="state_unix_wrlinux8" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+    <ns4:rpminfo_state id="state_ocp3_atomic" version="1">
+      <ns4:version operation="pattern match">^3.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ocp3_node" version="1">
+      <ns4:version operation="pattern match">^3.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ocp3_hyperkube" version="1">
+      <ns4:version operation="pattern match">^3.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_ocp4_node" version="1">
+      <ns4:version operation="pattern match">^4.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhosp13_release" version="1">
+      <ns4:version operation="pattern match">^13.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns4:rpminfo_state id="state_rhevm4_version" version="1">
+      <ns4:version operation="pattern match">^4.*$</ns4:version>
+    </ns4:rpminfo_state>
+    <ns3:variable_state id="state_sshd_not_required" version="1">
+      <ns3:value datatype="int" operation="equals">1</ns3:value>
+    </ns3:variable_state>
+    <ns3:variable_state id="state_sshd_required" version="1">
+      <ns3:value datatype="int" operation="equals">2</ns3:value>
+    </ns3:variable_state>
+    <ns3:variable_state id="state_sshd_requirement_unset" version="1">
+      <ns3:value datatype="int" operation="equals">0</ns3:value>
+    </ns3:variable_state>
+    <ns4:rpminfo_state id="state_openssh-server_version" version="1">
+      <ns4:evr datatype="evr_string" operation="greater than or equal">0:7.4</ns4:evr>
+    </ns4:rpminfo_state>
+    <ns5:uname_state comment="64 bit architecture" id="state_system_info_architecture_aarch_64" version="1">
+      <ns5:processor_type operation="equals">aarch64</ns5:processor_type>
+    </ns5:uname_state>
+    <ns5:uname_state comment="64 bit architecture" id="state_system_info_architecture_ppc_64" version="1">
+      <ns5:processor_type operation="equals">ppc64</ns5:processor_type>
+    </ns5:uname_state>
+    <ns5:uname_state comment="64 bit architecture" id="state_system_info_architecture_ppcle_64" version="1">
+      <ns5:processor_type operation="equals">ppc64le</ns5:processor_type>
+    </ns5:uname_state>
+    <ns5:uname_state comment="32 bit architecture" id="state_system_info_architecture_x86" version="1">
+      <ns5:processor_type operation="equals">i686</ns5:processor_type>
+    </ns5:uname_state>
+    <ns5:uname_state comment="64 bit architecture" id="state_system_info_architecture_x86_64" version="1">
+      <ns5:processor_type operation="equals">x86_64</ns5:processor_type>
+    </ns5:uname_state>
+  </oval:states>
+  <oval:variables>
+    <oval:external_variable comment="May be defined by Profiles to explicitly say if sshd is required or not" datatype="int" id="sshd_required" version="1"/>
+  </oval:variables>
+</oval:oval_definitions>

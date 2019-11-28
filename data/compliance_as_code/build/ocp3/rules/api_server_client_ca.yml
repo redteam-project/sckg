@@ -1,0 +1,31 @@
+description: "Certificates must be provided to fully setup TLS client certificate\n\
+  authentication. To ensure the API Server utilizes its own TLS certificates, the\n\
+  <tt>clientCA</tt> must be configured. Verify\nthat <tt>servingInfo</tt> has the\
+  \ <tt>clientCA</tt> configured in \nthe API Server pod specification file\n<tt>/etc/origin/master/master-config.yaml</tt>\
+  \ on the master\nnode(s) to something similar to:\n<pre>servingInfo:\n  clientCA:\
+  \ ca.crt\n  certFile: master.server.crt\n  keyFile: master.server.key</pre>"
+identifiers: {cce: 81152-1}
+ocil: "Run the following command on the master node(s):\n<pre>$ sudo grep -A7 servingInfo\
+  \ /etc/origin/master/master-config.yaml</pre>\nThe output should contain something\
+  \ similar to:\n<pre>servingInfo:\n  clientCA: ca.crt\n  certFile: master.server.crt\n\
+  \  keyFile: master.server.key</pre>"
+ocil_clause: <tt>clientCA</tt> is not set as appropriate for <tt>servingInfo</tt>
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'API Server communication contains sensitive parameters that should remain
+
+  encrypted in transit. Configure the API Server to serve only HTTPS traffic.
+
+  If <tt>-clientCA</tt> is set, any request presenting a client
+
+  certificate signed by one of the authorities in the <tt>client-ca-file</tt>
+
+  is authenticated with an identity corresponding to the <i>CommonName</i> of
+
+  the client certificate.'
+references: {cis: 1.1.29}
+severity: medium
+template: null
+title: Configure the Client Certificate Authority for the API Server
+warnings: []

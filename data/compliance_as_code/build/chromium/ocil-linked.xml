@@ -1,0 +1,833 @@
+<ns0:ocil xmlns:ns0="http://scap.nist.gov/schema/ocil/2.0">
+  <ns0:generator>
+    <ns0:product_name>xccdf-create-ocil.xslt from SCAP Security Guide</ns0:product_name>
+    <ns0:product_version>ssg: 0.1.47</ns0:product_version>
+    <ns0:schema_version>2.0</ns0:schema_version>
+    <ns0:timestamp>2019-11-28T04:46:57Z</ns0:timestamp>
+  </ns0:generator>
+  <ns0:questionnaires>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_session_cookies_ocil:questionnaire:1">
+      <ns0:title>Disable Session Cookies</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_session_cookies_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_search_suggestions_ocil:questionnaire:1">
+      <ns0:title>Disable Search Suggestion</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_search_suggestions_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_default_search_provider_name_ocil:questionnaire:1">
+      <ns0:title>Set the Default Search Provider's URL</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_default_search_provider_name_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_enable_browser_history_ocil:questionnaire:1">
+      <ns0:title>Enable Saving the Browser History</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_enable_browser_history_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_3d_graphics_api_ocil:questionnaire:1">
+      <ns0:title>Disable the 3D Graphics APIs</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_3d_graphics_api_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_background_processing_ocil:questionnaire:1">
+      <ns0:title>Disable Background Processing</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_background_processing_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_plugin_blacklist_ocil:questionnaire:1">
+      <ns0:title>Disable All Plugins by Default</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_plugin_blacklist_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_default_search_provider_ocil:questionnaire:1">
+      <ns0:title>Enable the Default Search Provider</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_default_search_provider_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_policy_file_ocil:questionnaire:1">
+      <ns0:title>Ensure the Chromium Policy Configuration File Exists</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_policy_file_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_automatic_installation_ocil:questionnaire:1">
+      <ns0:title>Disable Automatic Search And Installation of Plugins</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_automatic_installation_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_enable_approved_plugins_ocil:questionnaire:1">
+      <ns0:title>Enable Only Approved Plugins</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_enable_approved_plugins_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disallow_location_tracking_ocil:questionnaire:1">
+      <ns0:title>Disable Location Tracking</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disallow_location_tracking_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_trusted_home_page_ocil:questionnaire:1">
+      <ns0:title>Set the Default Home Page</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_trusted_home_page_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_whitelist_plugin_urls_ocil:questionnaire:1">
+      <ns0:title>Enable Plugins for Only Approved URLs</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_whitelist_plugin_urls_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_saved_passwords_ocil:questionnaire:1">
+      <ns0:title>Disable Saved Passwords</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_saved_passwords_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_popups_ocil:questionnaire:1">
+      <ns0:title>Disable Popups</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_popups_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_incognito_mode_ocil:questionnaire:1">
+      <ns0:title>Disable Incognito Mode</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_incognito_mode_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_firewall_traversal_ocil:questionnaire:1">
+      <ns0:title>Disable Chromium's Ability to Traverse Firewalls</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_firewall_traversal_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_http_authentication_ocil:questionnaire:1">
+      <ns0:title>Set Chromium's HTTP Authentication Scheme</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_http_authentication_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_default_block_plugins_ocil:questionnaire:1">
+      <ns0:title>Block Plugins by Default</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_default_block_plugins_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_cleartext_passwords_ocil:questionnaire:1">
+      <ns0:title>Disable Use of Cleartext Passwords</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_cleartext_passwords_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_enable_safe_browsing_ocil:questionnaire:1">
+      <ns0:title>Enable the Safe Browsing Feature</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_enable_safe_browsing_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_enable_encrypted_searching_ocil:questionnaire:1">
+      <ns0:title>Enable Encrypted Searching</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_enable_encrypted_searching_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_outdated_plugins_ocil:questionnaire:1">
+      <ns0:title>Disable Outdated Plugins</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_outdated_plugins_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_extension_whitelist_ocil:questionnaire:1">
+      <ns0:title>Enable Only Approved Extensions</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_extension_whitelist_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_autocomplete_ocil:questionnaire:1">
+      <ns0:title>Disable the AutoFill Feature</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_autocomplete_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_check_cert_revocation_ocil:questionnaire:1">
+      <ns0:title>Enable Online OCSP/CRL Certificate Checks</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_check_cert_revocation_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_block_desktop_notifications_ocil:questionnaire:1">
+      <ns0:title>Prevent Desktop Notifications</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_block_desktop_notifications_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_google_sync_ocil:questionnaire:1">
+      <ns0:title>Disable Data Synchronization to Google</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_google_sync_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_thirdparty_cookies_ocil:questionnaire:1">
+      <ns0:title>Disable 3rd Party Cookies</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_thirdparty_cookies_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_metrics_reporting_ocil:questionnaire:1">
+      <ns0:title>Disable Metrics Reporting</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_metrics_reporting_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_protocol_schemas_ocil:questionnaire:1">
+      <ns0:title>Disable Insecure And Obsolete Protocol Schemas</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_protocol_schemas_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_password_manager_ocil:questionnaire:1">
+      <ns0:title>Disable Chromium Password Manager</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_password_manager_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_blacklist_extension_installation_ocil:questionnaire:1">
+      <ns0:title>Disable All Extensions by Default</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_blacklist_extension_installation_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_network_prediction_ocil:questionnaire:1">
+      <ns0:title>Disable Network Prediction</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_network_prediction_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_disable_cloud_print_sharing_ocil:questionnaire:1">
+      <ns0:title>Disable Cloud Print Sharing</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_disable_cloud_print_sharing_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-chromium_plugins_require_authorization_ocil:questionnaire:1">
+      <ns0:title>Require Outdated Plugins to be Authorized</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-chromium_plugins_require_authorization_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+  </ns0:questionnaires>
+  <ns0:test_actions>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_session_cookies_action:testaction:1" question_ref="ocil:ssg-chromium_disable_session_cookies_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_search_suggestions_action:testaction:1" question_ref="ocil:ssg-chromium_disable_search_suggestions_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_default_search_provider_name_action:testaction:1" question_ref="ocil:ssg-chromium_default_search_provider_name_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_enable_browser_history_action:testaction:1" question_ref="ocil:ssg-chromium_enable_browser_history_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_3d_graphics_api_action:testaction:1" question_ref="ocil:ssg-chromium_disable_3d_graphics_api_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_background_processing_action:testaction:1" question_ref="ocil:ssg-chromium_disable_background_processing_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_plugin_blacklist_action:testaction:1" question_ref="ocil:ssg-chromium_disable_plugin_blacklist_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_default_search_provider_action:testaction:1" question_ref="ocil:ssg-chromium_default_search_provider_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_policy_file_action:testaction:1" question_ref="ocil:ssg-chromium_policy_file_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_automatic_installation_action:testaction:1" question_ref="ocil:ssg-chromium_disable_automatic_installation_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_enable_approved_plugins_action:testaction:1" question_ref="ocil:ssg-chromium_enable_approved_plugins_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disallow_location_tracking_action:testaction:1" question_ref="ocil:ssg-chromium_disallow_location_tracking_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_trusted_home_page_action:testaction:1" question_ref="ocil:ssg-chromium_trusted_home_page_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_whitelist_plugin_urls_action:testaction:1" question_ref="ocil:ssg-chromium_whitelist_plugin_urls_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_saved_passwords_action:testaction:1" question_ref="ocil:ssg-chromium_disable_saved_passwords_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_popups_action:testaction:1" question_ref="ocil:ssg-chromium_disable_popups_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_incognito_mode_action:testaction:1" question_ref="ocil:ssg-chromium_disable_incognito_mode_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_firewall_traversal_action:testaction:1" question_ref="ocil:ssg-chromium_disable_firewall_traversal_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_http_authentication_action:testaction:1" question_ref="ocil:ssg-chromium_http_authentication_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_default_block_plugins_action:testaction:1" question_ref="ocil:ssg-chromium_default_block_plugins_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_cleartext_passwords_action:testaction:1" question_ref="ocil:ssg-chromium_disable_cleartext_passwords_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_enable_safe_browsing_action:testaction:1" question_ref="ocil:ssg-chromium_enable_safe_browsing_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_enable_encrypted_searching_action:testaction:1" question_ref="ocil:ssg-chromium_enable_encrypted_searching_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_outdated_plugins_action:testaction:1" question_ref="ocil:ssg-chromium_disable_outdated_plugins_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_extension_whitelist_action:testaction:1" question_ref="ocil:ssg-chromium_extension_whitelist_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_autocomplete_action:testaction:1" question_ref="ocil:ssg-chromium_disable_autocomplete_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_check_cert_revocation_action:testaction:1" question_ref="ocil:ssg-chromium_check_cert_revocation_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_block_desktop_notifications_action:testaction:1" question_ref="ocil:ssg-chromium_block_desktop_notifications_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_google_sync_action:testaction:1" question_ref="ocil:ssg-chromium_disable_google_sync_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_thirdparty_cookies_action:testaction:1" question_ref="ocil:ssg-chromium_disable_thirdparty_cookies_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_metrics_reporting_action:testaction:1" question_ref="ocil:ssg-chromium_disable_metrics_reporting_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_protocol_schemas_action:testaction:1" question_ref="ocil:ssg-chromium_disable_protocol_schemas_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_password_manager_action:testaction:1" question_ref="ocil:ssg-chromium_disable_password_manager_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_blacklist_extension_installation_action:testaction:1" question_ref="ocil:ssg-chromium_blacklist_extension_installation_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_network_prediction_action:testaction:1" question_ref="ocil:ssg-chromium_disable_network_prediction_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_disable_cloud_print_sharing_action:testaction:1" question_ref="ocil:ssg-chromium_disable_cloud_print_sharing_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-chromium_plugins_require_authorization_action:testaction:1" question_ref="ocil:ssg-chromium_plugins_require_authorization_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+  </ns0:test_actions>
+  <ns0:questions>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_session_cookies_question:question:1">
+      <ns0:question_text>To verify that sessions cookies for approved sites only are enabled,
+run the following command:
+$ grep CookiesSessionOnlyForUrls /etc/chromium/policies/managed/*.json
+The output should contain:
+"CookiesSessionOnlyForUrls": ["none"],
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_search_suggestions_question:question:1">
+      <ns0:question_text>To verify that search suggestion is disabled, run the following command:
+$ grep SearchSuggestEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"SearchSuggestEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_default_search_provider_name_question:question:1">
+      <ns0:question_text>To verify that a default search provider is set, run the following command:
+$ grep DefaultSearchProviderName /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultSearchProviderName": "",
+      Is it the case that a default search provider is not set?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_enable_browser_history_question:question:1">
+      <ns0:question_text>To verify that saving the browser history is enabled, run the following command:
+$ grep SavingBrowserHistoryDisabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"SavingBrowserHistoryDisabled": false,
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_3d_graphics_api_question:question:1">
+      <ns0:question_text>To verify that 3D graphics are disabled, run the following command:
+$ grep Disable3DAPIs /etc/chromium/policies/managed/*.json
+The output should contain:
+"Disable3DAPIs": true,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_background_processing_question:question:1">
+      <ns0:question_text>To verify that background processing is disabled, run the following command:
+$ grep BackgroundModeEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"BackgroundModeEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_plugin_blacklist_question:question:1">
+      <ns0:question_text>To verify that all plugins are blacklisted, run the following command:
+$ grep DisabledPlugins /etc/chromium/policies/managed/*.json
+The output should contain:
+"DisabledPlugins": ["*"],
+      Is it the case that they are not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_default_search_provider_question:question:1">
+      <ns0:question_text>To verify that users cannot change the default search provider, run the following command:
+$ grep DefaultSearchProviderEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultSearchProviderEnabled": true,
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_policy_file_question:question:1">
+      <ns0:question_text>To verify that the Chromium policy file exists, run the following command:
+$ ls /etc/chromium/policies/managed
+The output should show file(s) ending in .json extension.
+For example:
+chrome-stig-policy.json
+      Is it the case that it does not exist or is not configured correctly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_automatic_installation_question:question:1">
+      <ns0:question_text>To verify that plugins cannot be automatically installed, run the following command:
+$ grep DisablePluginFinder /etc/chromium/policies/managed/*.json
+The output should contain:
+"DisablePluginFinder": true,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_enable_approved_plugins_question:question:1">
+      <ns0:question_text>To verify that approved plugins are set, run the following command:
+$ grep EnabledPlugins /etc/chromium/policies/managed/*.json
+The output should contain:
+"EnabledPlugins": ["approved_plugin1", "approved_plugin2"],
+      Is it the case that no plugins exist or it is not set to none?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disallow_location_tracking_question:question:1">
+      <ns0:question_text>To verify that location tracking is disabled, run the following command:
+$ grep DefaultGeolocationSetting /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultGeolocationSetting": 2,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_trusted_home_page_question:question:1">
+      <ns0:question_text>To verify that the defaut home page is set, run the following command:
+$ grep HomepageLocation /etc/chromium/policies/managed/*.json
+The output should contain:
+"HomepageLocation": "",
+      Is it the case that it is not set correctly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_whitelist_plugin_urls_question:question:1">
+      <ns0:question_text>To verify that plugins are allowed for only approved URLs, 
+run the following command:
+$ grep PluginsAllowedForUrls /etc/chromium/policies/managed/*.json
+The output should contain:
+"PluginsAllowedForUrls": ["[*.]mil", "[*.]example.com", "www.example.com"],
+      Is it the case that no urls exist or it is not set to none?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_saved_passwords_question:question:1">
+      <ns0:question_text>To verify that importing passwords is disabled, run the following command:
+$ grep ImportSavedPasswords /etc/chromium/policies/managed/*.json
+The output should contain:
+"ImportSavedPasswords": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_popups_question:question:1">
+      <ns0:question_text>To verify that pop-ups are disabled, run the following command:
+$ grep DefaultPopupsSetting /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultPopupsSetting": 2,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_incognito_mode_question:question:1">
+      <ns0:question_text>To verify that incognito mode is disabled, run the following command:
+$ grep IncognitoModeAvailability /etc/chromium/policies/managed/*.json
+The output should contain:
+"IncognitoModeAvailability": 1,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_firewall_traversal_question:question:1">
+      <ns0:question_text>To verify that Chromium's abililty to traverse the system firewall is 
+disabled, run the following command:
+$ grep RemoteAccessHostFirewallTraversal /etc/chromium/policies/managed/*.json
+The output should contain:
+"RemoteAccessHostFirewallTraversal": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_http_authentication_question:question:1">
+      <ns0:question_text>To verify that the HTTP Authentication Scheme is set, run the following command:
+$ grep AuthSchemes /etc/chromium/policies/managed/*.json
+The output should contain:
+"AuthSchemes": "",
+      Is it the case that it is not set?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_default_block_plugins_question:question:1">
+      <ns0:question_text>To verify that plugins cannot run automatically, run the following command:
+$ grep DefaultPluginsSetting /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultPluginsSetting": 3,
+      Is it the case that it is not set correctly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_cleartext_passwords_question:question:1">
+      <ns0:question_text>To verify that the use of cleartext passwords is disabled, run the following command:
+$ grep PasswordManagerAllowShowPasswords /etc/chromium/policies/managed/*.json
+The output should contain:
+"PasswordManagerAllowShowPasswords": false,
+      Is it the case that use of cleartext passwords are not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_enable_safe_browsing_question:question:1">
+      <ns0:question_text>To verify that the safe browsing feature is enabled, run the following command:
+$ grep SafeBrowsingEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"SafeBrowsingEnabled": true,
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_enable_encrypted_searching_question:question:1">
+      <ns0:question_text>To verify that the URL of the search engine is set, run the following command:
+$ grep DefaultSearchProviderSearchURL /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultSearchProviderSearchURL": "",
+      Is it the case that it is not set?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_outdated_plugins_question:question:1">
+      <ns0:question_text>To verify that outdated plugins are disabled, run the following command:
+$ grep AllowOutdatedPlugins /etc/chromium/policies/managed/*.json
+The output should contain:
+"AllowOutdatedPlugins": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_extension_whitelist_question:question:1">
+      <ns0:question_text>To verify that approved extensions are whitelisted, run the following command:
+$ grep ExtensionInstallWhitelist /etc/chromium/policies/managed/*.json
+The output should contain:
+"ExtensionInstallWhitelist": [""],
+      Is it the case that approved extensions are not set?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_autocomplete_question:question:1">
+      <ns0:question_text>To verify that the AutoFill feature is disabled, run the following command:
+$ grep AutoFillEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"AutoFillEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_check_cert_revocation_question:question:1">
+      <ns0:question_text>To verify that online OCSP/CRL checks are enabled, run the following command:
+$ grep EnableOnlineRevocationChecks /etc/chromium/policies/managed/*.json
+The output should contain:
+"EnableOnlineRevocationChecks": true,
+      Is it the case that it is not enabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_block_desktop_notifications_question:question:1">
+      <ns0:question_text>To verify that desktop notification is
+disabled, run the following command:
+$ grep DefaultNotificationsSetting /etc/chromium/policies/managed/*.json
+The output should contain:
+"DefaultNotificationsSetting": 2,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_google_sync_question:question:1">
+      <ns0:question_text>To verify that data synchronization is disabled, run the following command:
+$ grep SyncDisabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"SyncDisabled": true,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_thirdparty_cookies_question:question:1">
+      <ns0:question_text>To verify that third party cookies are disabled, run the following command:
+$ grep BlockThirdPartyCookies /etc/chromium/policies/managed/*.json
+The output should contain:
+"BlockThirdPartyCookies": true,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_metrics_reporting_question:question:1">
+      <ns0:question_text>To verify that metrics reporting is disabled, run the following command:
+$ grep MetricsReportingEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"MetricsReportingEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_protocol_schemas_question:question:1">
+      <ns0:question_text>To verify that data synchronization is disabled, run the following command:
+$ grep URLBlacklist /etc/chromium/policies/managed/*.json
+The output should contain:
+"URLBlacklist": [""],
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_password_manager_question:question:1">
+      <ns0:question_text>To verify that the use of Password Manager is disabled, run the following command:
+$ grep PasswordManagerEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"PasswordManagerEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_blacklist_extension_installation_question:question:1">
+      <ns0:question_text>To verify that all extensions are blacklisted from installing, run the following command:
+$ grep ExtensionInstallBlacklist /etc/chromium/policies/managed/*.json
+The output should contain:
+"ExtensionInstallBlacklist": ["*"],
+      Is it the case that extensions are not blacklisted?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_network_prediction_question:question:1">
+      <ns0:question_text>To verify that network prediction is disabled, run the following command:
+$ grep DnsPrefetchingEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"DnsPrefetchingEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_disable_cloud_print_sharing_question:question:1">
+      <ns0:question_text>To verify that the Cloud Print Sharing feature is disabled, run the following command:
+$ grep CloudPrintProxyEnabled /etc/chromium/policies/managed/*.json
+The output should contain:
+"CloudPrintProxyEnabled": false,
+      Is it the case that it is not disabled?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-chromium_plugins_require_authorization_question:question:1">
+      <ns0:question_text>To verify that plugins require authorization to run, run the following command:
+$ grep AlwaysAuthorizePlugins /etc/chromium/policies/managed/*.json
+The output should contain:
+"AlwaysAuthorizePlugins": false,
+      Is it the case that it is not set?
+      </ns0:question_text>
+    </ns0:boolean_question>
+  </ns0:questions>
+</ns0:ocil>

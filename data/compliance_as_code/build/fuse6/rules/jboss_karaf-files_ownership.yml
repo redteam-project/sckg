@@ -1,0 +1,19 @@
+description: 'All JBoss Fuse files within the installation directory should
+
+  be owned by the JBoss process owner account.'
+identifiers: {}
+ocil: null
+ocil_clause: JBoss files ownership is not correct
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'To prevent unauthorized modification or disclosure of JBoss configuration
+
+  settings, all files within the installation directory should be owned by
+
+  the JBoss process owner account.'
+references: {nist: AC-3}
+severity: medium
+template: null
+title: Ensure JBoss Files Are Owned By Appropriate Users
+warnings: []

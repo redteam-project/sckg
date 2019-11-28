@@ -1,0 +1,26 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable SSH Server If Possible (Unusual)
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_sshd_disabled
+    - unknown_severity
+  tasks:
+
+    - name: Stop sshd
+      command: /sbin/service 'sshd' stop
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Switch off sshd
+      command: /sbin/chkconfig --level 0123456 'sshd' off
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

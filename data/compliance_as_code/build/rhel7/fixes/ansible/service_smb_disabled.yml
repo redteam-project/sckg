@@ -1,0 +1,70 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - smb.service
+  command: systemctl list-unit-files smb.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_smb_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80277-7
+
+- name: Disable service smb
+  systemd:
+    name: smb.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"smb.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_smb_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80277-7
+
+- name: Unit Socket Exists - smb.socket
+  command: systemctl list-unit-files smb.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_smb_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80277-7
+
+- name: Disable socket smb
+  systemd:
+    name: smb.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"smb.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_smb_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80277-7

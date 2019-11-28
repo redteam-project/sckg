@@ -1,0 +1,24 @@
+description: ' To properly set the group owner of <code>/etc/origin/node/pods/apiserver.yaml</code>,
+  run the command: <pre>$ sudo chgrp root /etc/origin/node/pods/apiserver.yaml</pre>'
+identifiers: {cce: 80576-2}
+ocil: 'To check the group ownership of <code>/etc/origin/node/pods/apiserver.yaml</code>,
+  run the command: <pre>$ ls -lL /etc/origin/node/pods/apiserver.yaml</pre> If properly
+  configured, the output should indicate the following group-owner: <code>root</code>'
+ocil_clause: /etc/origin/node/pods/apiserver.yaml has group owner root
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'The <tt>/etc/origin/node/pods/apiserver.yaml</tt> file contains information
+  about the configuration of the
+
+  OpenShift API Server that is configured on the system. Protection of this file is
+
+  critical for OpenShift security.'
+references: {cis: 1.4.2}
+severity: medium
+template:
+  backends: {}
+  name: file_groupowner
+  vars: {filegid: '0', filepath: /etc/origin/node/pods/apiserver.yaml}
+title: Verify Group Who Owns The OpenShift API Specification File
+warnings: []

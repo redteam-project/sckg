@@ -1,0 +1,18 @@
+# platform = Java Runtime Environment
+# complexity = low
+# reboot = true
+# disruption = medium
+# strategy = disable
+- name: Configure Java Runtime to use System Crypto Policy
+  lineinfile:
+    create: true
+    dest: /usr/lib/jvm/jre/lib/security/java.security
+    regexp: ^\s*#?\s*security.useSystemPropertiesFile=true
+    line: security.useSystemPropertiesFile=true
+  tags:
+    - java_jre_configure_crypto_policy
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - reboot_required

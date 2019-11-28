@@ -1,0 +1,30 @@
+# platform = Red Hat Enterprise Linux 7,Oracle Linux 7
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: Encrypt Audit Records Sent With audispd Plugin
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80540-8
+    - DISA-STIG-RHEL-07-030310
+    - NIST-800-53-AU-9(3)
+    - auditd_audispd_encrypt_sent_records
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Configure Kerberos 5 Encryption in Audit Event Multiplexor (audispd)
+      lineinfile:
+        dest: /etc/audisp/audisp-remote.conf
+        line: enable_krb5 = yes
+        regexp: ^\s*enable_krb5\s*=\s*.*$
+        state: present
+        mode: 416
+        create: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

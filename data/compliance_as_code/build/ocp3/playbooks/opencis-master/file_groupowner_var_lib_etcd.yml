@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Group Who Owns The OpenShift etcd Data Directory
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80621-6
+    - configure_strategy
+    - file_groupowner_var_lib_etcd
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /var/lib/etcd/
+      stat:
+        path: /var/lib/etcd/
+      register: file_exists
+
+    - name: Ensure group owner 0 on /var/lib/etcd/
+      file:
+        path: /var/lib/etcd/
+        group: '0'
+      when: file_exists.stat is defined and file_exists.stat.exists

@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop certmonger
+  command: /sbin/service 'certmonger' stop
+- name: Switch off certmonger
+  command: /sbin/chkconfig --level 0123456 'certmonger' off

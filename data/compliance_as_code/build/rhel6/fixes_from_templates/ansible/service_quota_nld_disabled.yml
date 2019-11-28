@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop quota_nld
+  command: /sbin/service 'quota_nld' stop
+- name: Switch off quota_nld
+  command: /sbin/chkconfig --level 0123456 'quota_nld' off

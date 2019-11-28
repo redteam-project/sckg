@@ -1,0 +1,17 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Ensure tftp is removed
+  package:
+    name: tftp
+    state: absent
+  tags:
+    - package_tftp_removed
+    - high_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27448-0

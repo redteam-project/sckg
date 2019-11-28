@@ -1,0 +1,37 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: Test for existence /boot/grub/grub.conf
+  stat:
+    path: /boot/grub/grub.conf
+  register: file_exists
+  tags:
+    - file_groupowner_grub_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27022-3
+    - PCI-DSS-Req-7.1
+    - DISA-STIG-RHEL-06-000066
+    - NIST-800-53-AC-6(7)
+
+- name: Ensure group owner 0 on /boot/grub/grub.conf
+  file:
+    path: /boot/grub/grub.conf
+    group: '0'
+  when: file_exists.stat is defined and file_exists.stat.exists
+  tags:
+    - file_groupowner_grub_conf
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27022-3
+    - PCI-DSS-Req-7.1
+    - DISA-STIG-RHEL-06-000066
+    - NIST-800-53-AC-6(7)

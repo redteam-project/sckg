@@ -1,0 +1,42 @@
+# platform = Red Hat Enterprise Linux 7,Oracle Linux 7,multi_platform_rhv
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- (xccdf-var sshd_approved_macs)
+
+- name: Use Only FIPS 140-2 Validated MACs
+  block:
+
+    - name: Deduplicate values from /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        create: false
+        regexp: (?i)^\s*MACs\s+
+        state: absent
+
+    - name: Insert correct line to /etc/ssh/sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        create: true
+        line: MACs {{ sshd_approved_macs }}
+        state: present
+        insertbefore: ^[#\s]*Match
+        validate: /usr/sbin/sshd -t -f %s
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sshd_use_approved_macs
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.13.11
+    - NIST-800-171-3.13.8
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(b)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - NIST-800-53-SC-13
+    - NIST-800-53-MA-4(6)

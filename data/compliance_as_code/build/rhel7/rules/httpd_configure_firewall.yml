@@ -1,0 +1,55 @@
+description: '
+
+  By default, <tt>firewalld</tt>
+
+  blocks access to the ports used by the web server.
+
+
+  To configure <code>firewalld</code> to allow access, run the following command(s):
+
+
+
+  <code>firewall-cmd --permanent --add-service=http</code>
+
+
+
+  To configure <code>firewalld</code> to allow access, run the following command(s):
+
+
+
+  <code>firewall-cmd --permanent --add-service=https</code>'
+identifiers: {}
+ocil: 'Review the web site to determine if HTTP and HTTPs are used in accordance with
+
+  well known ports (e.g., 80 and 443) or those ports and services as registered
+
+  and approved for use by the DoD PPSM.
+
+
+  To configure <code>firewalld</code> to allow access, run the following command(s):
+
+
+
+  <code>firewall-cmd --permanent --add-service=http</code>
+
+
+
+  To configure <code>firewalld</code> to allow access, run the following command(s):
+
+
+
+  <code>firewall-cmd --permanent --add-service=https</code>'
+ocil_clause: it is not
+oval_external_content: null
+platform: null
+prodtype: rhel6,rhel7,rhel8
+rationale: 'Failure to comply with DoD ports, protocols, and services (PPS) requirements
+
+  can result in compromise of enclave boundary protections and/or functionality
+
+  of the AIS.'
+references: {stigid: RHEL-07-WG610}
+severity: low
+template: null
+title: Configure firewall to Allow Access to the Web Server
+warnings: []

@@ -1,0 +1,87 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="bash" system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix rule="java_jre_configure_crypto_policy">
+
+JRE_CONFIG_FILE="/usr/lib/jvm/jre/lib/security/java.security"
+<sub idref="function_replace_or_append" />
+replace_or_append "$JRE_CONFIG_FILE" '^security.useSystemPropertiesFile' 'true' '@CCENUM@' '%s=%s'
+</fix><fix rule="java_jre_deployment_config_properties">JAVA_CONFIG="/etc/.java/deployment/deployment.config"
+JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.system.config=file://${JAVA_CONFIG}$" ${JAVA_CONFIG} &amp;&amp; \
+sed -i "s;deployment.system.config=.*;deployment.system.config=file:\/\/${JAVA_PROPERTIES};g" ${JAVA_CONFIG}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.system.config=file://${JAVA_PROPERTIES}" &gt;&gt; ${JAVA_CONFIG}
+fi
+</fix><fix rule="java_jre_validation_ocsp_locked">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.validation.ocsp.locked$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.validation.ocsp\..*/deployment.security.validation.ocsp.locked/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.validation.ocsp.locked" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix><fix rule="java_jre_validation_crl_locked">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.validation.crl.locked$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.validation.crl\..*/deployment.security.validation.crl.locked/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.validation.crl.locked" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix><fix rule="java_jre_deployment_config_mandatory">JAVA_CONFIG="/etc/.java/deployment/deployment.config"
+
+grep -q "^deployment.system.config.mandatory=false$" ${JAVA_CONFIG} &amp;&amp; \
+sed -i "s/deployment.system.config.mandatory=.*/deployment.system.config.mandatory=false/g" ${JAVA_CONFIG}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.system.config.mandatory=false" &gt;&gt; ${JAVA_CONFIG}
+fi
+</fix><fix rule="java_jre_deployment_properties_exists">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+JAVA_DIR="/etc/.java/deployment"
+
+if [ ! -d ${JAVA_DIR} ] ; then
+  mkdir -p -m 755 ${JAVA_DIR}
+fi
+
+if [ ! -e ${JAVA_PROPERTIES} ]; then
+  touch ${JAVA_PROPERTIES} &amp;&amp; chmod 644 ${JAVA_PROPERTIES}
+fi
+
+chmod 644 ${JAVA_PROPERTIES}
+</fix><fix rule="java_jre_untrusted_sources_locked">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.askgrantdialog.notinca.locked$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.askgrantdialog.notinca\..*/deployment.security.askgrantdialog.notinca.locked/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.askgrantdialog.notinca.locked" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix><fix rule="java_jre_untrusted_sources">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.askgrantdialog.notinca=false$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.askgrantdialog.notinca=.*/deployment.security.askgrantdialog.notinca=false/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.askgrantdialog.notinca=false" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix><fix rule="java_jre_deployment_config_exists">JAVA_CONFIG="/etc/.java/deployment/deployment.config"
+JAVA_DIR="/etc/.java/deployment"
+
+if [ ! -d ${JAVA_DIR} ] ; then
+  mkdir -p -m 755 ${JAVA_DIR}
+fi
+
+if [ ! -e ${JAVA_CONFIG} ]; then
+  touch ${JAVA_CONFIG} &amp;&amp; chmod 644 ${JAVA_CONFIG}
+fi
+
+chmod 644 ${JAVA_CONFIG}
+</fix><fix rule="java_jre_validation_crl">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.validation.crl=true$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.validation.crl=.*/deployment.security.validation.crl=true/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.validation.crl=true" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix><fix rule="java_jre_validation_ocsp">JAVA_PROPERTIES="/etc/.java/deployment/deployment.properties"
+
+grep -q "^deployment.security.validation.ocsp=true$" ${JAVA_PROPERTIES} &amp;&amp; \
+sed -i "s/deployment.security.validation.ocsp=.*/deployment.security.validation.ocsp=true/g" ${JAVA_PROPERTIES}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.security.validation.ocsp=true" &gt;&gt; ${JAVA_PROPERTIES}
+fi
+</fix></fix-group></fix-content>

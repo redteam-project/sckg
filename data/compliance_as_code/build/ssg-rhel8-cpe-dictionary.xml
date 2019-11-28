@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<ns0:cpe-list xmlns:ns0="http://cpe.mitre.org/dictionary/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cpe.mitre.org/dictionary/2.0 http://cpe.mitre.org/files/cpe-dictionary_2.1.xsd">
+  <ns0:cpe-item name="cpe:/o:redhat:enterprise_linux:8">
+    <ns0:title xml:lang="en-us">Red Hat Enterprise Linux 8</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_OS_is_rhel8:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/o:centos:centos:8">
+    <ns0:title xml:lang="en-us">CentOS 8</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_OS_is_centos8:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:container">
+    <ns0:title xml:lang="en-us">Container</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_is_a_container:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:machine">
+    <ns0:title xml:lang="en-us">Bare-metal or Virtual Machine</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_is_a_machine:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:gdm">
+    <ns0:title xml:lang="en-us">Package gdm is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_gdm_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:libuser">
+    <ns0:title xml:lang="en-us">Package libuser is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_libuser_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:nss-pam-ldapd">
+    <ns0:title xml:lang="en-us">Package nss-pam-ldapd is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_nss-pam-ldapd_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:pam">
+    <ns0:title xml:lang="en-us">Package pam is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_pam_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:shadow-utils">
+    <ns0:title xml:lang="en-us">Package shadow-utils is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_shadow-utils_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:sssd">
+    <ns0:title xml:lang="en-us">Package sssd-common is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_sssd-common_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:systemd">
+    <ns0:title xml:lang="en-us">Package systemd is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_systemd_package:def:1</ns0:check>
+  </ns0:cpe-item>
+  <ns0:cpe-item name="cpe:/a:yum">
+    <ns0:title xml:lang="en-us">Package yum is installed</ns0:title>
+    <ns0:check href="ssg-rhel8-cpe-oval.xml" system="http://oval.mitre.org/XMLSchema/oval-definitions-5">oval:ssg-installed_env_has_yum_package:def:1</ns0:check>
+  </ns0:cpe-item>
+</ns0:cpe-list>

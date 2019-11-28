@@ -1,0 +1,24 @@
+# platform = multi_platform_ocp
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Configure A Unique CA Certificate for etcd
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80585-3
+    - etcd_unique_ca
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - restrict_strategy
+  tasks:
+
+    - name: '@RULE_TITLE@'
+      lineinfile:
+        path: /etc/etcd/etcd.conf
+        regexp: ^ETCD_TRUSTED_CA_FILE=
+        line: ETCD_TRUSTED_CA_FILE=/etc/etcd/ca.crt
+        create: true

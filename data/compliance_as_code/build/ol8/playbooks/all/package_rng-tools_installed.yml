@@ -1,0 +1,21 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install rng-tools Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_rng-tools_installed
+  tasks:
+
+    - name: Ensure rng-tools is installed
+      package:
+        name: rng-tools
+        state: present

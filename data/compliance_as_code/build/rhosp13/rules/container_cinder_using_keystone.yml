@@ -1,0 +1,21 @@
+description: "OpenStack supports various authentication strategies like noauth, keystone\
+  \ etc.\nIf the \u2018noauth\u2019 strategy is used then the users could interact\
+  \ with OpenStack\nservices without any authentication. This could be a potential\
+  \ risk since an\nattacker might gain unauthorized access to the OpenStack components.\
+  \ Thus it is\nstrongly recommended that all services must be authenticated with\
+  \ keystone\nusing their service accounts.\n\n<br />\n<br />\nPass: If value of parameter\
+  \ auth_strategy under [DEFAULT] section in\n/var/lib/config-data/puppet-generated/cinder/etc/cinder/cinder.conf\
+  \ is set to keystone.\n\n<br />\n<br />\nFail: If value of parameter auth_strategy\
+  \ under [DEFAULT] section is set to noauth."
+identifiers: {}
+ocil: null
+ocil_clause: null
+oval_external_content: null
+platform: null
+prodtype: rhosp13
+rationale: ''
+references: {nist: 'AC-6,AC-6(1)'}
+severity: high
+template: null
+title: 'Check-Block-03: Is keystone used for authentication?'
+warnings: []

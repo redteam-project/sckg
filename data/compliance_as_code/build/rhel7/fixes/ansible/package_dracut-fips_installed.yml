@@ -1,0 +1,27 @@
+# platform = Red Hat Enterprise Linux 6,Red Hat Enterprise Linux 7,Oracle Linux 7
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Ensure dracut-fips is installed
+  package:
+    name: dracut-fips
+    state: present
+  when:
+    - ansible_distribution == 'RedHat'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - package_dracut-fips_installed
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80358-5
+    - NIST-800-171-3.13.11
+    - NIST-800-171-3.13.8
+    - NIST-800-53-AC-17(a)
+    - NIST-800-53-AC-17(2)
+    - NIST-800-53-IA-7
+    - NIST-800-53-SC-13
+    - CJIS-5.10.1.2

@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop smartd
+  command: /sbin/service 'smartd' stop
+- name: Switch off smartd
+  command: /sbin/chkconfig --level 0123456 'smartd' off

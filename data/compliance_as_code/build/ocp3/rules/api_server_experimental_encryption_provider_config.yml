@@ -1,0 +1,29 @@
+description: "To encrypt the etcd key-value store, follow the OpenShift documentation\n\
+  and configure a <tt>EncryptionConfig</tt> file. Then, edit the API Server\npod specification\
+  \ file\n<tt>/etc/origin/master/master-config.yaml</tt> on the master\nnode(s) and\
+  \ set <tt>experimental-encryption-provider-config</tt>\nto the path of that file:\n\
+  <pre>kubernetesMasterConfig:\n  apiServerArguments:\n    experimental-encryption-provider-config:\n\
+  \    - /etc/origin/master/encryption-config.yaml</pre>"
+identifiers: {}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ sudo grep -A2 experimental-encryption-provider-config /etc/origin/master/master-config.yaml</pre>
+
+  The output should return <pre>/etc/origin/master/encryption-config.yaml</pre>.'
+ocil_clause: <tt>experimental-encryption-provider-config</tt> arguments do not point
+  to the <tt>EncryptionConfig</tt> file
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'etcd is a highly available key-value store used by OpenShift deployments
+
+  for persistent storage of all REST API objects. These objects are
+
+  sensitive in nature and should be encrypted at rest to avoid any
+
+  disclosures.'
+references: {cis: 1.1.33}
+severity: medium
+template: null
+title: Configure the Encryption Provider
+warnings: []

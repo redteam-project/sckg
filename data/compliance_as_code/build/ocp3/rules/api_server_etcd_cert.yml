@@ -1,0 +1,30 @@
+description: "To ensure etcd is configured to make use of TLS encryption for client\n\
+  communications, follow the OpenShift documentation and setup the TLS\nconnection\
+  \ between the API Server and etcd. Then, verify\nthat <tt>etcdClientInfo</tt> has\
+  \ the <tt>certFile</tt> configured in \nthe API Server pod specification file\n\
+  <tt>/etc/origin/master/master-config.yaml</tt> on the master\nnode(s) to something\
+  \ similar to:\n<pre>etcdClientInfo:\n  ca: master.etcd-ca.crt\n  certFile: master.etcd-client.crt\n\
+  \  keyFile: master.etcd-client.key</pre>"
+identifiers: {}
+ocil: "Run the following command on the master node(s):\n<pre>$ sudo grep -A3 etcdClientInfo\
+  \ /etc/origin/master/master-config.yaml</pre>\nThe output should contain something\
+  \ similar to:\n<pre>etcdClientInfo:\n  ca: master.etcd-ca.crt\n  certFile: master.etcd-client.crt\n\
+  \  keyFile: master.etcd-client.key</pre>"
+ocil_clause: <tt>certFile</tt> does not exist or is not configured to valid certificates
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'etcd is a highly-available key-value store used by OpenShift deployments
+
+  for persistent storage of all REST API objects. These objects are sensitive
+
+  in nature and should be protected by client authentication. This requires the
+
+  API Server to identify itself to the etcd server using a client certificate
+
+  and key.'
+references: {cis: 1.1.26}
+severity: medium
+template: null
+title: Configure the etcd Certificate for the API Server
+warnings: []

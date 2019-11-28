@@ -1,0 +1,21 @@
+description: 'JBoss applications and configuration files should
+
+  be backed up at least weekly, possibly more if needed by the
+
+  environment.'
+identifiers: {}
+ocil: null
+ocil_clause: there are no regular backups scheduled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Failure to regularly backup JBoss configuration files and deployed
+
+  applications can result in extensive downtime or information losses
+
+  in the event of a disaster or other system outage.'
+references: {nist: CP-9}
+severity: medium
+template: null
+title: Ensure Regular Backup Schedule
+warnings: []

@@ -1,0 +1,294 @@
+<?xml version="1.0"?>
+<ns0:ocil xmlns:ns0="http://scap.nist.gov/schema/ocil/2.0">
+  <ns0:generator>
+    <ns0:product_name>xccdf-create-ocil.xslt from SCAP Security Guide</ns0:product_name>
+    <ns0:product_version>ssg: 0.1.47</ns0:product_version>
+    <ns0:schema_version>2.0</ns0:schema_version>
+    <ns0:timestamp>2019-11-28T04:47:19Z</ns0:timestamp>
+  </ns0:generator>
+  <ns0:questionnaires>
+    <ns0:questionnaire id="ocil:ssg-java_jre_configure_crypto_policy_ocil:questionnaire:1">
+      <ns0:title>Configure Java Runtime to use System Crypto Policy</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_configure_crypto_policy_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_validation_ocsp_locked_ocil:questionnaire:1">
+      <ns0:title>Disable User Access to Online Certificate Validation Settings</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_validation_ocsp_locked_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_validation_crl_locked_ocil:questionnaire:1">
+      <ns0:title>Disable User Access to Revocation Check Settings</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_validation_crl_locked_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_deployment_properties_exists_ocil:questionnaire:1">
+      <ns0:title>The Java Properties File Exists</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_deployment_properties_exists_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_untrusted_sources_locked_ocil:questionnaire:1">
+      <ns0:title>Disable User Access to Untrusted Sources Settings</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_untrusted_sources_locked_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_untrusted_sources_ocil:questionnaire:1">
+      <ns0:title>Disable Java Execution From Untrusted Sources</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_untrusted_sources_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_validation_crl_ocil:questionnaire:1">
+      <ns0:title>Enable Revocation Checks for Publisher Certificates</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_validation_crl_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_updated_ocil:questionnaire:1">
+      <ns0:title>Ensure Java Patches Installed</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_updated_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_validation_ocsp_ocil:questionnaire:1">
+      <ns0:title>Enable Online Certificate Validation</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_validation_ocsp_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_deployment_config_properties_ocil:questionnaire:1">
+      <ns0:title>Configure the deployment.properties File Path</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_deployment_config_properties_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_deployment_config_mandatory_ocil:questionnaire:1">
+      <ns0:title>Configure The Java Deployment Mandatory Setting</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_deployment_config_mandatory_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+    <ns0:questionnaire id="ocil:ssg-java_jre_deployment_config_exists_ocil:questionnaire:1">
+      <ns0:title>The Java Configuration File Exists</ns0:title>
+      <ns0:actions>
+        <ns0:test_action_ref>ocil:ssg-java_jre_deployment_config_exists_action:testaction:1</ns0:test_action_ref>
+      </ns0:actions>
+    </ns0:questionnaire>
+  </ns0:questionnaires>
+  <ns0:test_actions>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_configure_crypto_policy_action:testaction:1" question_ref="ocil:ssg-java_jre_configure_crypto_policy_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_validation_ocsp_locked_action:testaction:1" question_ref="ocil:ssg-java_jre_validation_ocsp_locked_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_validation_crl_locked_action:testaction:1" question_ref="ocil:ssg-java_jre_validation_crl_locked_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_deployment_properties_exists_action:testaction:1" question_ref="ocil:ssg-java_jre_deployment_properties_exists_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_untrusted_sources_locked_action:testaction:1" question_ref="ocil:ssg-java_jre_untrusted_sources_locked_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_untrusted_sources_action:testaction:1" question_ref="ocil:ssg-java_jre_untrusted_sources_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_validation_crl_action:testaction:1" question_ref="ocil:ssg-java_jre_validation_crl_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_updated_action:testaction:1" question_ref="ocil:ssg-java_jre_updated_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_validation_ocsp_action:testaction:1" question_ref="ocil:ssg-java_jre_validation_ocsp_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_deployment_config_properties_action:testaction:1" question_ref="ocil:ssg-java_jre_deployment_config_properties_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_deployment_config_mandatory_action:testaction:1" question_ref="ocil:ssg-java_jre_deployment_config_mandatory_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+    <ns0:boolean_question_test_action id="ocil:ssg-java_jre_deployment_config_exists_action:testaction:1" question_ref="ocil:ssg-java_jre_deployment_config_exists_question:question:1">
+      <ns0:when_true>
+        <ns0:result>PASS</ns0:result>
+      </ns0:when_true>
+      <ns0:when_false>
+        <ns0:result>FAIL</ns0:result>
+      </ns0:when_false>
+    </ns0:boolean_question_test_action>
+  </ns0:test_actions>
+  <ns0:questions>
+    <ns0:boolean_question id="ocil:ssg-java_jre_configure_crypto_policy_question:question:1">
+      <ns0:question_text>To verify that Java uses the system crypto policy, check out that the respective JRE config file
+/usr/lib/jvm/jre/lib/security/java.security contains the security.useSystemPropertiesFile=true line:
+grep 'security.useSystemPropertiesFile=true' /usr/lib/jvm/jre/lib/security/java.security.
+      Is it the case that the &lt;pre&gt;java.security&lt;/pre&gt; doesn't contain the &lt;pre&gt;security.useSystemPropertiesFile=true&lt;/pre&gt; line?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_validation_ocsp_locked_question:question:1">
+      <ns0:question_text>To verify that users cannot change online certificate verification,
+run the following command:
+$ grep 'validation.ocsp.locked' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.validation.ocsp.locked
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_validation_crl_locked_question:question:1">
+      <ns0:question_text>To verify that users cannot change revocation check settings,
+run the following command:
+$ grep 'validation.crl.locked' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.validation.crl.locked
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_deployment_properties_exists_question:question:1">
+      <ns0:question_text>To verify that the deployment.properties file exists,
+run the following command:
+$ ls /etc/.java/deployment
+The output should contain:
+deployment.properties
+      Is it the case that it does not exist?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_untrusted_sources_locked_question:question:1">
+      <ns0:question_text>To verify that users cannot change the untrusted sources settings,
+run the following command:
+$ grep 'askgrantdialog.notinca.locked' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.askgrantdialog.notinca.locked
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_untrusted_sources_question:question:1">
+      <ns0:question_text>To verify that Java cannot execute from untrusted sources,
+run the following command:
+$ grep 'askgrantdialog.notinca=false' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.askgrantdialog.notinca=false
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_validation_crl_question:question:1">
+      <ns0:question_text>To verify that revocation checks are enabled, run the following command:
+$ grep 'validation.crl=true' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.validation.crl=true
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_updated_question:question:1">
+      <ns0:question_text>If the system is joined to the Red Hat Network, a Red Hat Satellite Server, or
+a yum server which provides updates, invoking the following command will
+indicate if updates are available:
+$ sudo yum check-update
+If the system is not configured to update from one of these sources,
+run the following command to list when each package was last updated:
+$ rpm -qa -last
+Compare this to Red Hat Security Advisories (RHSA) listed at
+
+    https://access.redhat.com/security/updates/active/https://access.redhat.com/security/updates/active/
+to determine if the system is missing applicable updates.
+      Is it the case that it is not updated?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_validation_ocsp_question:question:1">
+      <ns0:question_text>To verify that online certificate verification is enabled,
+run the following command:
+$ grep 'validation.ocsp=true' /etc/.java/deployment/deployment.properties
+If properly configured, the output should return:
+deployment.security.validation.ocsp=true
+      Is it the case that it does not exist or is not configured properly?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_deployment_config_properties_question:question:1">
+      <ns0:question_text>To verify that deployment.config is configured properly,
+run the following command:
+$ grep 'deployment.system.config=file' /etc/.java/deployment/deployment.config
+If properly configured, the output should return:
+deployment.system.config=file:///etc/.java/deployment/deployment.properties
+      Is it the case that it is not configured?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_deployment_config_mandatory_question:question:1">
+      <ns0:question_text>To verify that deployment.config is configured properly,
+run the following command:
+$ grep 'deployment.system.config.mandatory' /etc/.java/deployment/deployment.config
+If properly configured, the output should return:
+deployment.system.config.mandatory=false
+      Is it the case that it is not configured?
+      </ns0:question_text>
+    </ns0:boolean_question>
+    <ns0:boolean_question id="ocil:ssg-java_jre_deployment_config_exists_question:question:1">
+      <ns0:question_text>To verify that the deployment.config file exists,
+run the following command:
+$ ls /etc/.java/deployment
+The output should contain:
+deployment.config
+      Is it the case that it does not exist?
+      </ns0:question_text>
+    </ns0:boolean_question>
+  </ns0:questions>
+</ns0:ocil>

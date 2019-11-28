@@ -1,0 +1,35 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- (xccdf-var var_domain_kernel_load_modules)
+
+- name: Ensure libsemanage-python installed
+  package:
+    name: libsemanage-python
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_domain_kernel_load_modules
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82293-2
+
+- name: Set SELinux boolean domain_kernel_load_modules accordingly
+  seboolean:
+    name: domain_kernel_load_modules
+    state: '{{ var_domain_kernel_load_modules }}'
+    persistent: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_domain_kernel_load_modules
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82293-2

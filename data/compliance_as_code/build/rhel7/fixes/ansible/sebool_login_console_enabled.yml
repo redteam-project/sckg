@@ -1,0 +1,35 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- (xccdf-var var_login_console_enabled)
+
+- name: Ensure libsemanage-python installed
+  package:
+    name: libsemanage-python
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_login_console_enabled
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82301-3
+
+- name: Set SELinux boolean login_console_enabled accordingly
+  seboolean:
+    name: login_console_enabled
+    state: '{{ var_login_console_enabled }}'
+    persistent: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_login_console_enabled
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82301-3

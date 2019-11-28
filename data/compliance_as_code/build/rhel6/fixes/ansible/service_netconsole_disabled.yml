@@ -1,0 +1,34 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Stop netconsole
+  command: /sbin/service 'netconsole' stop
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27254-2
+    - DISA-STIG-RHEL-06-000289
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Switch off netconsole
+  command: /sbin/chkconfig --level 0123456 'netconsole' off
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_netconsole_disabled
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27254-2
+    - DISA-STIG-RHEL-06-000289
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7

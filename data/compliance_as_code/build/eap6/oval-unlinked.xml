@@ -1,0 +1,607 @@
+<?xml version="1.0"?>
+<oval:oval_definitions xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:ns4="http://oval.mitre.org/XMLSchema/oval-definitions-5#unix" xmlns:ns5="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <oval:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:47:08</ns2:timestamp>
+  </oval:generator>
+  <oval:definitions>
+    <oval:definition class="compliance" id="jboss_eap_configure_application_authentication" version="1">
+      <oval:metadata>
+        <oval:title>Remove Silent Authentication - Application Security Realm</oval:title>
+        <oval:description>Verify that Silent Authentication has been removed from the default Application security realm.</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_configure_application_authentication"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_auditing" version="1">
+      <oval:metadata>
+        <oval:title>Configure Audit Logging</oval:title>
+        <oval:description>Audit logging must be enabled</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_configure_auditing"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_keystore" version="1">
+      <oval:metadata>
+        <oval:title>Configure Vault for Passwords</oval:title>
+        <oval:description>The vault should be configured for storing passwords.</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_configure_keystore"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_logging_level" version="1">
+      <oval:metadata>
+        <oval:title>Configure JBoss Logging Level</oval:title>
+        <oval:description>Verify that the logging level for the ROOT logger is INFO.</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria operator="OR">
+        <oval:criterion test_ref="test_jboss_eap_configure_logging_level_info"/>
+        <oval:criterion test_ref="test_jboss_eap_configure_logging_level_debug"/>
+        <oval:criterion test_ref="test_jboss_eap_configure_logging_level_trace"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_management_authentication" version="1">
+      <oval:metadata>
+        <oval:title>Remove Silent Authentication - Management Security Realm</oval:title>
+        <oval:description>Verify that Silent Authentication has been removed from the default Management security realm.</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_configure_management_authentication"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_security_manager" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Enterprise Application Platform 6 Security Manager</oval:title>
+        <oval:description>Java security manager must be installed</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_sec_mgr"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_configure_syslog" version="1">
+      <oval:metadata>
+        <oval:title>Configure JBoss to Use Syslog</oval:title>
+        <oval:description>EAP should be configured to export logs to syslog</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_jboss_eap_configure_syslog"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_file_permissions" version="2">
+      <oval:metadata>
+        <oval:title>Configure JBoss Directory Permissions</oval:title>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+        <oval:description>File permissions for JBOSS_HOME should be set correctly.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_jboss_eap_file_permissions"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_logs_permissions" version="2">
+      <oval:metadata>
+        <oval:title>Configure JBoss Log Directory Permissions</oval:title>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+        <oval:description>File permissions for JBOSS_HOME/standalone/log should be set correctly.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:criterion test_ref="test_jboss_eap_logs_permissions_folder"/>
+        <oval:criterion test_ref="test_jboss_eap_logs_permissions_files"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_remove_jmx" version="1">
+      <oval:metadata>
+        <oval:title>Remove JMX Subsystem</oval:title>
+        <oval:description>EAP should be configured to remove the JMX subsystem</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion negate="true" test_ref="test_jboss_eap_jmx_installed"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_remove_quickstarts" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Enterprise Application Platform 6 Security Manager Remove Quickstarts</oval:title>
+        <oval:description>Quickstarts must be removed</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_quickstarts"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_remove_unnecessary_apps" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Enterprise Application Platform 6 Security Manager Remove Unnecessary Applications</oval:title>
+        <oval:description>Unnecessary apps must be removed</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_remove_apps"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_roll_over_transfer_logs" version="1">
+      <oval:metadata>
+        <oval:title>Configure Logs to Rollover</oval:title>
+        <oval:description>Logger should be configured to rollover log files</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion test_ref="test_eap_roll_over_transfer_logs"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="jboss_eap_vendor_supported" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Enterprise Application Platform Supported Version</oval:title>
+        <oval:description>Installed version of JBoss is a vendor supported version.</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:extend_definition comment="EAP supported version" definition_ref="installed_app_is_eap6"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_eap6" version="1">
+      <oval:metadata>
+        <oval:title>JBoss Enterprise Application Platform 6</oval:title>
+        <oval:description>EAP Version should be version 6</oval:description>
+        <oval:affected family="undefined">
+          <oval:product>JBoss EAP 6</oval:product>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.0.0" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.0.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.1.0" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.1.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.0" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.2" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.3" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.2.4" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.0" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.2" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.3.3" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.0" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.1" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.2" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.3" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.4" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.5" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.6" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.7" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.8" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.9" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.10" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.11" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.12" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.13" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.14" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.15" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.16" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.17" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.18" source="CPE"/>
+        <oval:reference ref_id="cpe:/a:redhat:jboss_enterprise_application_platform:6.4.19" source="CPE"/>
+      </oval:metadata>
+      <oval:criteria operator="OR">
+        <oval:criterion test_ref="test_installed_eap_version_6"/>
+        <oval:criterion test_ref="test_installed_eap_version_6_container"/>
+        <oval:criterion test_ref="test_package_eap6_installed"/>
+      </oval:criteria>
+    </oval:definition>
+  </oval:definitions>
+  <oval:tests>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP Audit Logging is Enabled" id="test_eap_configure_application_authentication" version="1">
+      <ns3:object object_ref="obj_eap_configure_application_authentication"/>
+      <ns3:state state_ref="state_eap_configure_application_authentication"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP Audit Logging is Enabled" id="test_eap_configure_auditing" version="1">
+      <ns3:object object_ref="obj_eap_configure_auditing"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP for vault" id="test_eap_configure_keystore" version="1">
+      <ns3:object object_ref="obj_eap_configure_keystore"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check that root logging is INFO level" id="test_jboss_eap_configure_logging_level_info" version="1">
+      <ns3:object object_ref="obj_jboss_eap_configure_logging_level_info"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check that root logging is DEBUG level" id="test_jboss_eap_configure_logging_level_debug" version="1">
+      <ns3:object object_ref="obj_jboss_eap_configure_logging_level_trace"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check that root logging is TRACE level" id="test_jboss_eap_configure_logging_level_trace" version="1">
+      <ns3:object object_ref="obj_jboss_eap_configure_logging_level_debug"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP Audit Logging is Enabled" id="test_eap_configure_management_authentication" version="1">
+      <ns3:object object_ref="obj_eap_configure_management_authentication"/>
+      <ns3:state state_ref="state_eap_configure_management_authentication"/>
+    </ns3:xmlfilecontent_test>
+    <ns3:textfilecontent54_test check="all" comment="Check EAP Security Manager" id="test_eap_sec_mgr" version="1">
+      <ns3:object object_ref="obj_eap_sec_mgr"/>
+      <ns3:state state_ref="state_eap_sec_mgr"/>
+    </ns3:textfilecontent54_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP for " id="test_jboss_eap_configure_syslog" version="1">
+      <ns3:object object_ref="obj_jboss_eap_configure_syslog_logs"/>
+    </ns3:xmlfilecontent_test>
+    <ns4:file_test check="all" check_existence="all_exist" comment="testing that the all files have the required permissions" id="test_jboss_eap_file_permissions" version="1">
+      <ns4:object object_ref="object_jboss_eap_file_permissions"/>
+      <ns4:state state_ref="state_jboss_eap_file_permissions"/>
+    </ns4:file_test>
+    <ns4:file_test check="all" check_existence="all_exist" comment="testing that the folder has the required permissions" id="test_jboss_eap_logs_permissions_folder" version="1">
+      <ns4:object object_ref="object_jboss_eap_logs_permissions_folder"/>
+      <ns4:state state_ref="state_jboss_eap_logs_permissions"/>
+    </ns4:file_test>
+    <ns4:file_test check="all" check_existence="all_exist" comment="testing that the folder has the required permissions" id="test_jboss_eap_logs_permissions_files" version="1">
+      <ns4:object object_ref="object_jboss_eap_logs_permissions_files"/>
+      <ns4:state state_ref="state_jboss_eap_logs_permissions"/>
+    </ns4:file_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP for " id="test_jboss_eap_jmx_installed" version="1">
+      <ns3:object object_ref="obj_jboss_eap_remove_jmx"/>
+    </ns3:xmlfilecontent_test>
+    <ns4:file_test check="all" check_existence="none_exist" comment="Check EAP for Quickstarts" id="test_eap_quickstarts" version="1">
+      <ns4:object object_ref="obj_eap_quickstarts"/>
+    </ns4:file_test>
+    <ns4:file_test check="all" check_existence="none_exist" comment="Check EAP for installed apps" id="test_eap_remove_apps" version="1">
+      <ns4:object object_ref="obj_eap_remove_apps"/>
+    </ns4:file_test>
+    <ns3:xmlfilecontent_test check="all" comment="Check EAP roll over transfer logs" id="test_eap_roll_over_transfer_logs" version="1">
+      <ns3:object object_ref="obj_eap_roll_over_transfer_logs"/>
+    </ns3:xmlfilecontent_test>
+    <ns5:rpminfo_test check="all" check_existence="all_exist" comment="package eap6 is installed" id="test_package_eap6_installed" version="1">
+      <ns5:object object_ref="obj_package_eap6_installed"/>
+    </ns5:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" comment="Check EAP Version" id="test_installed_eap_version_6" version="1">
+      <ns3:object object_ref="obj_installed_eap_version_6"/>
+      <ns3:state state_ref="state_installed_eap_version_6"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check EAP Version" id="test_installed_eap_version_6_container" version="1">
+      <ns3:object object_ref="obj_installed_eap_version_6_container"/>
+      <ns3:state state_ref="state_installed_eap_version_6"/>
+    </ns3:textfilecontent54_test>
+  </oval:tests>
+  <oval:objects>
+    <ns3:environmentvariable58_object id="obj_env_eap_configure_application_authentication" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_eap_configure_application_authentication" version="1">
+      <ns3:path var_ref="local_var_eap_configure_application_authentication"/>
+      <ns3:filename var_ref="local_var_eap_configure_application_authentication"/>
+      <ns3:xpath>count(//*[name()='server']/*[name()='management']/*[name()='security-realms']/*[name()='security-realm'][@name='ApplicationRealm']/*[name()='authentication']/*[name()='local'])</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_eap_configure_auditing" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_eap_configure_auditing" version="1">
+      <ns3:path var_ref="local_var_eap_configure_auditing"/>
+      <ns3:filename var_ref="local_var_profile_auditing"/>
+      <ns3:xpath>//*[name()='server']/*[name()='management']/*[name()='audit-log']/*[name()='logger'][@enabled='true']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_configure_keystore" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_eap_configure_keystore" version="1">
+      <ns3:path var_ref="local_var_rollover_jboss_home"/>
+      <ns3:filename var_ref="local_var_profile_vault_passwords"/>
+      <ns3:xpath>//*[name()='server']/*[name()='vault']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_jboss_eap_configure_logging_level" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_jboss_eap_configure_logging_level_info" version="1">
+      <ns3:path var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:filename var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='root-logger']/*[name()='level'][@name='INFO']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:xmlfilecontent_object id="obj_jboss_eap_configure_logging_level_debug" version="1">
+      <ns3:path var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:filename var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='root-logger']/*[name()='level'][@name='DEBUG']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:xmlfilecontent_object id="obj_jboss_eap_configure_logging_level_trace" version="1">
+      <ns3:path var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:filename var_ref="local_var_jboss_eap_configure_logging_level"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='root-logger']/*[name()='level'][@name='TRACE']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_eap_configure_management_authentication" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_eap_configure_management_authentication" version="1">
+      <ns3:path var_ref="local_var_eap_configure_management_authentication"/>
+      <ns3:filename var_ref="local_var_profile_management_authentication"/>
+      <ns3:xpath>count(//*[name()='server']/*[name()='management']/*[name()='security-realms']/*[name()='security-realm'][@name='ManagementRealm']/*[name()='authentication']/*[name()='local'])</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_eap_sec_mgr_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:textfilecontent54_object id="obj_eap_sec_mgr" version="1">
+      <ns3:path var_ref="local_var_eap_sec_mgr_path"/>
+      <ns3:filename>standalone.conf</ns3:filename>
+      <ns3:pattern operation="pattern match">^SECMGR="(.*)"</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:environmentvariable58_object id="obj_env_configure_syslog" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_jboss_eap_configure_syslog_logs" version="1">
+      <ns3:path var_ref="local_var_configure_syslog_jboss_home"/>
+      <ns3:filename var_ref="local_var_profile_syslog"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='syslog-handler']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_jboss_eap_file_permissions" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns4:file_object comment="JBOSS_HOME" id="object_jboss_eap_file_permissions" version="1">
+      <ns4:behaviors recurse="directories" recurse_direction="down" recurse_file_system="local"/>
+      <ns4:path var_ref="local_var_jboss_eap_file_permissions"/>
+      <ns4:filename operation="pattern match">.+</ns4:filename>
+    </ns4:file_object>
+    <ns3:environmentvariable58_object id="obj_env_jboss_eap_logs_permissions" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns4:file_object comment="JBOSS_HOME/standalone/log" id="object_jboss_eap_logs_permissions_folder" version="1">
+      <ns4:path var_ref="local_var_jboss_eap_logs_permissions_folder"/>
+      <ns4:filename xsi:nil="true"/>
+    </ns4:file_object>
+    <ns4:file_object comment="JBOSS_HOME/standalone/log/*.log" id="object_jboss_eap_logs_permissions_files" version="1">
+      <ns4:path var_ref="local_var_jboss_eap_logs_permissions_folder"/>
+      <ns4:filename operation="pattern match">.*\.log$</ns4:filename>
+    </ns4:file_object>
+    <ns3:environmentvariable58_object id="obj_env_remove_jmx" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_jboss_eap_remove_jmx" version="1">
+      <ns3:path var_ref="local_var_remove_jmx_jboss_home"/>
+      <ns3:filename var_ref="local_var_profile_remove_jmx"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='remoting-connector']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns3:environmentvariable58_object id="obj_env_eap_quickstarts_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns4:file_object id="obj_eap_quickstarts" version="1">
+      <ns4:path operation="pattern match" var_ref="local_var_eap_quickstart_path"/>
+      <ns4:filename operation="pattern match">*</ns4:filename>
+    </ns4:file_object>
+    <ns3:environmentvariable58_object id="obj_env_eap_remove_apps_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns4:file_object id="obj_eap_remove_apps" version="1">
+      <ns4:behaviors recurse_direction="down"/>
+      <ns4:path var_ref="local_var_eap_remove_apps_path"/>
+      <ns4:filename operation="pattern match">^((?!(README.txt|.*\.rar|.*\.deployed|.*\.undeployed)|.*\.dodeploy).)*$</ns4:filename>
+    </ns4:file_object>
+    <ns3:environmentvariable58_object id="obj_env_rollover_log" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:xmlfilecontent_object id="obj_eap_roll_over_transfer_logs" version="1">
+      <ns3:path var_ref="local_var_rollover_jboss_home"/>
+      <ns3:filename var_ref="local_var_profile_transfer_logs"/>
+      <ns3:xpath>//*[name()='server']/*[name()='profile']/*[name()='subsystem']/*[name()='periodic-rotating-file-handler'][@name='FILE']</ns3:xpath>
+    </ns3:xmlfilecontent_object>
+    <ns5:rpminfo_object id="obj_package_eap6_installed" version="1">
+      <ns5:name>eap6</ns5:name>
+    </ns5:rpminfo_object>
+    <ns3:environmentvariable58_object id="obj_env_installed_eap6_home" version="1">
+      <ns3:pid datatype="int" xsi:nil="true"/>
+      <ns3:name>JBOSS_HOME</ns3:name>
+    </ns3:environmentvariable58_object>
+    <ns3:textfilecontent54_object id="obj_installed_eap_version_6" version="1">
+      <ns3:path var_ref="local_var_installed_eap_version_6"/>
+      <ns3:filename>version.txt</ns3:filename>
+      <ns3:pattern operation="pattern match">Red[\s]+Hat[\s]+JBoss[\s]+Enterprise[\s]+Application[\s]+Platform[\s]+\-[\s]+Version[\s]+(.*)GA</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="obj_installed_eap_version_6_container" version="1">
+      <ns3:filepath>/opt/eap/version.txt</ns3:filepath>
+      <ns3:pattern operation="pattern match">Red[\s]+Hat[\s]+JBoss[\s]+Enterprise[\s]+Application[\s]+Platform[\s]+\-[\s]+Version[\s]+(.*)GA</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+  </oval:objects>
+  <oval:states>
+    <ns3:xmlfilecontent_state comment="ensure that the number of local authentication elements in the ApplicationRealm is 0" id="state_eap_configure_application_authentication" version="1">
+      <ns3:value_of datatype="int" operation="equals">0</ns3:value_of>
+    </ns3:xmlfilecontent_state>
+    <ns3:xmlfilecontent_state comment="ensure that the number of local authentication elements in the ManagementRealm is 0" id="state_eap_configure_management_authentication" version="1">
+      <ns3:value_of datatype="int" operation="equals">0</ns3:value_of>
+    </ns3:xmlfilecontent_state>
+    <ns3:textfilecontent54_state id="state_eap_sec_mgr" version="1">
+      <ns3:subexpression operation="pattern match">true</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+    <ns4:file_state comment="checks for o-rw" id="state_jboss_eap_file_permissions" version="1">
+      <ns4:oread datatype="boolean">false</ns4:oread>
+      <ns4:owrite datatype="boolean">false</ns4:owrite>
+    </ns4:file_state>
+    <ns4:file_state comment="checks for g-rwo,o-rwo" id="state_jboss_eap_logs_permissions" version="1">
+      <ns4:gread datatype="boolean">false</ns4:gread>
+      <ns4:gwrite datatype="boolean">false</ns4:gwrite>
+      <ns4:gexec datatype="boolean">false</ns4:gexec>
+      <ns4:oread datatype="boolean">false</ns4:oread>
+      <ns4:owrite datatype="boolean">false</ns4:owrite>
+      <ns4:oexec datatype="boolean">false</ns4:oexec>
+    </ns4:file_state>
+    <ns3:textfilecontent54_state id="state_installed_eap_version_6" version="1">
+      <ns3:subexpression operation="pattern match">6\.[0-4]+\.[0-9]+</ns3:subexpression>
+    </ns3:textfilecontent54_state>
+  </oval:states>
+  <oval:variables>
+    <oval:local_variable comment="configuration location" datatype="string" id="local_var_eap_configure_application_authentication" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_configure_application_authentication"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_application_authentication" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:external_variable comment="external variable for Jboss profile" datatype="string" id="var_jboss_profile" version="1"/>
+    <oval:local_variable comment="configuration location" datatype="string" id="local_var_eap_configure_auditing" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_configure_auditing"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_auditing" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_configure_keystore_jboss_home" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_configure_keystore"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_vault_passwords" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration location" datatype="string" id="local_var_jboss_eap_configure_logging_level" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_jboss_eap_configure_logging_level"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_logging_level" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration location" datatype="string" id="local_var_eap_configure_management_authentication" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_configure_management_authentication"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_management_authentication" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_eap_sec_mgr_path" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_sec_mgr_home"/>
+        <oval:literal_component>/bin/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_configure_syslog_jboss_home" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_configure_syslog"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_syslog" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="JBOSS_HOME location" datatype="string" id="local_var_jboss_eap_file_permissions" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_jboss_eap_file_permissions"/>
+        <oval:literal_component datatype="string">/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration location" datatype="string" id="local_var_jboss_eap_logs_permissions_folder" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_jboss_eap_logs_permissions"/>
+        <oval:literal_component datatype="string">/standalone/log</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_remove_jmx_jboss_home" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_remove_jmx"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_remove_jmx" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_eap_quickstart_path" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_quickstarts_home"/>
+        <oval:literal_component>/.*quickstart.*</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_eap_remove_apps_path" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_eap_remove_apps_home"/>
+        <oval:literal_component>/standalone/deployments</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_rollover_jboss_home" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_rollover_log"/>
+        <oval:literal_component datatype="string">/standalone/configuration/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="configuration profile" datatype="string" id="local_var_profile_transfer_logs" version="1">
+      <oval:concat>
+        <oval:variable_component var_ref="var_jboss_profile"/>
+        <oval:literal_component datatype="string">.xml</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+    <oval:local_variable comment="version location" datatype="string" id="local_var_installed_eap_version_6" version="1">
+      <oval:concat>
+        <oval:object_component item_field="value" object_ref="obj_env_installed_eap6_home"/>
+        <oval:literal_component datatype="string">/</oval:literal_component>
+      </oval:concat>
+    </oval:local_variable>
+  </oval:variables>
+</oval:oval_definitions>

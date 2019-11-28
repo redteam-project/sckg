@@ -1,0 +1,78 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - ntpdate.service
+  command: systemctl list-unit-files ntpdate.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_ntpdate_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80879-0
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Disable service ntpdate
+  systemd:
+    name: ntpdate.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"ntpdate.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_ntpdate_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80879-0
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Unit Socket Exists - ntpdate.socket
+  command: systemctl list-unit-files ntpdate.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_ntpdate_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80879-0
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+
+- name: Disable socket ntpdate
+  systemd:
+    name: ntpdate.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"ntpdate.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_ntpdate_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80879-0
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7

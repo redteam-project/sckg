@@ -1,0 +1,28 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = configure
+# reboot = false
+# disruption = low
+- name: Verify Permissions on the OpenShift etcd Specification File
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80636-4
+    - configure_strategy
+    - file_permissions_master_etcd
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+  tasks:
+
+    - name: Test for existence /etc/origin/node/pods/etcd.yaml
+      stat:
+        path: /etc/origin/node/pods/etcd.yaml
+      register: file_exists
+
+    - name: Ensure permission 0600 on /etc/origin/node/pods/etcd.yaml
+      file:
+        path: /etc/origin/node/pods/etcd.yaml
+        mode: '0600'
+      when: file_exists.stat is defined and file_exists.stat.exists

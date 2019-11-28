@@ -1,0 +1,22 @@
+<def-group>
+  <definition class="compliance" id="file_owner_master_openshift_conf" version="1">
+    <metadata>
+      <title>Verify /etc/origin/master/master-config.yaml Owner</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>This test makes sure that /etc/origin/master/master-config.yaml is owned by 0.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="Check file ownership of /etc/origin/master/master-config.yaml" test_ref="test_file_owner_master_openshift_conf" />
+    </criteria>
+  </definition>
+    <unix:file_test check="all" check_existence="all_exist" comment="Testing user ownership of /etc/origin/master/master-config.yaml" id="test_file_owner_master_openshift_conf" version="1">
+    <unix:object object_ref="object_file_owner_master_openshift_conf" />
+    <unix:state state_ref="state_file_owner_master_openshift_conf_uid_0" />
+  </unix:file_test>
+  <unix:file_state id="state_file_owner_master_openshift_conf_uid_0" version="1">
+    <unix:user_id datatype="int">0</unix:user_id>
+  </unix:file_state>
+  <unix:file_object comment="/etc/origin/master/master-config.yaml" id="object_file_owner_master_openshift_conf" version="1"><unix:filepath>/etc/origin/master/master-config.yaml</unix:filepath></unix:file_object>
+</def-group>

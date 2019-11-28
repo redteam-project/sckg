@@ -1,0 +1,24 @@
+# platform = multi_platform_ocp
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Ensure That The etcd Client Certificate Is Correctly Set
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80577-0
+    - etcd_cert_file
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - restrict_strategy
+  tasks:
+
+    - name: '@RULE_TITLE@'
+      lineinfile:
+        path: /etc/etcd/etcd.conf
+        regexp: ^ETCD_CERT_FILE
+        line: ETCD_CERT_FILE=/etc/etcd/server.crt
+        create: true

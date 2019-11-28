@@ -1,0 +1,59 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Disable rexec Service
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-80884-0
+    - NIST-800-171-3.1.13
+    - NIST-800-171-3.4.7
+    - NIST-800-53-AC-17(8)
+    - NIST-800-53-CM-7
+    - disable_strategy
+    - high_severity
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - service_rexec_disabled
+  tasks:
+
+    - name: Unit Service Exists - rexec.service
+      command: systemctl list-unit-files rexec.service
+      register: service_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable service rexec
+      systemd:
+        name: rexec.service
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"rexec.service" in service_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"
+
+    - name: Unit Socket Exists - rexec.socket
+      command: systemctl list-unit-files rexec.socket
+      register: socket_file_exists
+      changed_when: false
+      ignore_errors: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"
+
+    - name: Disable socket rexec
+      systemd:
+        name: rexec.socket
+        enabled: 'no'
+        state: stopped
+        masked: 'yes'
+      when:
+        - '"rexec.socket" in socket_file_exists.stdout_lines[1]'
+        - ansible_virtualization_role != "guest" or ansible_virtualization_type !=
+          "docker"

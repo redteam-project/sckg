@@ -1,0 +1,23 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Remove the OpenSSH Client and Server Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_openssh_removed
+  tasks:
+
+    - name: Ensure openssh is removed
+      package:
+        name: openssh
+        state: absent
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

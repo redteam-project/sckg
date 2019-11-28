@@ -1,0 +1,217 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="puppet" system="urn:xccdf:fix:script:puppet" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix complexity="low" disruption="low" reboot="false" rule="package_rsyslog-gnutls_installed" strategy="enable">include install_rsyslog-gnutls
+
+class install_rsyslog-gnutls {
+  package { 'rsyslog-gnutls':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openssh-server_installed" strategy="enable">include install_openssh-server
+
+class install_openssh-server {
+  package { 'openssh-server':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix rule="file_permissions_sshd_pub_key">include ssh_public_key_perms
+
+class ssh_public_key_perms {
+  exec { 'sshd_pub_key':
+    command =&gt; "chmod 0644 /etc/ssh/*.pub",
+    path    =&gt; '/bin:/usr/bin'
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_snmpd_disabled" strategy="enable">include disable_snmpd
+
+class disable_snmpd {
+  service {'snmpd':
+    enable =&gt; false,
+    ensure =&gt; 'stopped',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_syslogng_enabled" strategy="enable">include enable_syslogng
+
+class enable_syslogng {
+  service {'syslogng':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ntp_installed" strategy="enable">include install_ntp
+
+class install_ntp {
+  package { 'ntp':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_rsyslog_enabled" strategy="enable">include enable_rsyslog
+
+class enable_rsyslog {
+  service {'rsyslog':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ntpdate_removed" strategy="disable">include remove_ntpdate
+
+class remove_ntpdate {
+  package { 'ntpdate':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ntp_enabled" strategy="enable">include enable_ntp
+
+class enable_ntp {
+  service {'ntp':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_nis_removed" strategy="disable">include remove_nis
+
+class remove_nis {
+  package { 'nis':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_iptables_enabled" strategy="enable">include enable_iptables
+
+class enable_iptables {
+  service {'iptables':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openssh-server_removed" strategy="disable">include remove_openssh-server
+
+class remove_openssh-server {
+  package { 'openssh-server':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_sshd_disabled" strategy="enable">include disable_sshd
+
+class disable_sshd {
+  service {'ssh':
+    enable =&gt; false,
+    ensure =&gt; 'stopped',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd-ssl_removed" strategy="disable">include remove_telnetd-ssl
+
+class remove_telnetd-ssl {
+  package { 'telnetd-ssl':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_netfs_disabled" strategy="enable">include disable_netfs
+
+class disable_netfs {
+  service {'netfs':
+    enable =&gt; false,
+    ensure =&gt; 'stopped',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_nss-tools_installed" strategy="enable">include install_nss-tools
+
+class install_nss-tools {
+  package { 'nss-tools':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_gnutls-utils_installed" strategy="enable">include install_gnutls-utils
+
+class install_gnutls-utils {
+  package { 'gnutls-utils':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_cron_enabled" strategy="enable">include enable_cron
+
+class enable_cron {
+  service {'cron':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ip6tables_enabled" strategy="enable">include enable_ip6tables
+
+class enable_ip6tables {
+  service {'ip6tables':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd_removed" strategy="disable">include remove_telnetd
+
+class remove_telnetd {
+  package { 'telnetd':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_net-snmp_removed" strategy="disable">include remove_snmp
+
+class remove_snmp {
+  package { 'snmp':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_inetutils-telnetd_removed" strategy="disable">include remove_inetutils-telnetd
+
+class remove_inetutils-telnetd {
+  package { 'inetutils-telnetd':
+    ensure =&gt; 'purged',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_syslogng_installed" strategy="enable">include install_syslogng
+
+class install_syslogng {
+  package { 'syslogng':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsyslog_installed" strategy="enable">include install_rsyslog
+
+class install_rsyslog {
+  package { 'rsyslog':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_audit_installed" strategy="enable">include install_audit
+
+class install_audit {
+  package { 'audit':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_cron_installed" strategy="enable">include install_cron
+
+class install_cron {
+  package { 'cron':
+    ensure =&gt; 'installed',
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_ntpd_enabled" strategy="enable">include enable_ntpd
+
+class enable_ntpd {
+  service {'ntpd':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix><fix rule="file_permissions_sshd_private_key">include ssh_private_key_perms
+
+class ssh_private_key_perms {
+  exec { 'sshd_priv_key':
+    command =&gt; "chmod 0640 /etc/ssh/*_key",
+    path    =&gt; '/bin:/usr/bin'
+  }
+}
+</fix><fix complexity="low" disruption="low" reboot="false" rule="service_auditd_enabled" strategy="enable">include enable_auditd
+
+class enable_auditd {
+  service {'auditd':
+    enable =&gt; true,
+    ensure =&gt; 'running',
+  }
+}
+</fix></fix-group></fix-content>

@@ -1,0 +1,32 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol
+# complexity = low
+# strategy = restrict
+# reboot = false
+# disruption = low
+- name: Ensure Logs Sent To Remote Host
+  hosts: '@@HOSTS@@'
+  become: true
+  vars:
+    rsyslog_remote_loghost_address: logcollector
+  tags:
+    - CCE-27343-3
+    - DISA-STIG-RHEL-07-031000
+    - NIST-800-53-AU-3(2)
+    - NIST-800-53-AU-4(1)
+    - NIST-800-53-AU-9
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - restrict_strategy
+    - rsyslog_remote_loghost
+  tasks:
+
+    - name: Set rsyslog remote loghost
+      lineinfile:
+        dest: /etc/rsyslog.conf
+        regexp: ^\*\.\*
+        line: '*.* @@{{ rsyslog_remote_loghost_address }}'
+        create: true
+      when: ansible_virtualization_role != "guest" or ansible_virtualization_type
+        != "docker"

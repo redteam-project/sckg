@@ -1,0 +1,24 @@
+description: "To ensure the API Server utilizes its own TLS certificates, the\n<tt>certFile</tt>\
+  \ must be configured. Verify\nthat <tt>servingInfo</tt> has the <tt>certFile</tt>\
+  \ configured in \nthe API Server pod specification file\n<tt>/etc/origin/master/master-config.yaml</tt>\
+  \ on the master\nnode(s) to something similar to:\n<pre>servingInfo:\n  clientCA:\
+  \ ca.crt\n  certFile: master.server.crt\n  keyFile: master.server.key</pre>"
+identifiers: {}
+ocil: "Run the following command on the master node(s):\n<pre>$ sudo grep -A7 servingInfo\
+  \ /etc/origin/master/master-config.yaml</pre>\nThe output should contain something\
+  \ similar to:\n<pre>servingInfo:\n  clientCA: ca.crt\n  certFile: master.server.crt\n\
+  \  keyFile: master.server.key</pre>"
+ocil_clause: <tt>certFile</tt> is not set as appropriate for <tt>servingInfo</tt>
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'API Server communication contains sensitive parameters that should remain
+
+  encrypted in transit. Configure the API Server to serve only HTTPS
+
+  traffic.'
+references: {cis: 1.1.28}
+severity: medium
+template: null
+title: Configure the Certificate for the API Server
+warnings: []

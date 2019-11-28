@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = disable
+# reboot = false
+# disruption = low
+- name: Uninstall talk-server Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - CCE-27210-4
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_talk-server_removed
+  tasks:
+
+    - name: Ensure talk-server is removed
+      package:
+        name: talk-server
+        state: absent

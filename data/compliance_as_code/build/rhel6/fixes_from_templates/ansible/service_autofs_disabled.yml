@@ -1,0 +1,9 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: Stop autofs
+  command: /sbin/service 'autofs' stop
+- name: Switch off autofs
+  command: /sbin/chkconfig --level 0123456 'autofs' off

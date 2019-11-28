@@ -1,0 +1,24 @@
+description: ' To properly set the owner of <code>/etc/origin/master/scheduler.json</code>,
+  run the command: <pre>$ sudo chown root /etc/origin/master/scheduler.json </pre>'
+identifiers: {cce: 80628-1}
+ocil: 'To check the ownership of <code>/etc/origin/master/scheduler.json</code>, run
+  the command: <pre>$ ls -lL /etc/origin/master/scheduler.json</pre> If properly configured,
+  the output should indicate the following owner: <code>root</code>'
+ocil_clause: /etc/origin/master/scheduler.json has owner root
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'The <tt>/etc/origin/master/scheduler.json</tt> file contains information
+  about the configuration of the
+
+  OpenShift scheduler that is configured on the system. Protection of this file is
+
+  critical for OpenShift security.'
+references: {cis: 1.4.16}
+severity: medium
+template:
+  backends: {}
+  name: file_owner
+  vars: {filepath: /etc/origin/master/scheduler.json, fileuid: '0'}
+title: Verify User Who Owns The OpenShift Scheduler Configuration File
+warnings: []

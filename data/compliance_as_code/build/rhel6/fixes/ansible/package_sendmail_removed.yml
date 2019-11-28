@@ -1,0 +1,20 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Ensure sendmail is removed
+  package:
+    name: sendmail
+    state: absent
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - package_sendmail_removed
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27515-6
+    - DISA-STIG-RHEL-06-000288
+    - NIST-800-53-CM-7

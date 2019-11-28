@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - xinetd.service"
+  command: systemctl list-unit-files xinetd.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service xinetd
+  systemd:
+    name: "xinetd.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"xinetd.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - xinetd.socket"
+  command: systemctl list-unit-files xinetd.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket xinetd
+  systemd:
+    name: "xinetd.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"xinetd.socket" in socket_file_exists.stdout_lines[1]'

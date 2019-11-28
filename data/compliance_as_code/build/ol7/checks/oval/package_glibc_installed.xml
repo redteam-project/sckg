@@ -1,0 +1,34 @@
+<def-group>
+  <definition class="compliance" id="package_glibc_installed"
+  version="1">
+    <metadata>
+      <title>Package glibc Installed</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The RPM package glibc should be installed.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="package glibc is installed"
+      test_ref="test_package_glibc_installed" />
+    </criteria>
+  </definition>
+
+  <linux:rpminfo_test check="all" check_existence="all_exist"
+  id="test_package_glibc_installed" version="1"
+  comment="package glibc is installed">
+    <linux:object object_ref="obj_test_package_glibc_installed" />
+    
+      <linux:state state_ref="ste_test_package_glibc_installed" />
+    
+  </linux:rpminfo_test>
+  <linux:rpminfo_object id="obj_test_package_glibc_installed" version="1">
+    <linux:name>glibc</linux:name>
+  </linux:rpminfo_object>
+  
+    <linux:rpminfo_state id="ste_test_package_glibc_installed" version="1">
+      <linux:evr datatype="evr_string" operation="greater than or equal">0:2.17-55.0.4.el7_0.3</linux:evr>
+    </linux:rpminfo_state>
+  
+
+</def-group>

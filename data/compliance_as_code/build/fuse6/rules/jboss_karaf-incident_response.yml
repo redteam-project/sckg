@@ -1,0 +1,23 @@
+description: 'Ensure well developed procedures exist for incident
+
+  handling. Incidents include any events that are anomalous to the
+
+  environment.'
+identifiers: {}
+ocil: null
+ocil_clause: there are no incident response procedures in place
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Planning for incidents prior to real-life scenarios increases
+
+  incident response time and mitigates damages. Failure to
+
+  adequately prepare, plan, and exercise for these scenarios can
+
+  result in extensive losses.'
+references: {nist: 'IR-1,IR-8'}
+severity: medium
+template: null
+title: Document Incident Response Procedures
+warnings: []

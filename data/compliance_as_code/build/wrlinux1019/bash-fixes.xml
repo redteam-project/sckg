@@ -1,0 +1,1395 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="bash" system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix rule="banner_etc_motd">
+login_banner_text="<sub idref="login_banner_text" />"
+
+# There was a regular-expression matching various banners, needs to be expanded
+expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
+formatted=$(echo "$expanded" | fold -sw 80)
+
+cat &lt;&lt;EOF &gt;/etc/motd
+$formatted
+EOF
+
+printf "\n" &gt;&gt; /etc/motd
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_group" strategy="configure">
+
+chown 0 /etc/group
+</fix><fix rule="accounts_max_concurrent_login_sessions">
+var_accounts_max_concurrent_login_sessions="<sub idref="var_accounts_max_concurrent_login_sessions" />"
+
+if grep -q '^[^#]*\&lt;maxlogins\&gt;' /etc/security/limits.d/*.conf; then
+	sed -i "/^[^#]*\&lt;maxlogins\&gt;/ s/maxlogins.*/maxlogins $var_accounts_max_concurrent_login_sessions/" /etc/security/limits.d/*.conf
+elif grep -q '^[^#]*\&lt;maxlogins\&gt;' /etc/security/limits.conf; then
+	sed -i "/^[^#]*\&lt;maxlogins\&gt;/ s/maxlogins.*/maxlogins $var_accounts_max_concurrent_login_sessions/" /etc/security/limits.conf
+else
+	echo "*	hard	maxlogins	$var_accounts_max_concurrent_login_sessions" &gt;&gt; /etc/security/limits.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_shadow" strategy="configure">
+
+chgrp 0 /etc/shadow
+</fix><fix rule="accounts_umask_etc_profile">
+var_accounts_user_umask="<sub idref="var_accounts_user_umask" />"
+
+grep -q umask /etc/profile &amp;&amp; \
+  sed -i "s/umask.*/umask $var_accounts_user_umask/g" /etc/profile
+if ! [ $? -eq 0 ]; then
+    echo "umask $var_accounts_user_umask" &gt;&gt; /etc/profile
+fi
+</fix><fix rule="no_user_host_based_files">
+# Identify local mounts
+MOUNT_LIST=$(df --local | awk '{ print $6 }')
+
+# Find file on each listed mount point
+for cur_mount in ${MOUNT_LIST}
+do
+	find ${cur_mount} -xdev -type f -name ".shosts" -exec rm -f {} \;
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_passwd" strategy="configure">
+
+chown 0 /etc/passwd
+</fix><fix rule="set_password_hashing_algorithm_logindefs">if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
+	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
+else
+	echo "" &gt;&gt; /etc/login.defs
+	echo "ENCRYPT_METHOD SHA512" &gt;&gt; /etc/login.defs
+fi
+</fix><fix rule="auditd_data_retention_admin_space_left_action">
+var_auditd_admin_space_left_action="<sub idref="var_auditd_admin_space_left_action" />"
+
+AUDITCONFIG=/etc/audit/auditd.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDITCONFIG '^admin_space_left_action' "$var_auditd_admin_space_left_action" "@CCENUM@"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="coredump_disable_backtraces" strategy="restrict">if [ -e "/etc/systemd/coredump.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*ProcessSizeMax\s*=\s*/Id" "/etc/systemd/coredump.conf"
+else
+    touch "/etc/systemd/coredump.conf"
+fi
+cp "/etc/systemd/coredump.conf" "/etc/systemd/coredump.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "ProcessSizeMax=0" &gt;&gt; "/etc/systemd/coredump.conf"
+# Clean up after ourselves.
+rm "/etc/systemd/coredump.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_freq" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*freq\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "freq = 50" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_do_not_permit_user_env" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitUserEnvironment yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_sshd_pub_key" strategy="configure">
+find /etc/ssh/ -regex '^.*.pub$' -exec chmod 0644 {} \;
+</fix><fix complexity="low" disruption="low" reboot="false" rule="configure_firewalld_ports" strategy="configure">
+
+if ! rpm -q --quiet "firewalld" ; then
+    yum install -y "firewalld"
+fi
+firewalld_sshd_zone="<sub idref="firewalld_sshd_zone" />"
+
+# This assumes that firewalld_sshd_zone is one of the pre-defined zones
+if [ ! -f /etc/firewalld/zones/${firewalld_sshd_zone}.xml ]; then
+    cp /usr/lib/firewalld/zones/${firewalld_sshd_zone}.xml /etc/firewalld/zones/${firewalld_sshd_zone}.xml
+fi
+if ! grep -q 'service name="ssh"' /etc/firewalld/zones/${firewalld_sshd_zone}.xml; then
+    sed -i '/&lt;\/description&gt;/a \
+  &lt;service name="ssh"/&gt;' /etc/firewalld/zones/${firewalld_sshd_zone}.xml
+fi
+
+# Check if any eth interface is bounded to the zone with SSH service enabled
+nic_bound=false
+eth_interface_list=$(ip link show up | cut -d ' ' -f2 | cut -d ':' -s -f1 | grep -E '^(en|eth)')
+for interface in $eth_interface_list; do
+    if grep -q "ZONE=$firewalld_sshd_zone" /etc/sysconfig/network-scripts/ifcfg-$interface; then
+        nic_bound=true
+        break;
+    fi
+done
+
+if [ $nic_bound = false ];then
+    # Add first NIC to SSH enabled zone
+
+    if ! firewall-cmd --state -q; then
+<sub idref="function_replace_or_append" />
+        replace_or_append "/etc/sysconfig/network-scripts/ifcfg-${eth_interface_list[0]}" '^ZONE=' "$firewalld_sshd_zone" '@CCENUM@' '%s=%s'
+    else
+        # If firewalld service is running, we need to do this step with firewall-cmd
+        # Otherwise firewalld will comunicate with NetworkManage and will revert assigned zone
+        # of NetworkManager managed interfaces upon reload
+        firewall-cmd --zone=$firewalld_sshd_zone --add-interface=${eth_interface_list[0]}
+        firewall-cmd --reload
+    fi
+fi
+</fix><fix rule="sssd_ldap_start_tls">
+
+AUTHCONFIG="/etc/sysconfig/authconfig"
+USELDAPAUTH_REGEX="^USELDAPAUTH="
+SSSD_CONF="/etc/sssd/sssd.conf"
+LDAP_REGEX='[[:space:]]*\[domain\/[^]]*]([^(\n)]*(\n)+)+?[[:space:]]*ldap_id_use_start_tls'
+DOMAIN_REGEX="[[:space:]]*\[domain\/[^]]*]"
+
+# Try find USELDAPAUTH in authconfig. If its here set to 'yes', otherwise append USELDAPAUTH=yes
+grep -qs "^USELDAPAUTH=" "$AUTHCONFIG" &amp;&amp; sed -i 's/^USELDAPAUTH=.*/USELDAPAUTH=yes/g' $AUTHCONFIG
+if ! [ $? -eq 0 ]; then
+        echo "USELDAPAUTH=yes" &gt;&gt; $AUTHCONFIG
+fi
+
+# Try find [domain/..] and ldap_id_use_start_tls in sssd.conf, if it exists, set to 'True'
+# if ldap_id_use_start_tls isn't here, add it
+# if [domain/..] doesn't exist, add it here for default domain
+if grep -qzosP $LDAP_REGEX $SSSD_CONF; then
+        sed -i 's/ldap_id_use_start_tls[^(\n)]*/ldap_id_use_start_tls = True/' $SSSD_CONF
+elif grep -qs $DOMAIN_REGEX $SSSD_CONF; then
+        sed -i "/$DOMAIN_REGEX/a ldap_id_use_start_tls = True" $SSSD_CONF
+else
+        mkdir -p /etc/sssd
+        touch $SSSD_CONF
+        echo -e "[domain/default]\nldap_id_use_start_tls = True" &gt;&gt; $SSSD_CONF
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_net-snmp_removed" strategy="disable">
+# CAUTION: This remediation script will remove net-snmp
+#	   from the system, and may remove any packages
+#	   that depend on net-snmp. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "net-snmp" ; then
+    yum remove -y "net-snmp"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnetd
+#	   from the system, and may remove any packages
+#	   that depend on telnetd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnetd" ; then
+    yum remove -y "telnetd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_inetutils-telnetd_removed" strategy="disable">
+# CAUTION: This remediation script will remove inetutils-telnetd
+#	   from the system, and may remove any packages
+#	   that depend on inetutils-telnetd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "inetutils-telnetd" ; then
+    yum remove -y "inetutils-telnetd"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_passwd" strategy="configure">
+chmod 0644 /etc/passwd
+</fix><fix rule="disable_prelink"># prelink not installed
+if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
+    return 0
+fi
+
+if grep -q ^PRELINKING /etc/sysconfig/prelink
+then
+    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+else
+    printf '\n' &gt;&gt; /etc/sysconfig/prelink
+    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' &gt;&gt; /etc/sysconfig/prelink
+fi
+
+# Undo previous prelink changes to binaries if prelink is available.
+if test -x /usr/sbin/prelink; then
+    /usr/sbin/prelink -ua
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_gssapi_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*GSSAPIAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "GSSAPIAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "GSSAPIAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="sshd_set_keepalive">
+var_sshd_set_keepalive="<sub idref="var_sshd_set_keepalive" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_keepalive" '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnet-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnet-server
+#	   from the system, and may remove any packages
+#	   that depend on telnet-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnet-server" ; then
+    yum remove -y "telnet-server"
+fi
+</fix><fix rule="kernel_module_ipv6_option_disabled">
+# Prevent the IPv6 kernel module (ipv6) from loading the IPv6 networking stack
+echo "options ipv6 disable=1" &gt; /etc/modprobe.d/ipv6.conf
+
+# Since according to: https://access.redhat.com/solutions/72733
+# "ipv6 disable=1" options doesn't always disable the IPv6 networking stack from
+# loading, instruct also sysctl configuration to disable IPv6 according to:
+# https://access.redhat.com/solutions/8709#rhel6disable
+
+declare -a IPV6_SETTINGS=("net.ipv6.conf.all.disable_ipv6" "net.ipv6.conf.default.disable_ipv6")
+
+for setting in ${IPV6_SETTINGS[@]}
+do
+	# Set runtime =1 for setting
+	/sbin/sysctl -q -n -w "$setting=1"
+
+	# If setting is present in /etc/sysctl.conf, change value to "1"
+	# else, add "$setting = 1" to /etc/sysctl.conf
+	if grep -q ^"$setting" /etc/sysctl.conf ; then
+		sed -i "s/^$setting.*/$setting = 1/g" /etc/sysctl.conf
+	else
+		echo "" &gt;&gt; /etc/sysctl.conf
+		echo "# Set $setting = 1 per security requirements" &gt;&gt; /etc/sysctl.conf
+		echo "$setting = 1" &gt;&gt; /etc/sysctl.conf
+	fi
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_strictmodes" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*StrictModes\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "StrictModes yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "StrictModes yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="auditd_audispd_configure_remote_server">
+var_audispd_remote_server="<sub idref="var_audispd_remote_server" />"
+
+
+AUDITCONFIG=/etc/audisp/audisp-remote.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDITCONFIG '^remote_server' "$var_audispd_remote_server" "@CCENUM@"
+</fix><fix rule="auditd_audispd_syslog_plugin_activated">
+var_syslog_active="yes"
+
+
+AUDISP_SYSLOGCONFIG=/etc/audisp/plugins.d/syslog.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDISP_SYSLOGCONFIG '^active' "$var_syslog_active" "@CCENUM@"
+</fix><fix complexity="high" disruption="medium" reboot="false" rule="rpm_verify_permissions" strategy="restrict">
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
+
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS &lt; &lt;(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
+
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
+do
+	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
+done
+
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+	rpm --setperms "${RPM_PACKAGE}"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ntpdate_removed" strategy="disable">
+# CAUTION: This remediation script will remove ntpdate
+#	   from the system, and may remove any packages
+#	   that depend on ntpdate. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "ntpdate" ; then
+    yum remove -y "ntpdate"
+fi
+</fix><fix rule="rsyslog_cron_logging">
+if ! grep -s "^\s*cron\.\*\s*/var/log/cron$" /etc/rsyslog.conf /etc/rsyslog.d/*.conf; then
+	mkdir -p /etc/rsyslog.d
+	echo "cron.*	/var/log/cron" &gt;&gt; /etc/rsyslog.d/cron.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_passwd" strategy="configure">
+
+chgrp 0 /etc/passwd
+</fix><fix rule="selinux_state">
+var_selinux_state="<sub idref="var_selinux_state" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+
+fixfiles onboot
+fixfiles -f relabel
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_shadow" strategy="configure">
+
+chown 0 /etc/shadow
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_shadow" strategy="configure">
+chmod 0000 /etc/shadow
+</fix><fix rule="mount_option_noexec_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "noexec" "" "nfs4"
+</fix><fix rule="accounts_logon_fail_delay">
+
+# Set variables
+var_accounts_fail_delay="<sub idref="var_accounts_fail_delay" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/login.defs' '^FAIL_DELAY' "$var_accounts_fail_delay" '@CCENUM@' '%s %s'
+</fix><fix rule="accounts_passwords_pam_faillock_deny_root">
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+# This script fixes absence of pam_faillock.so in PAM stack or the
+# absense of even_deny_root in pam_faillock.so arguments
+# When inserting auth pam_faillock.so entries,
+# the entry with preauth argument will be added before pam_unix.so module
+# and entry with authfail argument will be added before pam_deny.so module.
+
+# The placement of pam_faillock.so entries will not be changed
+# if they are already present
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	# if PAM file is missing, system is not using PAM or broken
+	if [ ! -f $pamFile ]; then
+		continue
+	fi
+
+	# is 'auth required' here?
+	if grep -q "^auth.*required.*pam_faillock.so.*" $pamFile; then
+		# has 'auth required' even_deny_root option?
+		if ! grep -q "^auth.*required.*pam_faillock.so.*preauth.*even_deny_root" $pamFile; then
+			# even_deny_root is not present
+			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*\).*/\1 even_deny_root/" $pamFile
+		fi
+	else
+		# no 'auth required', add it
+		sed -i --follow-symlinks "/^auth.*pam_unix.so.*/i auth required pam_faillock.so preauth silent even_deny_root" $pamFile
+	fi
+
+	# is 'auth [default=die]' here?
+	if grep -q "^auth.*\[default=die\].*pam_faillock.so.*" $pamFile; then
+		# has 'auth [default=die]' even_deny_root option?
+		if ! grep -q "^auth.*\[default=die\].*pam_faillock.so.*authfail.*even_deny_root" $pamFile; then
+			# even_deny_root is not present
+			sed -i --follow-symlinks "s/\(^auth.*\[default=die\].*pam_faillock.so.*authfail.*\).*/\1 even_deny_root/" $pamFile
+		fi
+	else
+		# no 'auth [default=die]', add it
+		sed -i --follow-symlinks "/^auth.*pam_unix.so.*/a auth [default=die] pam_faillock.so authfail silent even_deny_root" $pamFile
+	fi
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_gshadow" strategy="configure">
+
+chgrp 0 /etc/gshadow
+</fix><fix rule="audit_rules_unsuccessful_file_modification_creat">
+<sub idref="function_create_audit_remediation_unsuccessful_file_modification_detailed" />
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_etc_group" strategy="configure">
+
+chgrp 0 /etc/group
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_name_format" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*name_format\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "name_format = hostname" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix rule="auditd_audispd_encrypt_sent_records">
+
+
+AUDISP_REMOTE_CONFIG="/etc/audisp/audisp-remote.conf"
+option="^enable_krb5"
+value="yes"
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDISP_REMOTE_CONFIG "$option" "$value" "@CCENUM@"
+</fix><fix rule="audit_rules_kernel_module_loading_delete">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S delete_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S delete_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="set_password_hashing_algorithm_systemauth">
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if ! grep -q "^password.*sufficient.*pam_unix.so.*sha512" $pamFile; then
+		sed -i --follow-symlinks "/^password.*sufficient.*pam_unix.so/ s/$/ sha512/" $pamFile
+	fi
+done
+</fix><fix rule="grub2_enable_fips_mode">
+
+# prelink not installed
+if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
+    return 0
+fi
+
+if grep -q ^PRELINKING /etc/sysconfig/prelink
+then
+    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+else
+    printf '\n' &gt;&gt; /etc/sysconfig/prelink
+    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' &gt;&gt; /etc/sysconfig/prelink
+fi
+
+# Undo previous prelink changes to binaries if prelink is available.
+if test -x /usr/sbin/prelink; then
+    /usr/sbin/prelink -ua
+fi
+
+if grep -q -m1 -o aes /proc/cpuinfo; then
+	if ! rpm -q --quiet "dracut-fips-aesni" ; then
+    yum install -y "dracut-fips-aesni"
+fi
+fi
+if ! rpm -q --quiet "dracut-fips" ; then
+    yum install -y "dracut-fips"
+fi
+
+dracut -f
+
+# Correct the form of default kernel command line in  grub
+if grep -q '^GRUB_CMDLINE_LINUX=.*fips=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a fips= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)fips=[^[:space:]]*\(.*"\)/\1 fips=1 \2/'  /etc/default/grub
+else
+	# no existing fips=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 fips=1"/'  /etc/default/grub
+fi
+
+# Get the UUID of the device mounted at /boot.
+BOOT_UUID=$(findmnt --noheadings --output uuid --target /boot)
+
+if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a boot= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/ grub
+else
+	# no existing boot=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 boot=UUID='${BOOT_UUID}'"/'  /etc/default/grub
+fi
+
+# Correct the form of kernel command line for each installed kernel in the bootloader
+/sbin/grubby --update-kernel=ALL --args="fips=1 boot=UUID=${BOOT_UUID}"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_tftp-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove tftp-server
+#	   from the system, and may remove any packages
+#	   that depend on tftp-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "tftp-server" ; then
+    yum remove -y "tftp-server"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_log_format" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*log_format\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "log_format = ENRICHED" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_set_loglevel_verbose" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*LogLevel\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "LogLevel VERBOSE" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "LogLevel VERBOSE" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="no_empty_passwords">sed --follow-symlinks -i 's/\&lt;nullok\&gt;//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\&lt;nullok\&gt;//g' /etc/pam.d/password-auth
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_use_priv_separation" strategy="restrict">
+var_sshd_priv_separation="<sub idref="var_sshd_priv_separation" />"
+
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*UsePrivilegeSeparation\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "UsePrivilegeSeparation $var_sshd_priv_separation" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "UsePrivilegeSeparation $var_sshd_priv_separation" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="rsyslog_remote_loghost">
+rsyslog_remote_loghost_address="<sub idref="rsyslog_remote_loghost_address" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/rsyslog.conf' '^\*\.\*' "@@$rsyslog_remote_loghost_address" '@CCENUM@' '%s %s'
+</fix><fix rule="mount_option_krb_sec_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "sec=krb5:krb5i:krb5p"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_root_login" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitRootLogin\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitRootLogin no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitRootLogin no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="sshd_disable_compression">
+var_sshd_disable_compression="<sub idref="var_sshd_disable_compression" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^Compression' "$var_sshd_disable_compression" '@CCENUM@' '%s %s'
+</fix><fix rule="account_disable_post_pw_expiration">
+var_account_disable_post_pw_expiration="<sub idref="var_account_disable_post_pw_expiration" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/default/useradd' '^INACTIVE' "$var_account_disable_post_pw_expiration" '@CCENUM@' '%s=%s'
+</fix><fix rule="require_singleuser_auth">
+service_file="/usr/lib/systemd/system/rescue.service"
+
+sulogin='/bin/sh -c "/sbin/sulogin; /usr/bin/systemctl --fail --no-block default"'
+
+if grep "^ExecStart=.*" "$service_file" ; then
+    sed -i "s%^ExecStart=.*%ExecStart=-$sulogin%" "$service_file"
+else
+    echo "ExecStart=-$sulogin" &gt;&gt; "$service_file"
+fi
+</fix><fix rule="accounts_have_homedir_login_defs">
+if ! grep -q ^CREATE_HOME /etc/login.defs; then
+	echo "CREATE_HOME     yes" &gt;&gt; /etc/login.defs
+else
+	sed -i "s/^\(CREATE_HOME\).*/\1 yes/g" /etc/login.defs
+fi
+</fix><fix rule="audit_rules_sysadmin_actions">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/sudoers" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers" "wa" "actions"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/sudoers.d" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers.d" "wa" "actions"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_etc_gshadow" strategy="configure">
+
+chown 0 /etc/gshadow
+</fix><fix rule="audit_rules_usergroup_modification">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/group" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/group" "wa" "audit_rules_usergroup_modification"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/passwd" "wa" "audit_rules_usergroup_modification"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/gshadow" "wa" "audit_rules_usergroup_modification"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+<sub idref="function_fix_audit_watch_rule" />
+fix_audit_watch_rule "auditctl" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_usergroup_modification"
+</fix><fix rule="audit_rules_kernel_module_loading_finit">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S finit_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S finit_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix rule="securetty_root_login_console_only">sed -i '/^vc\//d' /etc/securetty
+</fix><fix rule="aide_periodic_cron_checking">
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+
+if ! grep -q "/usr/sbin/aide --check" /etc/crontab ; then
+    echo "05 4 * * * root /usr/sbin/aide --check" &gt;&gt; /etc/crontab
+fi
+</fix><fix rule="no_direct_root_logins">echo &gt; /etc/securetty
+</fix><fix rule="accounts_passwords_pam_faillock_deny">
+var_accounts_passwords_pam_faillock_deny="<sub idref="var_accounts_passwords_pam_faillock_deny" />"
+<sub idref="function_include_set_faillock_option" />
+include_set_faillock_option
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+	set_faillock_option "$pam_file" "deny" "$var_accounts_passwords_pam_faillock_deny"
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_openssh-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove openssh-server
+#	   from the system, and may remove any packages
+#	   that depend on openssh-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "openssh-server" ; then
+    yum remove -y "openssh-server"
+fi
+</fix><fix rule="auditd_data_retention_action_mail_acct">
+var_auditd_action_mail_acct="<sub idref="var_auditd_action_mail_acct" />"
+
+AUDITCONFIG=/etc/audit/auditd.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDITCONFIG '^action_mail_acct' "$var_auditd_action_mail_acct" "@CCENUM@"
+</fix><fix rule="sshd_use_approved_macs">
+sshd_approved_macs="<sub idref="sshd_approved_macs" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^MACs' "$sshd_approved_macs" '@CCENUM@' '%s %s'
+</fix><fix rule="aide_scan_notification">
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+
+CRONTAB=/etc/crontab
+CRONDIRS='/etc/cron.d /etc/cron.daily /etc/cron.weekly /etc/cron.monthly'
+
+if [ -f /var/spool/cron/root ]; then
+	VARSPOOL=/var/spool/cron/root
+fi
+
+if ! grep -qR '^.*\/usr\/sbin\/aide\s*\-\-check.*|.*\/bin\/mail\s*-s\s*".*"\s*root@.*$' $CRONTAB $VARSPOOL $CRONDIRS; then
+	echo '0 5 * * * root /usr/sbin/aide  --check | /bin/mail -s "$(hostname) - AIDE Integrity Check" root@localhost' &gt;&gt; $CRONTAB
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_rsh-server_removed" strategy="disable">
+# CAUTION: This remediation script will remove rsh-server
+#	   from the system, and may remove any packages
+#	   that depend on rsh-server. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "rsh-server" ; then
+    yum remove -y "rsh-server"
+fi
+</fix><fix rule="accounts_tmout">
+var_accounts_tmout="<sub idref="var_accounts_tmout" />"
+
+if grep --silent ^TMOUT /etc/profile ; then
+        sed -i "s/^TMOUT.*/TMOUT=$var_accounts_tmout/g" /etc/profile
+else
+        echo -e "\n# Set TMOUT to $var_accounts_tmout per security requirements" &gt;&gt; /etc/profile
+        echo "TMOUT=$var_accounts_tmout" &gt;&gt; /etc/profile
+fi
+</fix><fix rule="sshd_set_idle_timeout">
+sshd_idle_timeout_value="<sub idref="sshd_idle_timeout_value" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeout_value '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_telnetd-ssl_removed" strategy="disable">
+# CAUTION: This remediation script will remove telnetd-ssl
+#	   from the system, and may remove any packages
+#	   that depend on telnetd-ssl. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "telnetd-ssl" ; then
+    yum remove -y "telnetd-ssl"
+fi
+</fix><fix rule="audit_rules_unsuccessful_file_modification_open">
+<sub idref="function_create_audit_remediation_unsuccessful_file_modification_detailed" />
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+</fix><fix rule="chronyd_or_ntpd_set_maxpoll">
+var_time_service_set_maxpoll="<sub idref="var_time_service_set_maxpoll" />"
+
+
+config_file="/etc/ntp.conf"
+/usr/sbin/pidof ntpd || config_file="/etc/chrony.conf"
+
+
+# Set maxpoll values to var_time_service_set_maxpoll
+sed -i "s/^\(server.*maxpoll\) [0-9][0-9]*\(.*\)$/\1 $var_time_service_set_maxpoll \2/" "$config_file"
+
+# Add maxpoll to server entries without maxpoll
+grep "^server" "$config_file" | grep -v maxpoll | while read -r line ; do
+        sed -i "s/$line/&amp; maxpoll $var_time_service_set_maxpoll/" "$config_file"
+done
+</fix><fix rule="audit_rules_unsuccessful_file_modification_open_by_handle_at">
+<sub idref="function_create_audit_remediation_unsuccessful_file_modification_detailed" />
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+</fix><fix complexity="low" disruption="low" reboot="false" rule="disable_host_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*HostbasedAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "HostbasedAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "HostbasedAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="coredump_disable_storage" strategy="restrict">if [ -e "/etc/systemd/coredump.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*Storage\s*=\s*/Id" "/etc/systemd/coredump.conf"
+else
+    touch "/etc/systemd/coredump.conf"
+fi
+cp "/etc/systemd/coredump.conf" "/etc/systemd/coredump.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "Storage=none" &gt;&gt; "/etc/systemd/coredump.conf"
+# Clean up after ourselves.
+rm "/etc/systemd/coredump.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_gshadow" strategy="configure">
+chmod 0000 /etc/gshadow
+</fix><fix rule="accounts_password_pam_retry">
+var_password_pam_retry="<sub idref="var_password_pam_retry" />"
+
+if grep -q "retry=" /etc/pam.d/system-auth ; then
+	sed -i --follow-symlinks "s/\(retry *= *\).*/\1$var_password_pam_retry/" /etc/pam.d/system-auth
+else
+	sed -i --follow-symlinks "/pam_pwquality.so/ s/$/ retry=$var_password_pam_retry/" /etc/pam.d/system-auth
+fi
+</fix><fix rule="accounts_password_pam_unix_remember">
+var_password_pam_unix_remember="<sub idref="var_password_pam_unix_remember" />"
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if grep -q "remember=" $pamFile; then
+		sed -i --follow-symlinks "s/\(^password.*sufficient.*pam_unix.so.*\)\(\(remember *= *\)[^ $]*\)/\1remember=$var_password_pam_unix_remember/" $pamFile
+	else
+		sed -i --follow-symlinks "/^password[[:space:]]\+sufficient[[:space:]]\+pam_unix.so/ s/$/ remember=$var_password_pam_unix_remember/" $pamFile
+	fi
+done
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_vsftpd_removed" strategy="disable">
+# CAUTION: This remediation script will remove vsftpd
+#	   from the system, and may remove any packages
+#	   that depend on vsftpd. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "vsftpd" ; then
+    yum remove -y "vsftpd"
+fi
+</fix><fix rule="audit_rules_system_shutdown">
+# Traverse all of:
+#
+# /etc/audit/audit.rules,			(for auditctl case)
+# /etc/audit/rules.d/*.rules			(for augenrules case)
+#
+# files to check if '-f .*' setting is present in that '*.rules' file already.
+# If found, delete such occurrence since auditctl(8) manual page instructs the
+# '-f 2' rule should be placed as the last rule in the configuration
+find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
+
+# Append '-f 2' requirement at the end of both:
+# * /etc/audit/audit.rules file 		(for auditctl case)
+# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
+
+for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
+do
+	echo '' &gt;&gt; $AUDIT_FILE
+	echo '# Set the audit.rules configuration to halt system upon audit failure per security requirements' &gt;&gt; $AUDIT_FILE
+	echo '-f 2' &gt;&gt; $AUDIT_FILE
+done
+</fix><fix reboot="false" rule="mount_option_nosuid_removable_partitions">
+var_removable_partition="<sub idref="var_removable_partition" />"
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+</fix><fix rule="no_host_based_files">
+# Identify local mounts
+MOUNT_LIST=$(df --local | awk '{ print $6 }')
+
+# Find file on each listed mount point
+for cur_mount in ${MOUNT_LIST}
+do
+	find ${cur_mount} -xdev -type f -name "shosts.equiv" -exec rm -f {} \;
+done
+</fix><fix rule="audit_rules_privileged_commands">
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_perform_audit_rules_privileged_commands_remediation" />
+perform_audit_rules_privileged_commands_remediation "auditctl" "1000"
+perform_audit_rules_privileged_commands_remediation "augenrules" "1000"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_local_events" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*local_events\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "local_events = yes" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix rule="ensure_logrotate_activated">
+LOGROTATE_CONF_FILE="/etc/logrotate.conf"
+CRON_DAILY_LOGROTATE_FILE="/etc/cron.daily/logrotate"
+
+# daily rotation is configured
+grep -q "^daily$" $LOGROTATE_CONF_FILE|| echo "daily" &gt;&gt; $LOGROTATE_CONF_FILE
+
+# remove any line configuring weekly, monthly or yearly rotation
+sed -i -r "/^(weekly|monthly|yearly)$/d" $LOGROTATE_CONF_FILE
+
+# configure cron.daily if not already
+if ! grep -q "^[[:space:]]*/usr/sbin/logrotate[[:alnum:][:blank:][:punct:]]*$LOGROTATE_CONF_FILE$" $CRON_DAILY_LOGROTATE_FILE; then
+	echo "#!/bin/sh" &gt; $CRON_DAILY_LOGROTATE_FILE
+	echo "/usr/sbin/logrotate $LOGROTATE_CONF_FILE" &gt;&gt; $CRON_DAILY_LOGROTATE_FILE
+fi
+</fix><fix rule="postfix_prevent_unrestricted_relay">
+if ! grep -q ^smtpd_client_restrictions /etc/postfix/main.cf; then
+	echo "smtpd_client_restrictions = permit_mynetworks,reject" &gt;&gt; /etc/postfix/main.cf
+else
+	sed -i "s/^smtpd_client_restrictions.*/smtpd_client_restrictions = permit_mynetworks,reject/g" /etc/postfix/main.cf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_user_known_hosts" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*IgnoreUserKnownHosts\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "IgnoreUserKnownHosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "IgnoreUserKnownHosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_etc_group" strategy="configure">
+chmod 0644 /etc/group
+</fix><fix rule="restrict_serial_port_logins">sed -i '/ttyS/d' /etc/securetty
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_empty_passwords" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitEmptyPasswords\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitEmptyPasswords no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitEmptyPasswords no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="accounts_umask_etc_login_defs">
+var_accounts_user_umask="<sub idref="var_accounts_user_umask" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/login.defs' '^UMASK' "$var_accounts_user_umask" '@CCENUM@' '%s %s'
+</fix><fix rule="disable_ctrlaltdel_reboot">systemctl mask ctrl-alt-del.target
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_owner_cron_allow" strategy="configure">
+
+chown 0 /etc/cron.allow
+</fix><fix rule="accounts_maximum_age_login_defs">
+var_accounts_maximum_age_login_defs="<sub idref="var_accounts_maximum_age_login_defs" />"
+
+grep -q ^PASS_MAX_DAYS /etc/login.defs &amp;&amp; \
+  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" &gt;&gt; /etc/login.defs
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_nis_removed" strategy="disable">
+# CAUTION: This remediation script will remove nis
+#	   from the system, and may remove any packages
+#	   that depend on nis. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "nis" ; then
+    yum remove -y "nis"
+fi
+</fix><fix rule="mount_option_nosuid_remote_filesystems">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+ensure_mount_option_for_vfstype "nfs[4]?" "nosuid" "" "nfs4"
+</fix><fix rule="snmpd_not_default_password">
+if grep -s "public\|private" /etc/snmp/snmpd.conf | grep -qv "^#"; then
+	sed -i "/^\s*#/b;/public\|private/ s/^/#/" /etc/snmp/snmpd.conf
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="package_ypserv_removed" strategy="disable">
+# CAUTION: This remediation script will remove ypserv
+#	   from the system, and may remove any packages
+#	   that depend on ypserv. Execute this
+#	   remediation AFTER testing on a non-production
+#	   system!
+
+if rpm -q --quiet "ypserv" ; then
+    yum remove -y "ypserv"
+fi
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_warning_banner" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Banner /etc/issue" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "Banner /etc/issue" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="ensure_gpgcheck_local_packages">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' '@CCENUM@'
+</fix><fix rule="banner_etc_issue">
+login_banner_text="<sub idref="login_banner_text" />"
+
+# There was a regular-expression matching various banners, needs to be expanded
+expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
+formatted=$(echo "$expanded" | fold -sw 80)
+
+cat &lt;&lt;EOF &gt;/etc/issue
+$formatted
+EOF
+
+printf "\n" &gt;&gt; /etc/issue
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_rekey_limit" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*RekeyLimit\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "RekeyLimit 512M 1h" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "RekeyLimit 512M 1h" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="rpm_verify_hashes">
+# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
+files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
+# From files names get package names and change newline to space, because rpm writes each package to new line
+packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
+
+yum reinstall -y $packages_to_reinstall
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_set_loglevel_info" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*LogLevel\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "LogLevel INFO" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "LogLevel INFO" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_kerb_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*KerberosAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "KerberosAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "KerberosAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="auditd_data_retention_num_logs">
+var_auditd_num_logs="<sub idref="var_auditd_num_logs" />"
+
+AUDITCONFIG=/etc/audit/auditd.conf
+<sub idref="function_replace_or_append" />
+replace_or_append $AUDITCONFIG '^num_logs' "$var_auditd_num_logs" "@CCENUM@"
+</fix><fix rule="audit_rules_kernel_module_loading_init">
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+# Note: 32-bit and 64-bit kernel syscall numbers not always line up =&gt;
+#       it's required on a 64-bit system to check also for the presence
+#       of 32-bit's equivalent of the corresponding rule.
+#       (See `man 7 audit.rules` for details )
+[ "$(getconf LONG_BIT)" = "32" ] &amp;&amp; RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S init_module \(-F key=\|-k \).*"
+	GROUP="modules"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S init_module -k modules"
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+<sub idref="function_fix_audit_syscall_rule" />
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+</fix><fix reboot="false" rule="mount_option_dev_shm_nodev">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nodev" "" ""
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+</fix><fix reboot="false" rule="mount_option_dev_shm_nosuid">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_rhosts" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*IgnoreRhosts\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "IgnoreRhosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "IgnoreRhosts yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="sshd_disable_rhosts_rsa">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_disable_pubkey_auth" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PubkeyAuthentication\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PubkeyAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PubkeyAuthentication no" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="auditd_data_retention_space_left">
+var_auditd_space_left="<sub idref="var_auditd_space_left" />"
+
+grep -q "^space_left[[:space:]]*=.*$" /etc/audit/auditd.conf &amp;&amp; \
+  sed -i "s/^space_left[[:space:]]*=.*$/space_left = $var_auditd_space_left/g" /etc/audit/auditd.conf || \
+  echo "space_left = $var_auditd_space_left" &gt;&gt; /etc/audit/auditd.conf
+</fix><fix rule="sshd_use_approved_ciphers">
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/ssh/sshd_config' '^Ciphers' 'aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc' '@CCENUM@' '%s %s'
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_allow_only_protocol2" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Protocol 2" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "Protocol 2" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="audit_rules_unsuccessful_file_modification_ftruncate">
+<sub idref="function_create_audit_remediation_unsuccessful_file_modification_detailed" />
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+</fix><fix rule="accounts_minimum_age_login_defs">
+var_accounts_minimum_age_login_defs="<sub idref="var_accounts_minimum_age_login_defs" />"
+
+grep -q ^PASS_MIN_DAYS /etc/login.defs &amp;&amp; \
+  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" &gt;&gt; /etc/login.defs
+fi
+</fix><fix rule="file_ownership_var_log_audit">
+if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
+  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
+  if ! [ "${GROUP}" == 'root' ] ; then
+    chown root.${GROUP} /var/log/audit
+    chown root.${GROUP} /var/log/audit/audit.log*
+  else
+    chown root.root /var/log/audit
+    chown root.root /var/log/audit/audit.log*
+  fi
+else
+  chown root.root /var/log/audit
+  chown root.root /var/log/audit/audit.log*
+fi
+</fix><fix rule="sssd_ldap_configure_tls_ca_dir">
+var_sssd_ldap_tls_ca_dir="<sub idref="var_sssd_ldap_tls_ca_dir" />"
+
+SSSD_CONF="/etc/sssd/sssd.conf"
+LDAP_REGEX='[[:space:]]*\[domain\/[^]]*]([^(\n)]*(\n)+)+?[[:space:]]*ldap_tls_cacertdir'
+DOMAIN_REGEX="[[:space:]]*\[domain\/[^]]*]"
+
+# Try find [domain/..] and ldap_tls_cacertdir in sssd.conf, if it exists, set to CA directory
+# if it isn't here, add it, if [domain/..] doesn't exist, add it here for default domain
+if grep -qzosP $LDAP_REGEX $SSSD_CONF; then
+        sed -i "s~ldap_tls_cacertdir[^(\n)]*~ldap_tls_cacertdir = $var_sssd_ldap_tls_ca_dir~" $SSSD_CONF
+elif grep -qs $DOMAIN_REGEX $SSSD_CONF; then
+        sed -i "/$DOMAIN_REGEX/a ldap_tls_cacertdir = $var_sssd_ldap_tls_ca_dir" $SSSD_CONF
+else
+        mkdir -p /etc/sssd
+        touch $SSSD_CONF
+        echo -e "[domain/default]\nldap_tls_cacertdir = $var_sssd_ldap_tls_ca_dir" &gt;&gt; $SSSD_CONF
+fi
+</fix><fix rule="selinux_policytype">
+var_selinux_policy_name="<sub idref="var_selinux_policy_name" />"
+<sub idref="function_replace_or_append" />
+replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_name '@CCENUM@' '%s=%s'
+</fix><fix reboot="false" rule="mount_option_home_nosuid">
+<sub idref="function_include_mount_options_functions" />
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /home || { echo "Not remediating, because there is no record of /home in /etc/fstab" &gt;&amp;2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/home" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/home"
+}
+
+perform_remediation
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_enable_x11_forwarding" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*X11Forwarding\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "X11Forwarding yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "X11Forwarding yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="set_password_hashing_algorithm_libuserconf">
+LIBUSER_CONF="/etc/libuser.conf"
+CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
+
+# Try find crypt_style in [defaults] section. If it is here, then change algorithm to sha512.
+# If it isn't here, then add it to [defaults] section.
+if grep -qzosP $CRYPT_STYLE_REGEX $LIBUSER_CONF ; then
+        sed -i "s/\(crypt_style[[:space:]]*=[[:space:]]*\).*/\1sha512/g" $LIBUSER_CONF
+elif grep -qs "\[defaults]" $LIBUSER_CONF ; then
+        sed -i "/[[:space:]]*\[defaults]/a crypt_style = sha512" $LIBUSER_CONF
+else
+        echo -e "[defaults]\ncrypt_style = sha512" &gt;&gt; $LIBUSER_CONF
+fi
+</fix><fix rule="accounts_no_uid_except_zero">awk -F: '$3 == 0 &amp;&amp; $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
+</fix><fix complexity="low" disruption="low" reboot="false" rule="sshd_print_last_log" strategy="restrict">if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PrintLastLog\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PrintLastLog yes" &gt;&gt; "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" &gt; "/etc/ssh/sshd_config"
+    printf '%s\n' "PrintLastLog yes" &gt;&gt; "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" &gt;&gt; "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+</fix><fix rule="display_login_attempts">if grep -q "^session.*pam_lastlog.so" /etc/pam.d/postlogin; then
+	sed -i --follow-symlinks "/pam_lastlog.so/d" /etc/pam.d/postlogin
+fi
+
+echo "session     [default=1]   pam_lastlog.so nowtmp showfailed" &gt;&gt; /etc/pam.d/postlogin
+echo "session     optional      pam_lastlog.so silent noupdate showfailed" &gt;&gt; /etc/pam.d/postlogin
+</fix><fix complexity="low" disruption="low" reboot="false" rule="auditd_write_logs" strategy="restrict">if [ -e "/etc/audit/auditd.conf" ] ; then
+    LC_ALL=C sed -i "/^\s*write_logs\s*=\s*/Id" "/etc/audit/auditd.conf"
+else
+    touch "/etc/audit/auditd.conf"
+fi
+cp "/etc/audit/auditd.conf" "/etc/audit/auditd.conf.bak"
+# Insert at the end of the file
+printf '%s\n' "write_logs = yes" &gt;&gt; "/etc/audit/auditd.conf"
+# Clean up after ourselves.
+rm "/etc/audit/auditd.conf.bak"
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_permissions_sshd_private_key" strategy="configure">
+find /etc/ssh/ -regex '^.*_key$' -exec chmod 0640 {} \;
+</fix><fix complexity="low" disruption="low" reboot="false" rule="file_groupowner_cron_allow" strategy="configure">
+
+chgrp 0 /etc/cron.allow
+</fix></fix-group></fix-content>

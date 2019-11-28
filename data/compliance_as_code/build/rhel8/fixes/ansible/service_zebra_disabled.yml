@@ -1,0 +1,74 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Unit Service Exists - zebra.service
+  command: systemctl list-unit-files zebra.service
+  register: service_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_zebra_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80889-9
+    - NIST-800-53-SC-32
+
+- name: Disable service zebra
+  systemd:
+    name: zebra.service
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"zebra.service" in service_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_zebra_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80889-9
+    - NIST-800-53-SC-32
+
+- name: Unit Socket Exists - zebra.socket
+  command: systemctl list-unit-files zebra.socket
+  register: socket_file_exists
+  changed_when: false
+  ignore_errors: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_zebra_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80889-9
+    - NIST-800-53-SC-32
+
+- name: Disable socket zebra
+  systemd:
+    name: zebra.socket
+    enabled: 'no'
+    state: stopped
+    masked: 'yes'
+  when:
+    - '"zebra.socket" in socket_file_exists.stdout_lines[1]'
+    - ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - service_zebra_disabled
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80889-9
+    - NIST-800-53-SC-32

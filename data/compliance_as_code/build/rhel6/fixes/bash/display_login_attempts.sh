@@ -1,0 +1,1 @@
+# platform = multi_platform_wrlinux,multi_platform_rhel,multi_platform_fedora,multi_platform_olsed -i --follow-symlinks '/pam_limits.so/a session\t    required\t  pam_lastlog.so showfailed' /etc/pam.d/system-auth

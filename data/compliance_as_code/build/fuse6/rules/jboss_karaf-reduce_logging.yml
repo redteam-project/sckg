@@ -1,0 +1,20 @@
+description: 'The server must configure auditing to reduce the
+
+  likelihood of storage capacity being exceeded.'
+identifiers: {}
+ocil: null
+ocil_clause: logging capacity has not been reduced
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: "The server auditing capability is critical for accurate\nforensic analysis.\
+  \ Alerting administrators when audit log\nsize thresholds are exceeded helps ensure\
+  \ the administrators\ncan respond to heavy activity in a timely manner. Failure\
+  \ to\nalert increases the probability that an adversary's actions\nwill go undetected.\_\
+  The server or the configured Network\nAttached Storage Device (SAN) must alert administrators\n\
+  when audit log usage reaches a defined percentage of overall\ncapacity."
+references: {}
+severity: low
+template: null
+title: Reduce Logging To Decrease Storage Capacity Limitations
+warnings: []

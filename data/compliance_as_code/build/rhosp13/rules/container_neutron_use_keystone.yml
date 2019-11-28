@@ -1,0 +1,21 @@
+description: "OpenStack supports various authentication strategies like noauth, keystone\
+  \ etc.\nIf the \u2018noauth\u2019 strategy is used then the users could interact\
+  \ with OpenStack services\nwithout any authentication. This could be a potential\
+  \ risk since an attacker might gain\nunauthorized access to the OpenStack components.\
+  \ Thus it is strongly recommended that\nall services must be authenticated with\
+  \ keystone using their service accounts.\n\n<br />\n<br />\nPass: If value of parameter\
+  \ auth_strategy under [DEFAULT] section in\n/var/lib/config-data/puppet-generated/neutron/etc/neutron/neutron.conf\
+  \ is set to keystone.\n\n<br />\n<br />\nFail: If value of parameter auth_strategy\
+  \ under [DEFAULT] section is set to noauth or noauth2."
+identifiers: {}
+ocil: null
+ocil_clause: null
+oval_external_content: null
+platform: null
+prodtype: rhosp13
+rationale: ''
+references: {nist: IA-4(4)}
+severity: high
+template: null
+title: 'Check-Neutron-03: Is keystone used for authentication?'
+warnings: []

@@ -1,0 +1,22 @@
+# platform = multi_platform_all
+# complexity = low
+# strategy = enable
+# reboot = false
+# disruption = low
+- name: Install sudo Package
+  hosts: '@@HOSTS@@'
+  become: true
+  tags:
+    - NIST-800-53-AC-6(5)
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - medium_severity
+    - no_reboot_needed
+    - package_sudo_installed
+  tasks:
+
+    - name: Ensure sudo is installed
+      package:
+        name: sudo
+        state: present

@@ -1,0 +1,27 @@
+description: '
+
+  To properly set the permissions of <code>/etc/origin/</code>, run the command:
+
+  <pre>$ sudo chmod 0700 /etc/origin/</pre>'
+identifiers: {}
+ocil: 'To check the permissions of <code>/etc/origin/</code>, run the command:
+
+  <pre>$ ls -l /etc/origin/</pre>
+
+  If properly configured, the output should indicate the following permissions:
+
+  <code>-rwx------</code>'
+ocil_clause: /etc/origin/ has unix mode -rwx------
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: If users can modify the OpenShift configurations, the OpenShift cluster
+  can become inoperable or compromised
+references: {}
+severity: medium
+template:
+  backends: {}
+  name: file_permissions
+  vars: {filemode: '0700', filepath: /etc/origin/}
+title: The OpenShift Configuration Directory Must Have Mode 0700
+warnings: []

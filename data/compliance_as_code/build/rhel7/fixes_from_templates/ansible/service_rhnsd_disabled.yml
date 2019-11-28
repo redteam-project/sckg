@@ -1,0 +1,29 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = disable
+# complexity = low
+# disruption = low
+- name: "Unit Service Exists - rhnsd.service"
+  command: systemctl list-unit-files rhnsd.service
+  register: service_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable service rhnsd
+  systemd:
+    name: "rhnsd.service"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rhnsd.service" in service_file_exists.stdout_lines[1]'
+- name: "Unit Socket Exists - rhnsd.socket"
+  command: systemctl list-unit-files rhnsd.socket
+  register: socket_file_exists
+  changed_when: False
+  ignore_errors: True
+- name: Disable socket rhnsd
+  systemd:
+    name: "rhnsd.socket"
+    enabled: "no"
+    state: "stopped"
+    masked: "yes"
+  when: '"rhnsd.socket" in socket_file_exists.stdout_lines[1]'

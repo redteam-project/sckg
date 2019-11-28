@@ -1,0 +1,16 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- name: Ensure sssd-ipa is installed
+  package:
+    name: sssd-ipa
+    state: present
+  tags:
+    - package_sssd-ipa_installed
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed

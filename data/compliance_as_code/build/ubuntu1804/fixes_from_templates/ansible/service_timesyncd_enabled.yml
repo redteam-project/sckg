@@ -1,0 +1,18 @@
+# platform = multi_platform_all
+# reboot = false
+# strategy = enable
+# complexity = low
+# disruption = low
+- name: Enable service systemd-timesyncd
+  block:
+  - name: Gather the package facts
+    package_facts:
+      manager: auto
+
+  - name: Enable service systemd-timesyncd
+    service:
+      name: "systemd-timesyncd"
+      enabled: "yes"
+      state: "started"
+    when:
+    - '"systemd" in ansible_facts.packages'

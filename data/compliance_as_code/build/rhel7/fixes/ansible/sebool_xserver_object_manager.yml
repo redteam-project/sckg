@@ -1,0 +1,35 @@
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = enable
+- (xccdf-var var_xserver_object_manager)
+
+- name: Ensure libsemanage-python installed
+  package:
+    name: libsemanage-python
+    state: present
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_xserver_object_manager
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82346-8
+
+- name: Set SELinux boolean xserver_object_manager accordingly
+  seboolean:
+    name: xserver_object_manager
+    state: '{{ var_xserver_object_manager }}'
+    persistent: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - sebool_xserver_object_manager
+    - medium_severity
+    - enable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-82346-8

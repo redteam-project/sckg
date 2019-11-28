@@ -1,0 +1,25 @@
+description: 'Outdated plugins should be disabled by setting <tt>AllowOutdatedPlugins</tt>
+
+  to <tt>false</tt> in the Chromium policy file.'
+identifiers: {}
+ocil: 'To verify that outdated plugins are disabled, run the following command:
+
+  <pre>$ grep AllowOutdatedPlugins /etc/chromium/policies/managed/*.json</pre>
+
+  The output should contain:
+
+  <pre>"AllowOutdatedPlugins": false,</pre>'
+ocil_clause: it is not disabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Running outdated plugins could lead to system compromise through the use
+
+  of known exploits. Having plugins updated to the most current version
+
+  ensures the smallest attack surfuce possible.'
+references: {stigid: CHROMIUM-DTBC0013}
+severity: unknown
+template: null
+title: Disable Outdated Plugins
+warnings: []

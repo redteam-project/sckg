@@ -1,0 +1,29 @@
+description: 'Production environments should exercise disaster
+
+  recovery procedures that include provisions for the JBoss
+
+  platform, deployed applications, and any required source code
+
+  at least annually. Environments requiring higher assurances
+
+  of disaster recovery ability should test procedures more
+
+  often, possibly quarterly or even monthly.'
+identifiers: {}
+ocil: null
+ocil_clause: disaster recovery exercises have not been conducted
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Planning for disasters and extended outages prior to a real-life
+
+  scenario helps mitigate losses associated with identified
+
+  disasters. Failure to adequately prepare, plan, and exercise for
+
+  these scenarios can result in extensive losses.'
+references: {nist: CP-4}
+severity: medium
+template: null
+title: Perform Periodic Disaster Recovery Exercises
+warnings: []

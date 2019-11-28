@@ -1,0 +1,27 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = configure
+- name: enable syslog plugin
+  lineinfile:
+    dest: /etc/audisp/plugins.d/syslog.conf
+    regexp: ^active
+    line: active = yes
+    create: true
+  when: ansible_virtualization_role != "guest" or ansible_virtualization_type != "docker"
+  tags:
+    - auditd_audispd_syslog_plugin_activated
+    - medium_severity
+    - configure_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-26933-2
+    - PCI-DSS-Req-10.5.3
+    - DISA-STIG-RHEL-06-000509
+    - NIST-800-171-3.3.1
+    - NIST-800-53-AU-1(b)
+    - NIST-800-53-AU-3(2)
+    - NIST-800-53-IR-5
+    - CJIS-5.4.1.1

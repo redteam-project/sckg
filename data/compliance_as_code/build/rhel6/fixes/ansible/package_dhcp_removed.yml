@@ -1,0 +1,18 @@
+# platform = multi_platform_all
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = disable
+- name: Ensure dhcp is removed
+  package:
+    name: dhcp
+    state: absent
+  tags:
+    - package_dhcp_removed
+    - medium_severity
+    - disable_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-27120-5
+    - NIST-800-53-CM-7

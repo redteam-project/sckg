@@ -1,0 +1,19 @@
+# platform = multi_platform_ocp
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_MAX_WALS=
+    line: ETCD_MAX_WALS=0
+    create: true
+  tags:
+    - etcd_max_wals
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80584-6

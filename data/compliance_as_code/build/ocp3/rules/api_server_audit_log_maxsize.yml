@@ -1,0 +1,32 @@
+description: "To rotate audit logs upon reaching a maximum size, edit the API Server\
+  \ pod\nspecification file <tt>/etc/origin/master/master-config.yaml</tt> on\nthe\
+  \ master node(s) and set the <tt>maximumFileSizeMegabytes</tt> parameter to\nan\
+  \ appropriate size in MB. For example, to set it to 100 MB:\n<pre>auditConfig:\n\
+  \  auditFilePath: \"/etc/origin/master/audit-ocp.log\"\n  enabled: true\n  maximumFileRetentionDays:\
+  \ 30\n  maximumFileSizeMegabytes: 100\n  maximumRetainedFiles: 10</pre>"
+identifiers: {}
+ocil: 'Run the following command on the master node(s):
+
+  <pre>$ sudo grep maximumFileSizeMegabytes /etc/origin/master/master-config.yaml</pre>
+
+  The output should return a value of <pre>100</pre> or as appropriate.'
+ocil_clause: <tt>maximumFileSizeMegabytes</tt> is set to <tt>100</tt> or as appropriate
+oval_external_content: null
+platform: null
+prodtype: ocp3
+rationale: 'OpenShift automatically rotates log files. Retaining old log files ensures
+  that
+
+  OpenShift Operators have sufficient log data available for carrying out any
+
+  investigation or correlation. If you have set file size of 100 MB and the number
+  of
+
+  old log files to keep as 10, there would be approximately 1 GB of log data
+
+  available for use in analysis.'
+references: {cis: 1.1.18}
+severity: medium
+template: null
+title: Configure Maximum Audit Log Size
+warnings: []

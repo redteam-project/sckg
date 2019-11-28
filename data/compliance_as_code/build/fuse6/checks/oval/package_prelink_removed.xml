@@ -1,0 +1,17 @@
+<def-group>
+  <definition class="compliance" id="package_prelink_removed"
+  version="1">
+    <metadata>
+      <title>Package prelink Removed</title>
+      <affected family="unix">
+        <platform>multi_platform_all</platform>
+      </affected>
+      <description>The  package prelink should be removed.</description>
+    </metadata>
+    <criteria>
+      <criterion comment="package prelink is removed"
+      test_ref="test_package_prelink_removed" />
+    </criteria>
+  </definition>
+
+</def-group>

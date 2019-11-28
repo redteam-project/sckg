@@ -1,0 +1,644 @@
+<?xml version="1.0"?>
+<oval:oval_definitions xmlns:ns2="http://oval.mitre.org/XMLSchema/oval-common-5" xmlns:ns3="http://oval.mitre.org/XMLSchema/oval-definitions-5#independent" xmlns:ns4="http://oval.mitre.org/XMLSchema/oval-definitions-5#linux" xmlns:oval="http://oval.mitre.org/XMLSchema/oval-definitions-5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://oval.mitre.org/XMLSchema/oval-common-5 oval-common-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5 oval-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#independent independent-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#unix unix-definitions-schema.xsd         http://oval.mitre.org/XMLSchema/oval-definitions-5#linux linux-definitions-schema.xsd">
+  <oval:generator>
+    <ns2:product_name>combine_ovals.py from SCAP Security Guide</ns2:product_name>
+    <ns2:product_version>ssg: [0, 1, 47], python: 2.7.5</ns2:product_version>
+    <ns2:schema_version>5.11</ns2:schema_version>
+    <ns2:timestamp>2019-11-28T04:47:15</ns2:timestamp>
+  </oval:generator>
+  <oval:definitions>
+    <oval:definition class="compliance" id="firefox_preferences-addons_plugin_updates" version="1">
+      <oval:metadata>
+        <oval:title>Disable Addons Plugin Updates</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox automatically updates installed
+      add-ons and plugins.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="addons plugin updates configured" test_ref="test_firefox_preferences-addons_plugin_updates"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-auto-download_actions" version="1">
+      <oval:metadata>
+        <oval:title>Disable Automatic Downloads of MIME Types</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox automatically executes or downloads MIME types which are
+      not authorized for auto-download.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Auto download actions of mime type is disabled" test_ref="test_firefox_preferences-auto-download_actions"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-auto-update_of_firefox" version="1">
+      <oval:metadata>
+        <oval:title>Disable Firefox Auto-Update Capability</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should not be able to automatically
+      update itself.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="auto-update is disabled" test_ref="test_firefox_preferences-auto-update_of_firefox"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-autofill_forms" version="1">
+      <oval:metadata>
+        <oval:title>Disable Autofill Form Assistance</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox formfill assistance option is disabled.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="autofill_forms disabled" test_ref="test_firefox_preferences-autofill_forms"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-autofill_passwords" version="1">
+      <oval:metadata>
+        <oval:title>Disable User Ability To Autofill Passwords</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should not be configured to autofill passwords.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="autofill_passwords disabled" test_ref="test_firefox_preferences-autofill_passwords"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-home_page" version="1">
+      <oval:metadata>
+        <oval:title>Default Firefox Home Page Configured</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>The default homepage for Firefox is set and cannot be changed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="home page configured" test_ref="test_firefox_preferences-home_page"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-javascript_context_menus" version="1">
+      <oval:metadata>
+        <oval:title>Disable JavaScript Context Menus</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should be configured to not allow JavaScript to
+      disable or replace context menus.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="disable javaScript context menus" test_ref="test_firefox_preferences-javascript_context_menus"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-javascript_status_bar_changes" version="1">
+      <oval:metadata>
+        <oval:title>Disable JavaScript's Ability To Change The Status Bar</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should be configured to not allow JavaScript to
+      hide or change the status bar.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="disable hiding or changing status bar menus" test_ref="test_firefox_preferences-javascript_status_bar_changes"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-javascript_status_bar_text" version="1">
+      <oval:metadata>
+        <oval:title>Disable JavaScript's Ability To Modify The Browser Appearance</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should be configured not to allow JavaScript
+      to change the status bar text.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="disable changing the status bar text" test_ref="test_firefox_preferences-javascript_status_bar_text"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-javascript_window_changes" version="1">
+      <oval:metadata>
+        <oval:title>Disable JavaScript's Raise Or Lower Windows Capability</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox should be configured to not allow JavaScript to
+      raise or lower windows.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="raise or lower windows disabled" test_ref="test_firefox_preferences-javascript_window_changes"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-javascript_window_resizing" version="1">
+      <oval:metadata>
+        <oval:title>Disable JavaScript's Moving Or Resizing Windows Capability</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>FireFox should not be configured to allow JavaScript to move
+      or resize windows.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="move or resize windows disabled" test_ref="test_firefox_preferences-javascript_window_resizing"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-non-secure_page_warning" version="1">
+      <oval:metadata>
+        <oval:title>Enable Non-Secure Page Warnings</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox is not configured to provide warnings when a user switches
+      from a secure (SSL-enabled) to a non-secure page.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="non-secure page warning configured" test_ref="test_firefox_preferences-non-secure_page_warning"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-open_confirmation" version="1">
+      <oval:metadata>
+        <oval:title>Enable Downloading and Opening File Confirmation</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox is not configured to prompt user before downloading and
+      opening required file types.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="open_confirmation configured" test_ref="test_firefox_preferences-open_confirmation"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-password_store" version="1">
+      <oval:metadata>
+        <oval:title>Disable the Firefox Password Store</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>The Firefox password store should be disabled.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="password_store disabled" test_ref="test_firefox_preferences-password_store"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-pop-up_windows" version="1">
+      <oval:metadata>
+        <oval:title>Enable Firefox Pop-up Blocker</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>The Firefox Pop-up blocker should be enabled as windows may be
+      used to launch an attack within a new browser window with altered settings.
+      </oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="pop-up_windows installed" test_ref="test_firefox_preferences-pop-up_windows"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-search_update" version="1">
+      <oval:metadata>
+        <oval:title>Disable Installed Search Plugins Update Checking</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Search plugins can be automatically configured to check for
+      updates. Updates need to be controlled and installed from authorized and
+      trusted servers.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Disable search plugin update capability" test_ref="test_firefox_preferences-search_update"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-shell_protocol" version="1">
+      <oval:metadata>
+        <oval:title>Disable Firefox Access to Shell Protocols</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Firefox can be configured to access systems shells which
+      could potentially allow Firefox and other users to access to the
+      underlying system.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Disable Firefox Shell Protocol Access" test_ref="test_firefox_preferences-shell_protocol"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-ssl_protocol_tls" version="1">
+      <oval:metadata>
+        <oval:title>Enable TLS Usage in Firefox</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>DoD implementations of SSL must use TLS 1.0 in accordance with
+      the Network Infrastructure STIG.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="TLS is enabled" test_ref="test_firefox_preferences-ssl_protocol_tls"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-ssl_version_2" version="1">
+      <oval:metadata>
+        <oval:title>Disable SSL Version 2.0 in Firefox</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>SSL 2.0 and SSL 3.0 contain a number of security flaws.
+      Therefore, SSL 2.0 should be disabled.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="SSL 2.0 protocol disabled" test_ref="test_firefox_preferences-ssl_version_2"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-ssl_version_3" version="1">
+      <oval:metadata>
+        <oval:title>Disable SSL Version 3 in Firefox</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Earlier versions of SSL have known security vulnerabilities
+      and are not authorized for use in DOD.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="SSL V3 installed" test_ref="test_firefox_preferences-ssl_version_3"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-verification" version="1">
+      <oval:metadata>
+        <oval:title>Enable Certificate Verification</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>When a web site asks for a certificate for user authentication, Firefox must be configured to have the user choose which certificate to present. Websites within DOD require user authentication for access which increases security for DoD information. Access will be denied to the user if certificate management is not configured</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="verification installed" test_ref="test_firefox_preferences-verification"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="installed_firefox_version_supported" version="1">
+      <oval:metadata>
+        <oval:title>Supported Version of Firefox Installed</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Use of versions of an application which are not
+      supported by the vendor are not permitted. Vendors respond to
+      security flaws with updates and patches. These updates are not
+      available for unsupported versions which can leave the application
+      vulnerable to attack.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="installed version of firefox supported" test_ref="test_supported_version_of_firefox"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-cookies_clear" version="1">
+      <oval:metadata>
+        <oval:title>Clear Cookies And Other Data When Firefox Closes</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Set browser preferences to perform a Clear Private Data
+      operation when closing the browser in order to clear cookies and other
+      data installed by websites visited during the session.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="enabled sanitizeOnShutdown" test_ref="test_firefox_preferences-cookies_shutdown_sanitize"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-cookies_user_notice" version="1">
+      <oval:metadata>
+        <oval:title>Disable User Prompt For Clearing Cookies And Other Data</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Users should not be prompted about data and cookies being
+      cleared when the browser is closed.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="disable promptOnSanitize" test_ref="test_firefox_preferences-cookies_sanitize_prompt"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-lock_settings_config_file" version="1">
+      <oval:metadata>
+        <oval:title>Prevent Users from Changing Firefox Configuration Settings</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Locked settings prevents users from accessing about:config and
+      changing the security settings set by the system administrator.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Configuration file is set" test_ref="test_firefox_preferences-config_filename"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="compliance" id="firefox_preferences-lock_settings_obscure" version="1">
+      <oval:metadata>
+        <oval:title>Prevent Users from Changing Firefox Configuration Settings</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>Locked settings prevents users from accessing about:config and
+      changing the security settings set by the system administrator.</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Do not obscure locked file content with ROT-13" test_ref="test_firefox_preferences-obscure_value"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_app_is_firefox" version="2">
+      <oval:metadata>
+        <oval:title>Mozilla Firefox</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:reference ref_id="cpe:/a:mozilla:firefox" source="CPE"/>
+        <oval:description>The application installed on the system is firefox.</oval:description>
+      </oval:metadata>
+      <oval:criteria operator="AND">
+        <oval:extend_definition comment="Installed OS is part of the Unix family" definition_ref="installed_OS_is_part_of_Unix_family"/>
+        <oval:criterion comment="Firefox is installed" test_ref="test_firefox"/>
+      </oval:criteria>
+    </oval:definition>
+    <oval:definition class="inventory" id="installed_OS_is_part_of_Unix_family" version="1">
+      <oval:metadata>
+        <oval:title>Installed operating system is part of the Unix family</oval:title>
+        <oval:affected family="unix">
+          <oval:product>Firefox</oval:product>
+        </oval:affected>
+        <oval:description>The operating system installed on the system is part of the Unix OS family</oval:description>
+      </oval:metadata>
+      <oval:criteria>
+        <oval:criterion comment="Installed operating system is part of the unix family" test_ref="test_unix_family"/>
+      </oval:criteria>
+    </oval:definition>
+  </oval:definitions>
+  <oval:tests>
+    <ns3:textfilecontent54_test check="all" comment="Check for addons plugin updates" id="test_firefox_preferences-addons_plugin_updates" version="1">
+      <ns3:object object_ref="object_firefox_preferences-addons_plugin_updates"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for Auto download Actions installed" id="test_firefox_preferences-auto-download_actions" version="1">
+      <ns3:object object_ref="object_firefox_preferences-auto-download_actions"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check that auto-update of firefox is disabled" id="test_firefox_preferences-auto-update_of_firefox" version="1">
+      <ns3:object object_ref="object_firefox_preferences-auto-update_of_firefox"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for autofill_forms disabled" id="test_firefox_preferences-autofill_forms" version="1">
+      <ns3:object object_ref="object_firefox_preferences-autofill_forms"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for autofill_passwords disabled" id="test_firefox_preferences-autofill_passwords" version="1">
+      <ns3:object object_ref="object_firefox_preferences-autofill_passwords"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for home page configured" id="test_firefox_preferences-home_page" version="1">
+      <ns3:object object_ref="object_firefox_preferences-home_page"/>
+      <ns3:state state_ref="state_firefox_preferences-home_page"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for disable javaScript context menu is disabled" id="test_firefox_preferences-javascript_context_menus" version="1">
+      <ns3:object object_ref="object_firefox_preferences-javascript_context_menus"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check that hiding or changing status bar is disabled" id="test_firefox_preferences-javascript_status_bar_changes" version="1">
+      <ns3:object object_ref="object_firefox_preferences-javascript_status_bar_changes"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check that changing the status bar text is disabled" id="test_firefox_preferences-javascript_status_bar_text" version="1">
+      <ns3:object object_ref="object_firefox_preferences-javascript_status_bar_text"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="raise or lower windows is disabled" id="test_firefox_preferences-javascript_window_changes" version="1">
+      <ns3:object object_ref="object_firefox_preferences-javascript_window_changes"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for move or resize windows disabled" id="test_firefox_preferences-javascript_window_resizing" version="1">
+      <ns3:object object_ref="object_firefox_preferences-javascript_window_resizing"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for non-secure page warning configured" id="test_firefox_preferences-non-secure_page_warning" version="1">
+      <ns3:object object_ref="object_firefox_preferences-non-secure_page_warning"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for open_confirmation configured" id="test_firefox_preferences-open_confirmation" version="1">
+      <ns3:object object_ref="object_firefox_preferences-open_confirmation"/>
+      <ns3:state state_ref="state_firefox_preferences-open_confirmation"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check that the password_store is disabled" id="test_firefox_preferences-password_store" version="1">
+      <ns3:object object_ref="object_firefox_preferences-password_store"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for pop-up_windows installed" id="test_firefox_preferences-pop-up_windows" version="1">
+      <ns3:object object_ref="object_firefox_preferences-pop-up_windows"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check search plugin update capability is disabled" id="test_firefox_preferences-search_update" version="1">
+      <ns3:object object_ref="object_firefox_preferences-search_update"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check that the hell_protocol is disabled" id="test_firefox_preferences-shell_protocol" version="1">
+      <ns3:object object_ref="object_firefox_preferences-shell_protocol"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check if TLS is enabled" id="test_firefox_preferences-ssl_protocol_tls" version="1">
+      <ns3:object object_ref="object_firefox_preferences-ssl_protocol_tls"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check SSL 2.0 protocol disabled" id="test_firefox_preferences-ssl_version_2" version="1">
+      <ns3:object object_ref="object_firefox_preferences-ssl_version_2"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for SSL Version 3 preferences" id="test_firefox_preferences-ssl_version_3" version="1">
+      <ns3:object object_ref="object_firefox_preferences-ssl_version_3"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Enable Certification verification" id="test_firefox_preferences-verification" version="1">
+      <ns3:object object_ref="object_firefox_preferences-verification"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="any_exist" comment="Installed version of firefox is greater than ESR 31.5" id="test_supported_version_of_firefox" version="1">
+      <ns4:object object_ref="obj_supported_version_of_firefox"/>
+      <ns4:state state_ref="state_supported_version_of_firefox"/>
+    </ns4:rpminfo_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for sanitizeOnShutdown enabled" id="test_firefox_preferences-cookies_shutdown_sanitize" version="1">
+      <ns3:object object_ref="object_firefox_preferences-cookies_shutdown_sanitize"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for promptOnSanitize disabled" id="test_firefox_preferences-cookies_sanitize_prompt" version="1">
+      <ns3:object object_ref="object_firefox_preferences-cookies_sanitize_prompt"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for configuration filename" id="test_firefox_preferences-config_filename" version="1">
+      <ns3:object object_ref="object_firefox_preferences-config_filename"/>
+    </ns3:textfilecontent54_test>
+    <ns3:textfilecontent54_test check="all" comment="Check for obscure_value" id="test_firefox_preferences-obscure_value" version="1">
+      <ns3:object object_ref="object_firefox_preferences-obscure_value"/>
+    </ns3:textfilecontent54_test>
+    <ns4:rpminfo_test check="all" check_existence="at_least_one_exists" comment="Firefox is installed" id="test_firefox" version="1">
+      <ns4:object object_ref="obj_firefox"/>
+    </ns4:rpminfo_test>
+    <ns3:family_test check="all" check_existence="at_least_one_exists" comment="Test installed OS is part of the unix family" id="test_unix_family" version="1">
+      <ns3:object object_ref="object_unix_family"/>
+      <ns3:state state_ref="state_unix_family"/>
+    </ns3:family_test>
+  </oval:tests>
+  <oval:objects>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-addons_plugin_updates" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("extensions.update.enabled",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-auto-download_actions" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("browser.helperApps.alwaysAsk.force",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-auto-update_of_firefox" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("app.update.enabled",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-autofill_forms" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("browser.formfill.enable",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-autofill_passwords" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("signon.prefillForms",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-home_page" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("browser.startup.homepage",[\s]+"(\S+)"\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-javascript_context_menus" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.event.contextmenu.enabled",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-javascript_status_bar_changes" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.disable_window_status_change",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-javascript_status_bar_text" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.disable_window_open_feature.status",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-javascript_window_changes" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.disable_window_flip",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-javascript_window_resizing" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.disable_window_move_resize",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-non-secure_page_warning" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("security.warn_leaving_secure",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-open_confirmation" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("plugin.disable_full_page_plugin_for_types",[\s]+"(\S+)"\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-password_store" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("signon.rememberSignons",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-pop-up_windows" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("dom.disable_window_open_feature.status",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-search_update" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("browser.search.update",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-shell_protocol" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("network.protocol-handler.external.shell",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-ssl_protocol_tls" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("security.enable_tls",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-ssl_version_2" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("security.enable_ssl2",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-ssl_version_3" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("security.enable_ssl3",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-verification" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("security.default_personal_cert",[\s]+"Ask Every Time"\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_supported_version_of_firefox" version="1">
+      <ns4:name>firefox</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-cookies_shutdown_sanitize" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("privacy.sanitize.sanitizeOnShutdown",[\s]+true\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-cookies_sanitize_prompt" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.cfg$</ns3:filename>
+      <ns3:pattern operation="pattern match">^lockPref\("privacy.sanitize.promptOnSanitize",[\s]+false\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-config_filename" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox\/defaults\/preferences</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.js$</ns3:filename>
+      <ns3:pattern operation="pattern match">^pref\("general.config.filename",[\s]+"(\S+)\.cfg"\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns3:textfilecontent54_object id="object_firefox_preferences-obscure_value" version="1">
+      <ns3:path operation="pattern match">^\/usr\/(|local\/)lib(|64)\/firefox\/defaults\/preferences</ns3:path>
+      <ns3:filename operation="pattern match">^.*\.js$</ns3:filename>
+      <ns3:pattern operation="pattern match">^pref\("general.config.obscure_value",[\s]+0\);$</ns3:pattern>
+      <ns3:instance datatype="int">1</ns3:instance>
+    </ns3:textfilecontent54_object>
+    <ns4:rpminfo_object id="obj_firefox" version="1">
+      <ns4:name>firefox</ns4:name>
+    </ns4:rpminfo_object>
+    <ns3:family_object id="object_unix_family" version="1"/>
+  </oval:objects>
+  <oval:states>
+    <ns3:textfilecontent54_state id="state_firefox_preferences-home_page" version="1">
+      <ns3:subexpression datatype="string" operation="equals" var_check="all" var_ref="var_default_home_page"/>
+    </ns3:textfilecontent54_state>
+    <ns3:textfilecontent54_state id="state_firefox_preferences-open_confirmation" version="1">
+      <ns3:subexpression operation="equals" var_check="all" var_ref="var_required_file_types"/>
+    </ns3:textfilecontent54_state>
+    <ns4:rpminfo_state id="state_supported_version_of_firefox" version="1">
+      <ns4:evr datatype="evr_string" operation="greater than">3.0.0</ns4:evr>
+    </ns4:rpminfo_state>
+    <ns3:family_state id="state_unix_family" version="1">
+      <ns3:family>unix</ns3:family>
+    </ns3:family_state>
+  </oval:states>
+  <oval:variables>
+    <oval:external_variable comment="Expected default home page" datatype="string" id="var_default_home_page" version="1"/>
+    <oval:external_variable comment="Expected file types" datatype="string" id="var_required_file_types" version="1"/>
+  </oval:variables>
+</oval:oval_definitions>

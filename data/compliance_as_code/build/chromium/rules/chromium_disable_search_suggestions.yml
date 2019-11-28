@@ -1,0 +1,24 @@
+description: "Chromium tries to guess what users are searching for when users enter\n\
+  search data in the search Omnibox. This should be disabled by \nsetting <tt>SearchSuggestEnabled</tt>\
+  \ to <tt>false</tt> in the Chromium \npolicy file."
+identifiers: {}
+ocil: 'To verify that search suggestion is disabled, run the following command:
+
+  <pre>$ grep SearchSuggestEnabled /etc/chromium/policies/managed/*.json</pre>
+
+  The output should contain:
+
+  <pre>"SearchSuggestEnabled": false,</pre>'
+ocil_clause: it is not disabled
+oval_external_content: null
+platform: null
+prodtype: all
+rationale: 'Search suggestion should be disabled as it could lead to searches being
+  conducted
+
+  that were never intended to be made.'
+references: {stigid: CHROMIUM-DTBC0027}
+severity: unknown
+template: null
+title: Disable Search Suggestion
+warnings: []

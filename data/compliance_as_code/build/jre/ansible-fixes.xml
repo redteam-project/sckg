@@ -1,0 +1,14 @@
+<fix-content system="urn:xccdf:fix:script:sh" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix-group id="ansible" system="urn:xccdf:fix:script:ansible" xmlns="http://checklists.nist.gov/xccdf/1.1"><fix complexity="low" disruption="medium" reboot="true" rule="java_jre_configure_crypto_policy" strategy="disable">- name: Configure Java Runtime to use System Crypto Policy
+  lineinfile:
+    create: true
+    dest: /usr/lib/jvm/jre/lib/security/java.security
+    regexp: ^\s*#?\s*security.useSystemPropertiesFile=true
+    line: security.useSystemPropertiesFile=true
+  tags:
+    - java_jre_configure_crypto_policy
+    - unknown_severity
+    - disable_strategy
+    - low_complexity
+    - medium_disruption
+    - reboot_required
+</fix></fix-group></fix-content>

@@ -1,0 +1,19 @@
+# platform = multi_platform_ocp
+# complexity = low
+# reboot = false
+# disruption = low
+# strategy = restrict
+- name: '@RULE_TITLE@'
+  lineinfile:
+    path: /etc/etcd/etcd.conf
+    regexp: ^ETCD_TRUSTED_CA_FILE=
+    line: ETCD_TRUSTED_CA_FILE=/etc/etcd/ca.crt
+    create: true
+  tags:
+    - etcd_unique_ca
+    - medium_severity
+    - restrict_strategy
+    - low_complexity
+    - low_disruption
+    - no_reboot_needed
+    - CCE-80585-3
