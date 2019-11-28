@@ -3,8 +3,8 @@ from sckg.etl.generic import Generic
 
 class PCIDSS(Generic):
 
-  def __init__(self):
-    super().__init__()
+  def __init__(self, config):
+    super().__init__(config)
 
   def extract(self):
     pass

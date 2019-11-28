@@ -6,8 +6,9 @@ defaults:
 regimes:
   - name: 800_53
     description: NIST SP 800-53
-    source_document: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
-    parsable_document: data/
+    document:
+      source: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
+      parsable: data/regimes/nis_800-53r4.tsv
     etl:
       module: sckg.etl.800_53
       class: NIST80053
@@ -33,56 +34,66 @@ regimes:
         PM: Program Management
   - name: fedramp_high
     description: FedRAMP Baseline High
-    source_document: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
-    parsable_document: data/
+    document:
+      source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
+      parsable: data/regimes/fedramp_high.tsv
   - name: fedramp_moderate
     description: FedRAMP Baseline Moderate
-    source_document: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
-    parsable_document: data/
+    document:
+      source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
+      parsable: data/regimes/fedramp_moderate.tsv
   - name: dod_srg
     description: US Department of Defense Security Requirements Guide
-    source_document:
-    parsable_document: data/
+    document:
+      source: https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf
+      parsable: data/regimes/dod_srg.tsv
     etl:
       module: sckg.etl.dod_srg
       class: DoDSRG
   - nane: cnssi_1253_ci
     description: CNSSI 1253 Classified Information Overlay
-    source_document: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
-    parsable_document: data/
+    document:
+      source: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
+      parsable: data/regimes/cnssi_1253_classified_information.tsv
   - nane: cnssi_1253_pii
     description: CNSSI 1253 Privacy Overlay
-    source_document: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
-    parsable_document: data/
+    document:
+      source: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
+      parsable: data/regimes/cnssi_1253_privacy.tsv
   - nane: cis
     description: Center for Internet Security Benchmark
-    source_document: https://learn.cisecurity.org/benchmarks
-    parsable_document: data/
+    document:
+      source: https://learn.cisecurity.org/benchmarks
+      parsable: data/regimes/cis.tsv
   - name: pci_dss
     description: Payment Card Industry Data Security Standard
-    source_document: https://www.pcisecuritystandards.org/document_library
-    parsable_document: data/
+    document:
+      source: https://www.pcisecuritystandards.org/document_library
+      parsable: data/pcidss_v321.tsv
     etl:
       module: sckg.etl.pci_dss
       class: PCIDSS
   - name: nist_csf
     description: NIST Cybersecurity Framework
-    source_document:
-    parsable_document: data/
+    document:
+      source: https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf
+      parsable: data/regimes/nis_csf.tsv
     etl:
       module: sckg.etl.nist_csf
       class: NISTCSF
   - name: cac_rules_rhel7
     description: ComplianceAsCode Rules
-    source_document:
-    parsable_document: data/
+    document:
+      source: https://github.com/ComplianceAsCode/content
+      parsable_document: data/regimes/<<<<>>>>
     etl:
       module: sckg.etl.cac.rules_rhel7
       class: RulesRHEL7
   - name: cac_bash_rhel7
     description: ComplianceAsCode RHEL 7 bash
-    source_document:
-    parsable_document: data/
+    document:
+      source: https://github.com/ComplianceAsCode/content
+      parsable: data/regimes/<<<<>>>>
     etl:
       module: sckg.etl.cac.bash_rhel7
       class: BashRHEL7

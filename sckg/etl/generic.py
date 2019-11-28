@@ -1,8 +1,8 @@
 
 class Generic(object):
 
-  def __init__(self):
-    pass
+  def __init__(self, config):
+    self.config = config
 
   def extract(self):
     pass
