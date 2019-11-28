@@ -1,0 +1,24 @@
+documentation_complete: true
+
+prodtype: rhel7,rhel8,rhv4
+
+title: 'Enable the staff_exec_content SELinux Boolean'
+
+description: |-
+    By default, the SELinux boolean <tt>staff_exec_content</tt> is enabled.
+    If this setting is disabled, it should be enabled.
+    {{{ describe_sebool_enable(sebool="staff_exec_content") }}}
+
+rationale: ""
+
+severity: medium
+
+identifiers:
+    cce@rhel7: 82328-6
+
+{{{ complete_ocil_entry_sebool_enabled(sebool="staff_exec_content") }}}
+
+template:
+    name: sebool
+    vars:
+        seboolid: staff_exec_content

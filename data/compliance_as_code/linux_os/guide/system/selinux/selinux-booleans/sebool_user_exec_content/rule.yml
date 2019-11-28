@@ -1,0 +1,24 @@
+documentation_complete: true
+
+prodtype: rhel7,rhel8,rhv4
+
+title: 'Enable the user_exec_content SELinux Boolean'
+
+description: |-
+    By default, the SELinux boolean <tt>user_exec_content</tt> is enabled.
+    If this setting is disabled, it should be enabled.
+    {{{ describe_sebool_enable(sebool="user_exec_content") }}}
+
+rationale: ""
+
+severity: medium
+
+identifiers:
+    cce@rhel7: 82332-8
+
+{{{ complete_ocil_entry_sebool_enabled(sebool="user_exec_content") }}}
+
+template:
+    name: sebool
+    vars:
+        seboolid: user_exec_content

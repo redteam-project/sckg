@@ -89,19 +89,19 @@ regimes:
     etl:
       module: sckg.etl.nist_csf
       class: NISTCSF
-  - name: cac_rules_rhel7
+  - name: cac_rules
     description: ComplianceAsCode Rules
     document:
       source: https://github.com/ComplianceAsCode/content
-      parsable_document: data/regimes/<<<<>>>>
+      parsable_document: data/compliance_as_code/linux_os/guide
     etl:
-      module: sckg.etl.cac.rules_rhel7
-      class: RulesRHEL7
+      module: sckg.etl.cac.rules
+      class: Rules
   - name: cac_bash_rhel7
-    description: ComplianceAsCode RHEL 7 bash
+    description: ComplianceAsCode RHEL 7 bash STIG
     document:
       source: https://github.com/ComplianceAsCode/content
-      parsable: data/regimes/<<<<>>>>
+      parsable: data/compliance_as_code/build/bash/rhel7-script-stig.sh
     etl:
       module: sckg.etl.cac.bash_rhel7
       class: BashRHEL7

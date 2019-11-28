@@ -1,0 +1,33 @@
+documentation_complete: true
+
+prodtype: debian9,rhel6,rhel7,rhel8
+
+title: 'Disable snmpd Service'
+
+description: '{{{ describe_service_disable(service="snmpd") }}}'
+
+rationale: |-
+    Running SNMP software provides a network-based avenue of attack, and
+    should be disabled if not needed.
+
+severity: unknown
+
+identifiers:
+    cce@rhel6: 26906-8
+    cce@rhel7: 80274-4
+
+references:
+    vmmsrg: SRG-OS-000480-VMM-002000
+    cis: 2.2.14
+
+ocil: '{{{ ocil_service_disabled(service="snmpd") }}}'
+
+platform: machine
+
+template:
+    name: service_disabled
+    vars:
+        servicename: snmpd
+        packagename@debian9: snmpd
+        packagename: net-snmp
+
