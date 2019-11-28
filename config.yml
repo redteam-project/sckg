@@ -1,0 +1,89 @@
+# Configuration settings for sckg
+defaults:
+  generic:
+    module: sckg.etl.generic
+    class: Generic
+regimes:
+  - name: 800_53
+    description: NIST SP 800-53
+    source_document: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
+    parsable_document: data/
+    etl:
+      module: sckg.etl.800_53
+      class: NIST80053
+    meta:
+      families:
+        AC: Access Control
+        MP: Media Protection
+        AT: Awareness and Training
+        PE: Physical and Environmental Protection
+        AU: Audit and Accountability
+        PL: Planning
+        CA: Security Assessment and Authorization
+        PS: Personnel Security
+        CM: Configuration Management
+        RA: Risk Assessment
+        CP: Contingency Planning
+        SA: System and Services Acquisition
+        IA: Identification and Authentication
+        SC: System and Communications Protection
+        IR: Incident Response
+        SI: System and Information Integrity
+        MA: Maintenance
+        PM: Program Management
+  - name: fedramp_high
+    description: FedRAMP Baseline High
+    source_document: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
+    parsable_document: data/
+  - name: fedramp_moderate
+    description: FedRAMP Baseline Moderate
+    source_document: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
+    parsable_document: data/
+  - name: dod_srg
+    description: US Department of Defense Security Requirements Guide
+    source_document:
+    parsable_document: data/
+    etl:
+      module: sckg.etl.dod_srg
+      class: DoDSRG
+  - nane: cnssi_1253_ci
+    description: CNSSI 1253 Classified Information Overlay
+    source_document: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
+    parsable_document: data/
+  - nane: cnssi_1253_pii
+    description: CNSSI 1253 Privacy Overlay
+    source_document: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
+    parsable_document: data/
+  - nane: cis
+    description: Center for Internet Security Benchmark
+    source_document: https://learn.cisecurity.org/benchmarks
+    parsable_document: data/
+  - name: pci_dss
+    description: Payment Card Industry Data Security Standard
+    source_document: https://www.pcisecuritystandards.org/document_library
+    parsable_document: data/
+    etl:
+      module: sckg.etl.pci_dss
+      class: PCIDSS
+  - name: nist_csf
+    description: NIST Cybersecurity Framework
+    source_document:
+    parsable_document: data/
+    etl:
+      module: sckg.etl.nist_csf
+      class: NISTCSF
+  - name: cac_rules_rhel7
+    description: ComplianceAsCode Rules
+    source_document:
+    parsable_document: data/
+    etl:
+      module: sckg.etl.cac.rules_rhel7
+      class: RulesRHEL7
+  - name: cac_bash_rhel7
+    description: ComplianceAsCode RHEL 7 bash
+    source_document:
+    parsable_document: data/
+    etl:
+      module: sckg.etl.cac.bash_rhel7
+      class: BashRHEL7
+
