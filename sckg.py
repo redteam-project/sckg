@@ -8,9 +8,9 @@ class SCKG(object):
       self.config = yaml.safe_load(f.read())
 
     for regime in self.config['regimes']:
-      self.regimeETL(regime)
+      self.regime_etl(regime)
 
-  def regimeETL(self, regime):
+  def regime_etl(self, regime):
     etl_config = regime.get('etl', 'generic')
     if etl_config == 'generic':
       module_name = self.config['defaults']['generic']['module']
