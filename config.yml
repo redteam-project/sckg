@@ -50,6 +50,14 @@ regimes:
     etl:
       module: sckg.etl.dod_srg
       class: DoDSRG
+  - name: dod_cci
+    description: US Department of Defense Control Correlation Identifiers
+    document:
+      source: https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip
+      parsable: data/regimes/U_CCI_List.xml
+    etl:
+      module: sckg.etl.dod_cci
+      class: DoDCCI
   - nane: cnssi_1253_ci
     description: CNSSI 1253 Classified Information Overlay
     document:
