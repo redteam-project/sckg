@@ -7,5 +7,5 @@ class DoDSRG(Generic):
     super().__init__(config)
 
   def transform(self, regime, regime_list):
-    pass
+    return []
 

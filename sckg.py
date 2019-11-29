@@ -27,12 +27,16 @@ class SCKG(object):
     else:
       module_name = regime['etl']['module']
       class_name = regime['etl']['class']
+
+    parsable_document = self.config['cwd'] + '/' + \
+                        regime['document']['parsable']
+
     etl_class = getattr(importlib.import_module(module_name),
                         class_name)
     etl_instance = etl_class(self.config)
 
-    regime_list = etl_instance.extract(regime)
     # todo: remove breakpoints
+    regime_list = etl_instance.extract(regime, parsable_document)
     pause = True
     stmts = etl_instance.transform(regime, regime_list)
     pause = True

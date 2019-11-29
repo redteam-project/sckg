@@ -9,7 +9,7 @@ defaults:
       path: data/templates/cypher/
 regimes:
   - name: 800_53
-    description: NIST SP 800-53
+    description: NIST 800-53
     document:
       source: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
       parsable: data/regimes/nist_800-53r4.tsv
@@ -37,17 +37,47 @@ regimes:
         MA: Maintenance
         PM: Program Management
   - name: fedramp_high
-    description: FedRAMP Baseline High
+    description: FedRAMP High
     document:
       source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
       parsable: data/regimes/fedramp_high.tsv
+    baseline:
+      regime_name: FedRAMP
+      baseline_name: High
+      control_regime: 800_53
+      uid_key: id
   - name: fedramp_moderate
-    description: FedRAMP Baseline Moderate
+    description: FedRAMP Moderate
     document:
       source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
       parsable: data/regimes/fedramp_moderate.tsv
+    baseline:
+      regime_name: FedRAMP
+      baseline_name: Moderate
+      control_regime: 800_53
+      uid_key: id
+  - name: cnssi_1253_ci
+    description: CNSSI 1253 Classified Information Overlay
+    document:
+      source: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
+      parsable: data/regimes/cnssi_1253_classified_information.tsv
+    baseline:
+      regime_name: CNSSI 1253
+      baseline_name: Classified Information
+      control_regime: 800_53
+      uid_key: id
+  - name: cnssi_1253_pii
+    description: CNSSI 1253 Privacy Overlay
+    document:
+      source: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
+      parsable: data/regimes/cnssi_1253_privacy.tsv
+    baseline:
+      regime_name: CNSSI 1253
+      baseline_name: Privacy
+      control_regime: 800_53
+      uid_key: id
   - name: dod_srg
-    description: US Department of Defense Security Requirements Guide
+    description: DoD Cloud Computing SRG
     document:
       source: https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf
       parsable: data/regimes/dod_srg.tsv
@@ -55,28 +85,21 @@ regimes:
       module: sckg.etl.dod_srg
       class: DoDSRG
   - name: dod_cci
-    description: US Department of Defense Control Correlation Identifiers
+    description: DoD CCI
     document:
       source: https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip
       parsable: data/regimes/U_CCI_List.xml
     etl:
       module: sckg.etl.dod_cci
       class: DoDCCI
-  - name: cnssi_1253_ci
-    description: CNSSI 1253 Classified Information Overlay
-    document:
-      source: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
-      parsable: data/regimes/cnssi_1253_classified_information.tsv
-  - name: cnssi_1253_pii
-    description: CNSSI 1253 Privacy Overlay
-    document:
-      source: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
-      parsable: data/regimes/cnssi_1253_privacy.tsv
   - name: cis
     description: Center for Internet Security Benchmark
     document:
       source: https://learn.cisecurity.org/benchmarks
       parsable: data/regimes/cis.tsv
+    etl:
+      module: sckg.etl.cis
+      class: CIS
   - name: pci_dss
     description: Payment Card Industry Data Security Standard
     document:

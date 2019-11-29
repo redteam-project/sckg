@@ -8,14 +8,38 @@ class Generic(object):
     self.template_path = self.config['cwd'] + '/' + \
                          self.config['defaults']['templates']['cypher']['path']
 
-  def extract(self, regime):
-    pass
+  def extract(self, regime, parsable_document):
+    with open(parsable_document, 'r') as f:
+      rows = f.readlines()
+
+    regime_list = self.parse_baseline(rows)
+
+    return regime_list
 
   def transform(self, regime, regime_list):
-    pass
+    stmts = []
+
+    if regime.get('baseline'):
+      baseline = regime['baseline']
+
+      stmts.append(self.create_regime(baseline['regime_name']))
+      stmts.append(self.create_generic_baseline(baseline['regime_name'],
+                                                self.get_control_regime_name(regime),
+                                                baseline['baseline_name'],
+                                                baseline['uid_key'],
+                                                regime_list))
+    else:
+      raise Exception('no baseline for regime "{}" in config.yml'.format(regime['name']))
 
   def load(self, regime, neo4j, stmts):
-    pass
+    neo4j.load_baseline(stmts)
+
+  def get_control_regime_name(self, regime):
+    control_regime = regime['baseline']['control_regime']
+    for r in self.config['regimes']:
+      if r['name'] == control_regime:
+        return r['description']
+    return None
 
   def get_field_names(self, first_row: str):
     # function for generating clean field names

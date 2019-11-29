@@ -6,9 +6,7 @@ class NIST80053(Generic):
   def __init__(self, config):
     super().__init__(config)
 
-  def extract(self, regime):
-    parsable_document = self.config['cwd'] + '/' + \
-                        regime['document']['parsable']
+  def extract(self, regime, parsable_document):
     with open(parsable_document, 'r') as f:
       rows = f.readlines()
 
@@ -92,7 +90,7 @@ class NIST80053(Generic):
 
     stmts = {}
     # create regime node
-    regime_name = 'NIST 800-53'
+    regime_name = regime['description']
     stmt = self.create_regime(regime_name)
     stmts['regime'] = stmt
 
