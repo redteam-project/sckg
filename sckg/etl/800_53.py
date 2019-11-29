@@ -7,7 +7,8 @@ class NIST80053(Generic):
     super().__init__(config)
 
   def extract(self, regime):
-    parsable_document = regime['document']['parsable']
+    parsable_document = self.config['cwd'] + '/' + \
+                        regime['document']['parsable']
     with open(parsable_document, 'r') as f:
       rows = f.readlines()
 

@@ -8,7 +8,7 @@ regimes:
     description: NIST SP 800-53
     document:
       source: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
-      parsable: data/regimes/nis_800-53r4.tsv
+      parsable: data/regimes/nist_800-53r4.tsv
     etl:
       module: sckg.etl.800_53
       class: NIST80053

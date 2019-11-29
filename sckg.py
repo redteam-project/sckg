@@ -1,4 +1,5 @@
 import importlib
+import os
 import yaml
 
 class SCKG(object):
@@ -6,6 +7,8 @@ class SCKG(object):
   def __init__(self):
     with open('config.yml', 'r') as f:
       self.config = yaml.safe_load(f.read())
+
+    self.config['cwd'] = os.getcwd()
 
     for regime in self.config['regimes']:
       self.regime_etl(regime)
