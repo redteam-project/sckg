@@ -65,7 +65,7 @@ regimes:
       regime_name: CNSSI 1253
       baseline_name: Classified Information
       control_regime: 800_53
-      uid_key: id
+      uid_key: control
   - name: cnssi_1253_pii
     description: CNSSI 1253 Privacy Overlay
     document:
@@ -75,7 +75,7 @@ regimes:
       regime_name: CNSSI 1253
       baseline_name: Privacy
       control_regime: 800_53
-      uid_key: id
+      uid_key: control
   - name: dod_srg
     description: DoD Cloud Computing SRG
     document:
