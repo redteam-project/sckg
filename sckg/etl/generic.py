@@ -14,7 +14,7 @@ class Generic(object):
   def transform(self, regime, regime_list):
     pass
 
-  def load(self, regime, stmts):
+  def load(self, regime, neo4j, stmts):
     pass
 
   def get_field_names(self, first_row: str):

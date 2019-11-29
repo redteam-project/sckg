@@ -175,5 +175,12 @@ class NIST80053(Generic):
 
     return stmts
 
-  def load(self, regime, stmts):
-    pass
+  def load(self, regime, neo4j, stmts):
+    neo4j.execute_cypher(stmts['regime'])
+    for key in ['families', 'controls']:
+      for stmt in stmts[key]:
+        neo4j.execute_cypher(stmt)
+    for key in ['low', 'moderate', 'high']:
+      neo4j.execute_cypher(stmts['baselines'][key])
+    for stmt in stmts['impact']:
+      neo4j.execute_cypher(stmt)

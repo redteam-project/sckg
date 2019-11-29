@@ -2,6 +2,8 @@ import importlib
 import os
 import yaml
 
+from sckg.neo4j import Neo4j
+
 class SCKG(object):
 
   def __init__(self):
@@ -10,8 +12,12 @@ class SCKG(object):
 
     self.config['cwd'] = os.getcwd()
 
+    self.neo4j = Neo4j(self.config)
+
     for regime in self.config['regimes']:
       self.regime_etl(regime)
+
+    self.neo4j.close_driver()
 
   def regime_etl(self, regime):
     etl_config = regime.get('etl', 'generic')
@@ -30,7 +36,7 @@ class SCKG(object):
     pause = True
     stmts = etl_instance.transform(regime, regime_list)
     pause = True
-    etl_instance.load(regime, stmts)
+    etl_instance.load(regime, self.neo4j, stmts)
     pause = True
 
 def main():
