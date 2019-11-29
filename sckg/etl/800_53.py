@@ -1,4 +1,4 @@
-
+import re
 from sckg.etl.generic import Generic
 
 class NIST80053(Generic):
@@ -7,6 +7,10 @@ class NIST80053(Generic):
     super().__init__(config)
 
   def extract(self, regime):
+    parsable_document = regime['document']['parsable']
+    with open(parsable_document, 'r') as f:
+      rows = f.readlines()
+
     # call parent's generic baseline function
     baseline_80053_list = []
     baseline_list = self.parse_baseline(rows)
@@ -81,8 +85,8 @@ class NIST80053(Generic):
 
     return baseline_80053_list
 
-  def transform(self, regime):
+  def transform(self, regime, regime_list):
     pass
 
-  def load(self, regime):
+  def load(self, regime, stmts):
     pass

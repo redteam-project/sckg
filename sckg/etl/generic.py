@@ -7,10 +7,10 @@ class Generic(object):
   def extract(self, regime):
     pass
 
-  def transform(self, regime):
+  def transform(self, regime, regime_list):
     pass
 
-  def load(self, regime):
+  def load(self, regime, stmts):
     pass
 
   def get_field_names(self, first_row: str):

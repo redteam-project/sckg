@@ -9,6 +9,6 @@ class PCIDSS(Generic):
   def extract(self, regime):
     pass
 
-  def transform(self, regime):
+  def transform(self, regime, regime_list):
     pass
 

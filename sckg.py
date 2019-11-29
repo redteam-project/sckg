@@ -22,9 +22,9 @@ class SCKG(object):
                         class_name)
     etl_instance = etl_class(self.config)
 
-    etl_instance.extract(regime)
-    etl_instance.transform(regime)
-    etl_instance.load(regime)
+    regime_list = etl_instance.extract(regime)
+    stmts = etl_instance.transform(regime, regime_list)
+    etl_instance.load(regime, stmts)
 
 def main():
   sckg = SCKG()
