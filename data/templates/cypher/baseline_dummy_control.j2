@@ -1,0 +1,6 @@
+MATCH (control_regime:regime {name: '{{ args[0] }}'}){% if args[1] %}-[:HAS*]->(control_baseline:baseline {name: '{{ args[2] }}'}){% endif %}
+MERGE {% if args[1] %}(control_baseline){% else %}(control_regime){% endif %}-[:HAS]->(control:control {name: '{{ args[3] }}'})
+WITH 1 as dummy
+MATCH (regime:regime {name: '{{ args[4] }}'})-[:HAS*]-(baseline:baseline {name: '{{ args[5] }}'}),
+    (control_regime:regime {name: '{{ args[0] }}'})-[:HAS*]->(control {name: '{{ args[3] }}'})
+MERGE (baseline)-[:REQUIRES { {% for p in properties %}{{ p[0] }}: '{{ p[1] }}'{% if not loop.last %}, {% endif %}{% endfor %} }]->(control)

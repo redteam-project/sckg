@@ -3,6 +3,9 @@ defaults:
   generic:
     module: sckg.etl.generic
     class: Generic
+  templates:
+    cypher:
+      path: data/templates/cypher/
 regimes:
   - name: 800_53
     description: NIST SP 800-53

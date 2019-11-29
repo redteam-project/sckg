@@ -87,7 +87,93 @@ class NIST80053(Generic):
     return baseline_80053_list
 
   def transform(self, regime, regime_list):
-    pass
+    # todo: parameterize this
+    render_related = False
+
+    stmts = {}
+    # create regime node
+    regime_name = 'NIST 800-53'
+    stmt = self.create_regime(regime_name)
+    stmts['regime'] = stmt
+
+    # create families
+    families = regime['meta']['families']
+    family_stmts = []
+    for family in families.keys():
+      description = families[family]
+      stmt = self.render_template('regime_family.j2', regime_name,
+                                  name=family,
+                                  description=description)
+      family_stmts.append(stmt)
+    stmts['families'] = family_stmts
+
+    # make the controls
+    control_stmts = []
+    for control_dict in regime_list:
+      c = control_dict.copy()
+      c = self.clean_dict(c)
+      properties = {}
+
+      derived_family = control_dict['name'][:2]
+      if not control_dict.get('parent'):
+        # its parent is a family
+        del c['family']
+        if c.get('baseline_impact'):
+          del c['baseline_impact']
+        if c.get('related'):
+          del c['related']
+        stmt = self.render_template('control.j2',
+                                    'NIST 800-53',
+                                    'family',
+                                    derived_family,
+                                    properties=c)
+        control_stmts.append(stmt)
+      else:
+        # its parent is a control
+        del c['family']
+        del c['parent']
+        if c.get('related'):
+          del c['related']
+        if c.get('baseline_impact'):
+          del c['baseline_impact']
+        stmt = self.render_template('control.j2',
+                                    'NIST 800-53',
+                                    'control',
+                                    control_dict['parent'],
+                                    properties=c)
+      control_stmts.append(stmt)
+    stmts['controls'] = control_stmts
+
+    # add related mappings
+    if render_related:
+      related_stmts = []
+      for control_dict in regime_list:
+        for related in control_dict.get('related', []):
+          stmt = self.render_template('mapping.j2',
+                                      regime_name, control_dict['name'],
+                                      regime_name, related,
+                                      'RELATED')
+          related_stmts.append(stmt)
+      stmts['related'] = stmt
+
+    # add baseline impacts
+    baseline_stmts = {
+      'low': self.create_regime_baseline(regime_name, properties={'name': 'LOW'}),
+      'moderate': self.create_regime_baseline(regime_name, properties={
+        'name': 'MODERATE'}),
+      'high': self.create_regime_baseline(regime_name, properties={'name': 'HIGH'})
+    }
+    stmts['baselines'] = baseline_stmts
+
+    impact_stmts = []
+    for control_dict in regime_list:
+      for impact in control_dict.get('baseline_impact', []):
+        stmt = self.render_template('baseline_control.j2', regime_name, impact,
+                                    control_dict['name'])
+        impact_stmts.append(stmt)
+    stmts['impact'] = impact_stmts
+
+    return stmts
 
   def load(self, regime, stmts):
     pass

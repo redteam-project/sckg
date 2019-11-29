@@ -1,0 +1,3 @@
+MATCH (i:implementation {name: '{{ args[0] }}'})-[:HAS]->(configuration:configuration {name: '{{ args[1] }}'}),
+    (r:regime {name: '{{ args[2] }}'})-[:HAS]->(control:control {name: '{{ args[3] }}'})
+MERGE (configuration)-[:REFERENCES { {% for p in properties %}{{ p[0] }}: '{{ p[1] }}'{% if not loop.last %}, {% endif %}{% endfor %} }]->(control)

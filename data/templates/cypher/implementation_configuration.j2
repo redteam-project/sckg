@@ -1,0 +1,2 @@
+MATCH (implementation:implementation {name: '{{ args[0] }}'})
+MERGE (implementation)-[:HAS]->(configuration:configuration { {% for p in properties %}{{ p[0] }}: '{{ p[1] }}'{% if not loop.last %}, {% endif %}{% endfor %} })

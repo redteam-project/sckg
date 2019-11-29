@@ -1,0 +1,2 @@
+MATCH (parent:control {name: '{{ args[1] }}'})
+MERGE (parent)-[:HAS]->(control:control { {% for p in properties %}{{ p[0] }}: '{{ p[1] }}'{% if not loop.last %}, {% endif %}{% endfor %} })

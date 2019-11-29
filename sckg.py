@@ -26,8 +26,12 @@ class SCKG(object):
     etl_instance = etl_class(self.config)
 
     regime_list = etl_instance.extract(regime)
+    # todo: remove breakpoints
+    pause = True
     stmts = etl_instance.transform(regime, regime_list)
+    pause = True
     etl_instance.load(regime, stmts)
+    pause = True
 
 def main():
   sckg = SCKG()

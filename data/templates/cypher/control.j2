@@ -1,0 +1,2 @@
+MATCH (regime:regime {name: '{{ args[0] }}'})-[:HAS*]->(parent:{% if args[1] == 'baseline' %}baseline{% elif args[1] == 'family' %}family{% elif args[1] == 'control' %}control{% endif %} {name: '{{ args[2] }}'})
+MERGE (parent)-[:HAS]->(control:control { {% for p in properties %}{{ p[0] }}: '{{ p[1] }}'{% if not loop.last %}, {% endif %}{% endfor %} })
