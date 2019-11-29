@@ -84,14 +84,6 @@ regimes:
     etl:
       module: sckg.etl.dod_srg
       class: DoDSRG
-  - name: dod_cci
-    description: DoD CCI
-    document:
-      source: https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip
-      parsable: data/regimes/U_CCI_List.xml
-    etl:
-      module: sckg.etl.dod_cci
-      class: DoDCCI
   - name: cis
     description: Center for Internet Security Benchmark
     document:
@@ -101,7 +93,7 @@ regimes:
       module: sckg.etl.cis
       class: CIS
   - name: pci_dss
-    description: Payment Card Industry Data Security Standard
+    description: PCI DSS
     document:
       source: https://www.pcisecuritystandards.org/document_library
       parsable: data/pcidss_v321.tsv
@@ -132,4 +124,11 @@ regimes:
     etl:
       module: sckg.etl.cac.bash_rhel7
       class: BashRHEL7
-
+  - name: dod_cci
+    description: DoD CCI
+    document:
+      source: https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip
+      parsable: data/regimes/U_CCI_List.xml
+    etl:
+      module: sckg.etl.dod_cci
+      class: DoDCCI
