@@ -6,11 +6,11 @@ class NIST80053(Generic):
   def __init__(self, config):
     super().__init__(config)
 
-  def extract(self):
+  def extract(self, regime):
     pass
 
-  def transform(self):
+  def transform(self, regime):
     pass
 
-  def load(self):
+  def load(self, regime):
     pass

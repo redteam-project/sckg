@@ -4,11 +4,11 @@ class Generic(object):
   def __init__(self, config):
     self.config = config
 
-  def extract(self):
+  def extract(self, regime):
     pass
 
-  def transform(self):
+  def transform(self, regime):
     pass
 
-  def load(self):
+  def load(self, regime):
     pass
