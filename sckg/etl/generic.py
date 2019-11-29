@@ -4,13 +4,13 @@ class Generic(object):
   def __init__(self, config):
     self.config = config
 
-  def extract(self):
+  def extract(self, regime):
     pass
 
-  def transform(self):
+  def transform(self, regime):
     pass
 
-  def load(self):
+  def load(self, regime):
     pass
 
   def get_field_names(self, first_row: str):

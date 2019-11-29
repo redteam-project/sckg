@@ -6,7 +6,7 @@ class NIST80053(Generic):
   def __init__(self, config):
     super().__init__(config)
 
-  def extract(self):
+  def extract(self, regime):
     # call parent's generic baseline function
     baseline_80053_list = []
     baseline_list = self.parse_baseline(rows)
@@ -81,8 +81,8 @@ class NIST80053(Generic):
 
     return baseline_80053_list
 
-  def transform(self):
+  def transform(self, regime):
     pass
 
-  def load(self):
+  def load(self, regime):
     pass
