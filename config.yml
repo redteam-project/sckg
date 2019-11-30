@@ -112,7 +112,7 @@ regimes:
     description: ComplianceAsCode Rules
     document:
       source: https://github.com/ComplianceAsCode/content
-      parsable_document: data/compliance_as_code/linux_os/guide
+      parsable: data/compliance_as_code/linux_os/guide
     etl:
       module: sckg.etl.cac.rules
       class: Rules
