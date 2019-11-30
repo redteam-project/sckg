@@ -17,6 +17,8 @@ class DoDSRG(Generic):
   def transform(self, regime, regime_list):
     stmts = []
     regime_name = regime['description']
+    control_regime = self.get_control_regime_name(regime)
+    
     stmts.append(
         self.create_regime(regime_name)
     )
@@ -56,7 +58,7 @@ class DoDSRG(Generic):
             stmts.append(
                 self.create_baseline_control(regime_name,
                                              'Impact Level 4',
-                                             'NIST 800-53',
+                                             control_regime,
                                              c['control'],
                                              properties={
                                                'section': c['section'],
@@ -69,7 +71,7 @@ class DoDSRG(Generic):
             stmts.append(
                 self.create_baseline_control(regime_name,
                                              'Impact Level 5',
-                                             'NIST 800-53',
+                                             control_regime,
                                              c['control'],
                                              properties={
                                                'section': c['section'],
@@ -82,7 +84,7 @@ class DoDSRG(Generic):
             stmts.append(
                 self.create_baseline_control(regime_name,
                                              'Impact Level 6',
-                                             'NIST 800-53',
+                                             control_regime,
                                              c['control'],
                                              properties={
                                                'section': c['section'],

@@ -150,7 +150,7 @@ class Generic(object):
       properties):
     stmt = self.render_template('baseline_control.j2',
                                 regime, baseline,
-                                control,
+                                control_regime, control,
                                 properties=properties)
     return stmt
 

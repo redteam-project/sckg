@@ -84,6 +84,11 @@ regimes:
     etl:
       module: sckg.etl.dod_srg
       class: DoDSRG
+    baseline:
+      regime_name: DoD Cloud Computing SRG
+      baseline_name: None
+      control_regime: 800_53
+      uid_key: control
   - name: cis
     description: Center for Internet Security Benchmark
     document:
