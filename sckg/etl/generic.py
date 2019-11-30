@@ -22,11 +22,11 @@ class Generic(object):
     if regime.get('baseline'):
       baseline = regime['baseline']
 
-      stmts.append(self.create_generic_baseline(baseline['regime_name'],
-                                                self.get_control_regime_name(regime),
-                                                baseline['baseline_name'],
-                                                baseline['uid_key'],
-                                                regime_list))
+      stmts += self.create_generic_baseline(baseline['regime_name'],
+                                            self.get_control_regime_name(regime),
+                                            baseline['baseline_name'],
+                                            baseline['uid_key'],
+                                            regime_list)
       return stmts
     else:
       raise Exception('no baseline for regime "{}" in config.yml'.format(regime['name']))

@@ -104,7 +104,7 @@ regimes:
     description: NIST Cybersecurity Framework
     document:
       source: https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf
-      parsable: data/regimes/nis_csf.tsv
+      parsable: data/regimes/nist_csf.tsv
     etl:
       module: sckg.etl.nist_csf
       class: NISTCSF
