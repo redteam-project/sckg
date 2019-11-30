@@ -85,12 +85,12 @@ regimes:
       module: 'sckg.etl.dod_srg'
       class: 'DoDSRG'
     baseline:
-      regime_name: 'DoD Cloud Computing SRG'
+      regime_name: 'DoD SRG'
       baseline_name: 'None'
       control_regime: '800_53'
       uid_key: 'control'
   - name: 'cis'
-    description: 'Center for Internet Security Benchmark'
+    description: 'CIS CSC'
     document:
       source: 'https://learn.cisecurity.org/benchmarks'
       parsable: 'data/regimes/cis.tsv'
@@ -106,7 +106,7 @@ regimes:
       module: 'sckg.etl.pci_dss'
       class: 'PCIDSS'
   - name: 'nist_csf'
-    description: 'NIST Cybersecurity Framework'
+    description: 'NIST CSF'
     document:
       source: 'https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf'
       parsable: 'data/regimes/nist_csf.tsv'
