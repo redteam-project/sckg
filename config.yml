@@ -2,139 +2,139 @@
 # Configuration settings for sckg
 defaults:
   generic:
-    module: sckg.etl.generic
-    class: Generic
+    module: 'sckg.etl.generic'
+    class: 'Generic'
   templates:
     cypher:
-      path: data/templates/cypher/
+      path: 'data/templates/cypher/'
 regimes:
-  - name: 800_53
-    description: NIST 800-53
+  - name: '800_53'
+    description: 'NIST 800-53'
     document:
-      source: http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf
-      parsable: data/regimes/nist_800-53r4.tsv
+      source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
+      parsable: 'data/regimes/nist_800-53r4.tsv'
     etl:
-      module: sckg.etl.800_53
-      class: NIST80053
+      module: 'sckg.etl.800_53'
+      class: 'NIST80053'
     meta:
       families:
-        AC: Access Control
-        MP: Media Protection
-        AT: Awareness and Training
-        PE: Physical and Environmental Protection
-        AU: Audit and Accountability
-        PL: Planning
-        CA: Security Assessment and Authorization
-        PS: Personnel Security
-        CM: Configuration Management
-        RA: Risk Assessment
-        CP: Contingency Planning
-        SA: System and Services Acquisition
-        IA: Identification and Authentication
-        SC: System and Communications Protection
-        IR: Incident Response
-        SI: System and Information Integrity
-        MA: Maintenance
-        PM: Program Management
-  - name: fedramp_high
-    description: FedRAMP High
+        AC: 'Access Control'
+        MP: 'Media Protection'
+        AT: 'Awareness and Training'
+        PE: 'Physical and Environmental Protection'
+        AU: 'Audit and Accountability'
+        PL: 'Planning'
+        CA: 'Security Assessment and Authorization'
+        PS: 'Personnel Security'
+        CM: 'Configuration Management'
+        RA: 'Risk Assessment'
+        CP: 'Contingency Planning'
+        SA: 'System and Services Acquisition'
+        IA: 'Identification and Authentication'
+        SC: 'System and Communications Protection'
+        IR: 'Incident Response'
+        SI: 'System and Information Integrity'
+        MA: 'Maintenance'
+        PM: 'Program Management'
+  - name: 'fedramp_high'
+    description: 'FedRAMP High'
     document:
-      source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
-      parsable: data/regimes/fedramp_high.tsv
+      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
+      parsable: 'data/regimes/fedramp_high.tsv'
     baseline:
-      regime_name: FedRAMP
-      baseline_name: High
-      control_regime: 800_53
-      uid_key: id
-  - name: fedramp_moderate
-    description: FedRAMP Moderate
+      regime_name: 'FedRAMP'
+      baseline_name: 'High'
+      control_regime: '800_53'
+      uid_key: 'id'
+  - name: 'fedramp_moderate'
+    description: 'FedRAMP Moderate'
     document:
-      source: https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx
-      parsable: data/regimes/fedramp_moderate.tsv
+      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
+      parsable: 'data/regimes/fedramp_moderate.tsv'
     baseline:
-      regime_name: FedRAMP
-      baseline_name: Moderate
-      control_regime: 800_53
-      uid_key: id
-  - name: cnssi_1253_ci
-    description: CNSSI 1253 Classified Information Overlay
+      regime_name: 'FedRAMP'
+      baseline_name: 'Moderate'
+      control_regime: '800_53'
+      uid_key: 'id'
+  - name: 'cnssi_1253_ci'
+    description: 'CNSSI 1253 Classified Information Overlay'
     document:
-      source: http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg==
-      parsable: data/regimes/cnssi_1253_classified_information.tsv
+      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg=='
+      parsable: 'data/regimes/cnssi_1253_classified_information.tsv'
     baseline:
-      regime_name: CNSSI 1253
-      baseline_name: Classified Information
-      control_regime: 800_53
-      uid_key: control
-  - name: cnssi_1253_pii
-    description: CNSSI 1253 Privacy Overlay
+      regime_name: 'CNSSI 1253'
+      baseline_name: 'Classified Information'
+      control_regime: '800_53'
+      uid_key: 'control'
+  - name: 'cnssi_1253_pii'
+    description: 'CNSSI 1253 Privacy Overlay'
     document:
-      source: http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q==
-      parsable: data/regimes/cnssi_1253_privacy.tsv
+      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q=='
+      parsable: 'data/regimes/cnssi_1253_privacy.tsv'
     baseline:
-      regime_name: CNSSI 1253
-      baseline_name: Privacy
-      control_regime: 800_53
-      uid_key: control
-  - name: dod_srg
-    description: DoD Cloud Computing SRG
+      regime_name: 'CNSSI 1253'
+      baseline_name: 'Privacy'
+      control_regime: '800_53'
+      uid_key: 'control'
+  - name: 'dod_srg'
+    description: 'DoD Cloud Computing SRG'
     document:
-      source: https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf
-      parsable: data/regimes/dod_srg.tsv
+      source: 'https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf'
+      parsable: 'data/regimes/dod_srg.tsv'
     etl:
-      module: sckg.etl.dod_srg
-      class: DoDSRG
+      module: 'sckg.etl.dod_srg'
+      class: 'DoDSRG'
     baseline:
-      regime_name: DoD Cloud Computing SRG
-      baseline_name: None
-      control_regime: 800_53
-      uid_key: control
-  - name: cis
-    description: Center for Internet Security Benchmark
+      regime_name: 'DoD Cloud Computing SRG'
+      baseline_name: 'None'
+      control_regime: '800_53'
+      uid_key: 'control'
+  - name: 'cis'
+    description: 'Center for Internet Security Benchmark'
     document:
-      source: https://learn.cisecurity.org/benchmarks
-      parsable: data/regimes/cis.tsv
+      source: 'https://learn.cisecurity.org/benchmarks'
+      parsable: 'data/regimes/cis.tsv'
     etl:
-      module: sckg.etl.cis
-      class: CIS
-  - name: pci_dss
-    description: PCI DSS
+      module: 'sckg.etl.cis'
+      class: 'CIS'
+  - name: 'pci_dss'
+    description: 'PCI DSS'
     document:
-      source: https://www.pcisecuritystandards.org/document_library
-      parsable: data/regimes/pcidss_v321.tsv
+      source: 'https://www.pcisecuritystandards.org/document_library'
+      parsable: 'data/regimes/pcidss_v321.tsv'
     etl:
-      module: sckg.etl.pci_dss
-      class: PCIDSS
-  - name: nist_csf
-    description: NIST Cybersecurity Framework
+      module: 'sckg.etl.pci_dss'
+      class: 'PCIDSS'
+  - name: 'nist_csf'
+    description: 'NIST Cybersecurity Framework'
     document:
-      source: https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf
-      parsable: data/regimes/nist_csf.tsv
+      source: 'https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf'
+      parsable: 'data/regimes/nist_csf.tsv'
     etl:
-      module: sckg.etl.nist_csf
-      class: NISTCSF
-  - name: cac_rules
-    description: ComplianceAsCode Rules
+      module: 'sckg.etl.nist_csf'
+      class: 'NISTCSF'
+  - name: 'cac_rules'
+    description: 'ComplianceAsCode Rules'
     document:
-      source: https://github.com/ComplianceAsCode/content
+      source: 'https://github.com/ComplianceAsCode/content'
       # parsable can be a file or dir
-      parsable: data/compliance_as_code/linux_os/guide
+      parsable: 'data/compliance_as_code/linux_os/guide'
     etl:
-      module: sckg.etl.cac.rules
-      class: Rules
-  - name: cac_bash_rhel7
-    description: ComplianceAsCode RHEL 7 bash STIG
+      module: 'sckg.etl.cac.rules'
+      class: 'Rules'
+  - name: 'cac_bash_rhel7'
+    description: 'ComplianceAsCode RHEL 7 bash STIG'
     document:
-      source: https://github.com/ComplianceAsCode/content
-      parsable: data/compliance_as_code/build/bash/rhel7-script-stig.sh
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/rhel7-script-stig.sh'
     etl:
-      module: sckg.etl.cac.bash_rhel7
-      class: BashRHEL7
-  - name: dod_cci
-    description: DoD CCI
+      module: 'sckg.etl.cac.bash_rhel7'
+      class: 'BashRHEL7'
+  - name: 'dod_cci'
+    description: 'DoD CCI'
     document:
-      source: https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip
-      parsable: data/regimes/U_CCI_List.xml
+      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip'
+      parsable: 'data/regimes/U_CCI_List.xml'
     etl:
-      module: sckg.etl.dod_cci
-      class: DoDCCI
+      module: 'sckg.etl.dod_cci'
+      class: 'DoDCCI'
