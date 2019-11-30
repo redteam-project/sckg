@@ -21,15 +21,15 @@ class Generic(object):
 
     if regime.get('baseline'):
       baseline = regime['baseline']
-
-      stmts += self.create_generic_baseline(baseline['regime_name'],
-                                            self.get_control_regime_name(regime),
-                                            baseline['baseline_name'],
-                                            baseline['uid_key'],
-                                            regime_list)
-      return stmts
+      return self.create_generic_baseline(baseline['regime_name'],
+                                          self.get_control_regime_name(regime),
+                                          baseline['baseline_name'],
+                                          baseline['uid_key'],
+                                          regime_list)
     else:
-      raise Exception('no baseline for regime "{}" in config.yml'.format(regime['name']))
+      raise Exception('no baseline for regime "{}" in config.yml. \n'
+                      'generic transform currently only supports '
+                      'baselines'.format(regime['name']))
 
   def load(self, regime, neo4j, stmts):
     neo4j.load_baseline(stmts)
