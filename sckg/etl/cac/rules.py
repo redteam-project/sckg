@@ -119,16 +119,16 @@ class Rules(Generic):
 
         # statement to create the referenced regimes
         extant_regimes = {
-          'cis-csc': 'CIS CSC',
-          'cis': 'CIS CSC',
+          'cis-csc': self.get_control_regime_name('cis'),
+          'cis': self.get_control_regime_name('cis'),
           'cobit5': 'COBIT 5',
-          'nist': 'NIST 800-53',
-          'nist-csf': 'NIST CSF',
+          'nist': self.get_control_regime_name('800_53'),
+          'nist-csf': self.get_control_regime_name('nist_csf'),
           'isa-62443-2009': 'ISA 62443-2-1:2009',
           'isa-62443-2013': 'ISA 62443-3-3:2013',
           'iso27001-2013': 'ISO/IEC 27001:2013',
-          'srg': 'DoD SRG',
-          'pcidss': 'PCI DSS'
+          'srg': self.get_control_regime_name('dod_srg'),
+          'pcidss': self.get_control_regime_name('pci_dss')
         }
         for regime_name in references.keys():
           referenced_regime = extant_regimes.get(regime_name,
