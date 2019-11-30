@@ -101,7 +101,7 @@ regimes:
     description: PCI DSS
     document:
       source: https://www.pcisecuritystandards.org/document_library
-      parsable: data/pcidss_v321.tsv
+      parsable: data/regimes/pcidss_v321.tsv
     etl:
       module: sckg.etl.pci_dss
       class: PCIDSS
