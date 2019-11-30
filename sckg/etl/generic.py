@@ -1,4 +1,4 @@
-
+import os
 from jinja2 import Template
 
 class Generic(object):
@@ -33,6 +33,19 @@ class Generic(object):
 
   def load(self, regime, neo4j, stmts):
     neo4j.load_baseline(stmts)
+
+  def flatten_dict(self, d: dict):
+    return ', '.join("{!s}={!r}".format(key, val) for (key, val) in d.items())
+
+  # recursively get a list of files in a directory
+  def get_dir_files(self, d):
+    f = []
+    for dir_name, subdir_list, file_list in os.walk(d):
+      if len(subdir_list) > 0:
+        for subdirectory in subdir_list:
+          f = f + self.get_dir_files(d + '/' + subdirectory)
+      f = f + list(map(lambda x: d + '/' + x, file_list))
+      return f
 
   def get_control_regime_name(self, regime):
     control_regime = regime['baseline']['control_regime']

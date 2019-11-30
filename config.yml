@@ -117,6 +117,7 @@ regimes:
     description: ComplianceAsCode Rules
     document:
       source: https://github.com/ComplianceAsCode/content
+      # parsable can be a file or dir
       parsable: data/compliance_as_code/linux_os/guide
     etl:
       module: sckg.etl.cac.rules
