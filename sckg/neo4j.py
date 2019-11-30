@@ -25,6 +25,8 @@ class Neo4j(object):
     return result
 
   def load_baseline(self, stmts):
+    if stmts is None or len(stmts) == 0:
+      return
     for stmt in stmts:
       self.execute_cypher(stmt)
 
