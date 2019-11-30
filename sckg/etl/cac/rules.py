@@ -124,6 +124,7 @@ class Rules(Generic):
         )
 
         # statement to create the referenced regimes
+        # todo: find a way to differentiate complete regimes and derived ones
         extant_regimes = {
           'cis-csc': self.get_regime_description('cis'),
           'cis': self.get_regime_description('cis'),

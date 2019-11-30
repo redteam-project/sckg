@@ -77,7 +77,7 @@ regimes:
       control_regime: '800_53'
       uid_key: 'control'
   - name: 'dod_srg'
-    description: 'DoD Cloud Computing SRG'
+    description: 'DoD SRG'
     document:
       source: 'https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf'
       parsable: 'data/regimes/dod_srg.tsv'
