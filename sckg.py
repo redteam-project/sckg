@@ -35,13 +35,9 @@ class SCKG(object):
                         class_name)
     etl_instance = etl_class(self.config)
 
-    # todo: remove breakpoints
     regime_list = etl_instance.extract(regime, parsable_document)
-    pause = True
     stmts = etl_instance.transform(regime, regime_list)
-    pause = True
     etl_instance.load(regime, self.neo4j, stmts)
-    pause = True
 
 def main():
   sckg = SCKG()

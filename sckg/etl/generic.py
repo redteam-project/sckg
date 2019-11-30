@@ -47,6 +47,14 @@ class Generic(object):
       f = f + list(map(lambda x: d + '/' + x, file_list))
       return f
 
+  # todo: make regimes a dict so we don't have to iterate over the list
+  #       this will take some rewrites...
+  def get_regime_description(self, name):
+    for r in self.config['regimes']:
+      if r['name'] == name:
+        return r['description']
+    return None
+
   def get_control_regime_name(self, regime):
     control_regime = regime['baseline']['control_regime']
     for r in self.config['regimes']:
