@@ -123,13 +123,21 @@ regimes:
       module: 'sckg.etl.cac.rules'
       class: 'Rules'
   - name: 'cac_bash_rhel7'
-    description: 'ComplianceAsCode RHEL 7 bash STIG'
+    description: 'rhel7-script-stig.sh'
     document:
       source: 'https://github.com/ComplianceAsCode/content'
       parsable: 'data/compliance_as_code/build/bash/rhel7-script-stig.sh'
     etl:
-      module: 'sckg.etl.cac.bash_rhel7'
-      class: 'BashRHEL7'
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
+  - name: 'cac_bash_ubuntu1804'
+    description: 'ubuntu1804-script-standard.sh'
+    document:
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/ubuntu1804-script-standard.sh'
+    etl:
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
   - name: 'dod_cci'
     description: 'DoD CCI'
     document:
