@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop netconsole
-  command: /sbin/service 'netconsole' stop
-- name: Switch off netconsole
-  command: /sbin/chkconfig --level 0123456 'netconsole' off

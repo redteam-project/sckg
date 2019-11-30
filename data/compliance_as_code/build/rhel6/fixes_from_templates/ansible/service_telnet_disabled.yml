@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop telnet
-  command: /sbin/service 'telnet' stop
-- name: Switch off telnet
-  command: /sbin/chkconfig --level 0123456 'telnet' off

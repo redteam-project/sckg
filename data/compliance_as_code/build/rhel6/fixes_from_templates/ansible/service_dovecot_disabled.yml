@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop dovecot
-  command: /sbin/service 'dovecot' stop
-- name: Switch off dovecot
-  command: /sbin/chkconfig --level 0123456 'dovecot' off

@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop rexec
-  command: /sbin/service 'rexec' stop
-- name: Switch off rexec
-  command: /sbin/chkconfig --level 0123456 'rexec' off

@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop smb
-  command: /sbin/service 'smb' stop
-- name: Switch off smb
-  command: /sbin/chkconfig --level 0123456 'smb' off

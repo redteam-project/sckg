@@ -108,14 +108,21 @@ class Generic(object):
   def clean_dict(self, d: dict):
     # function for cleaning up bad characters that make cypher barf
     def clean(s):
-      return s.replace('\\', '\\\\').replace("'", "\\'")
+      return s.replace('\\', '\\\\').replace("'", "\\'").replace('\n', ' ')
 
     for key in d.keys():
+      if isinstance(d[key], dict):
+        d[key] = self.clean_dict(d[key])
       if isinstance(d[key], str):
         d[key] = clean(d[key])
       if isinstance(d[key], list):
+        # we don't (curently) expect nested lists, only need to check for
+        # nested dicts
         for i in range(len(d[key])):
-          d[key][i] = clean(d[key][i])
+          if isinstance(d[key][i], dict):
+            d[key][i] = self.clean_dict(d[key][i])
+          else:
+            d[key][i] = clean(d[key][i])
     return d
 
   def create_regime(self, regime):

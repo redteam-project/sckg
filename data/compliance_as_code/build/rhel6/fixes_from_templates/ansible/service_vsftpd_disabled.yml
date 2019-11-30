@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop vsftpd
-  command: /sbin/service 'vsftpd' stop
-- name: Switch off vsftpd
-  command: /sbin/chkconfig --level 0123456 'vsftpd' off

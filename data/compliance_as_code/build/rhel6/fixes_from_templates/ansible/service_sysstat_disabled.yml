@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop sysstat
-  command: /sbin/service 'sysstat' stop
-- name: Switch off sysstat
-  command: /sbin/chkconfig --level 0123456 'sysstat' off

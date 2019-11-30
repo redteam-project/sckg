@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = enable
-# complexity = low
-# disruption = low
-- name: Ensure vsftpd is installed
-  package:
-    name: "vsftpd"
-    state: present

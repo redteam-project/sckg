@@ -23,5 +23,5 @@ cd content-0.1.47/build
 cmake ../
 make -j4
 cd ..
-tar --exclude='build/jinja2_cache/*' -cvzf /var/tmp/cac.tar.gz build linux_os LICENSE
+tar --exclude='build/jinja2_cache/*' -cvzf /var/tmp/cac.tar.gz build/bash linux_os LICENSE
 ```

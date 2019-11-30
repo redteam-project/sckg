@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Ensure xinetd is removed
-  package:
-    name: "xinetd"
-    state: absent

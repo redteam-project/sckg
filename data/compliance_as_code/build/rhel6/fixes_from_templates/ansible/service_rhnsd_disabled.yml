@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop rhnsd
-  command: /sbin/service 'rhnsd' stop
-- name: Switch off rhnsd
-  command: /sbin/chkconfig --level 0123456 'rhnsd' off

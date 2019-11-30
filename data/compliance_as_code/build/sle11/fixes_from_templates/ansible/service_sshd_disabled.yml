@@ -1,9 +1,0 @@
-# platform = multi_platform_all
-# reboot = false
-# strategy = disable
-# complexity = low
-# disruption = low
-- name: Stop sshd
-  command: /sbin/service 'sshd' stop
-- name: Switch off sshd
-  command: /sbin/chkconfig --level 0123456 'sshd' off

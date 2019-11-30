@@ -75,7 +75,7 @@ class Rules(Generic):
     stmts = []
     for regime_dict in regime_list:
       for key in regime_dict.keys():
-        properties = regime_dict[key].copy()
+        properties = self.clean_dict(regime_dict[key].copy())
         properties['name'] = key
 
         # move references into its own dict
@@ -98,6 +98,12 @@ class Rules(Generic):
         if properties.get('identifiers'):
           properties['identifiers'] = self.flatten_dict(
               properties['identifiers']
+          )
+
+        # flatten template into a string
+        if properties.get('template'):
+          properties['template'] = self.flatten_dict(
+              properties['template']
           )
 
         # statement to create this control
