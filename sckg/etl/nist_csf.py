@@ -37,6 +37,7 @@ class NISTCSF(Generic):
                                           'name': c['subcategory']
                                         })
       )
+      # todo: handle derived regimes differently than ETLed regimes
       for ref_regime in ['CIS CSC',
                          'COBIT 5',
                          'ISA 62443-2-1:2009',
