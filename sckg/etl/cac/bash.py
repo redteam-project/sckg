@@ -38,22 +38,23 @@ class Bash(Generic):
     return steps
 
   def transform(self, regime, regime_list):
-    regime_name = regime['name']
+    regime_name = regime['description']
     stmts = []
-    for step_dict in regime_list:
 
-      step = step_dict.keys()[0]
+    stmts.append(
+        self.create_regime('ComplianceAsCode')
+    )
+    stmts.append(
+        self.create_regime_baseline('ComplianceAsCode',
+                                    properties={
+                                      'name': regime_name
+                                    })
+    )
+
+    for step_dict in regime_list:
+      step = list(step_dict.keys())[0]
       code = step_dict[step]
 
-      stmts.append(
-          self.create_regime('ComplianceAsCode')
-      )
-      stmts.append(
-          self.create_regime_baseline('ComplianceAsCode',
-                                      properties={
-                                        'name': 'bash'
-                                      })
-      )
       stmts.append(
           self.create_geneirc_control('ComplianceAsCode',
                                       'baseline',
