@@ -36,11 +36,17 @@ password: FILLMEIN
 EOF
 ```
 
-### Building the graph
+### Loading from a dump
 
-This project requires Python 3.
+The fastest way to get up and running is to load from one of the included database dumps. Use the `neo4j-admin` command to load a dump from the [data/dumps](data/dumps) directory. 
 
-To build the graph, ensure your Neo4j database is running, install the dependencies, then call `build.py`.
+Refer to the `neo4j-admin load` [example](https://neo4j.com/docs/operations-manual/current/tools/dump-load/) in the Neo4j docs.
+
+### Building the graph from scratch
+
+To build your own graph from scratch, ensure your Neo4j database is running, install the dependencies, then call `build.py`.
+
+Note that this project requires Python 3.
 
 ```bash
 virtualenv venv
