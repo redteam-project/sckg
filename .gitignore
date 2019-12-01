@@ -134,3 +134,4 @@ secrets/
 *_newline.json
 private.yml
 sckg/etl/private
+data/regimes/private
