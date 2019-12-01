@@ -42,6 +42,13 @@ The fastest way to get up and running is to load from one of the included databa
 
 Refer to the `neo4j-admin load` [example](https://neo4j.com/docs/operations-manual/current/tools/dump-load/) in the Neo4j docs.
 
+### Tabular query output
+
+If you don't want to bother with running a local graph, you can just look through our tabular query output. Here are some that might interest you:
+
+* By OS
+  * [RHEL 7 STIG to PCI DSS](data/query_output/by_os/rhel7_stig_to_pcidss.csv)
+
 ### Building the graph from scratch
 
 To build your own graph from scratch, ensure your Neo4j database is running, install the dependencies, then call `build.py`.
