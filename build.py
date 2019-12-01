@@ -13,7 +13,7 @@ class SCKG(object):
     try:
       with open('private.yml', 'r') as f:
         private_regimes = yaml.safe_load(f.read())
-        self.config['regimes'] += private_regimes
+        self.config['regimes'] += private_regimes['regimes']
     except FileNotFoundError as e:
       pass
 
