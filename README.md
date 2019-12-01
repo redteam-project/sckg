@@ -216,7 +216,7 @@ MATCH (step)-[*..4]->(nc)
 RETURN step.name AS Step, nc.name AS NIST ORDER BY NIST
 ```
 
-Now the more complicated example: let's find out which PCI DSS controls are satisfiied by this STIG script. We'll have to use the NIST CSF path identified above.
+Now the more complicated example: let's find out which PCI DSS controls are satisfied by this STIG script. We'll have to use the NIST CSF path identified above.
 
 ```cypher
 MATCH (bash:baseline {name: 'rhel7-script-stig.sh'})-[:HAS]->(step:control)
