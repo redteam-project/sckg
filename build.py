@@ -29,7 +29,7 @@ class Build(object):
     self.neo4j = Neo4j(self.config)
 
     for regime in self.config['regimes']:
-      # iterate over the regimes, buliding each one
+      # iterate over the regimes, building each one
       # it's important to keep in mind that the order of the regimes in
       # config.yml matters because of how the regimes refer to one another,
       # which is why we do this as a list and not a dict (which would be easier
@@ -74,7 +74,8 @@ class Build(object):
     etl_instance = etl_class(self.config)
 
     # the next three lines are for the extract, transform, and load methods.
-    # extract takes the parsable document and returns a list of dicts
+    # extract takes the parsable document and returns a list of rows from the
+    # parsable doc
     regime_list = etl_instance.extract(regime, parsable_document)
     # transform takes the list of dicts and converts them into cypher statements
     stmts = etl_instance.transform(regime, regime_list)

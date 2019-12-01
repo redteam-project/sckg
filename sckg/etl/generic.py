@@ -2,13 +2,40 @@ import os
 from jinja2 import Template
 
 class Generic(object):
+  """generic ETL class
+     The getters and setters for the ETL classes and child classes live here
+     as well.
+  """
 
   def __init__(self, config):
+    """Init class for Generic ETL
+
+    Args:
+      config: the serialized config.yml data
+
+    Returns:
+      None
+
+    Raises:
+      None
+    """
     self.config = config
     self.template_path = self.config['cwd'] + '/' + \
                          self.config['defaults']['templates']['cypher']['path']
 
   def extract(self, regime, parsable_document):
+    """extract method
+
+    Args:
+      regime: the regime dict from config
+      parsable_document: path relative to build.py to the regime source doc
+
+    Returns:
+      regime_list: a list of lines from the parsable_document
+
+    Returns:
+      None
+    """
     with open(parsable_document, 'r') as f:
       rows = f.readlines()
 
@@ -17,6 +44,18 @@ class Generic(object):
     return regime_list
 
   def transform(self, regime, regime_list):
+    """transform method
+
+    Args:
+      regime: the regime dict from config
+      regime_list: the list of rows from the parsable_document
+
+    Returns:
+      list: a list of cypher statements to build this regime
+
+    Raises:
+      Exception: if no baseline is specified for the regime in config
+    """
     stmts = []
 
     if regime.get('baseline'):
@@ -32,13 +71,48 @@ class Generic(object):
                       'baselines'.format(regime['name']))
 
   def load(self, regime, neo4j, stmts):
+    """load method
+
+    Args:
+      regime: the regime dict from config
+      neo4j: the neo4j object that contains the active server connection
+      stmts: list of the cypher statements to be executed
+
+    Returns:
+      None
+
+    Raises:
+      None
+    """
     neo4j.load_baseline(stmts)
 
   def flatten_dict(self, d: dict):
+    """flattens a dict into a string in the form of k=v[, k=v]
+
+    Args:
+      d: the dict to be flattened
+
+    Returns:
+      string: a string representative of the flattened dict in the form of
+              key=value, comma delimited
+
+    Raises:
+      None
+    """
     return ', '.join("{!s}={!r}".format(key, val) for (key, val) in d.items())
 
-  # recursively get a list of files in a directory
   def get_dir_files(self, d):
+    """recursively finds files in a directory
+
+    Args:
+      d: the directory to be searched
+
+    Returns:
+      f: a list of file names
+
+    Raises:
+      None
+    """
     f = []
     for dir_name, subdir_list, file_list in os.walk(d):
       if len(subdir_list) > 0:
@@ -47,15 +121,44 @@ class Generic(object):
       f = f + list(map(lambda x: d + '/' + x, file_list))
       return f
 
-  # todo: make regimes a dict so we don't have to iterate over the list
-  #       this will take some rewrites...
   def get_regime_description(self, name):
+    """returns the description of a given regime
+       Because we're representing our build-order in the config file with a
+       list we can't just reference regime descriptions by a dict key because
+       if the regimes object was of type dict then we couldn't guarantee in
+       order execution. So we have this helper function to iterate over the
+       regime list, find the desired regime, and return the description. It's
+       kind of suboptimal, but is a suitable trade-off.
+
+    Args:
+      name: the name of the regime in config
+
+    Returns:
+      string: the regime description from config
+
+    Raises:
+      None
+    """
     for r in self.config['regimes']:
       if r['name'] == name:
         return r['description']
     return None
 
   def get_control_regime_name(self, regime):
+    """getter for a regime's baseline's control regime
+       In our graph schema a baseline's controls reference another regime. This
+       getter finds the regime's baseline's control regime description then
+       returns it
+
+      Args:
+        regime: the regime dict from config
+
+      Returns:
+        string: the description of the regime's baseline's control regime
+
+      Raises:
+        None
+    """
     control_regime = regime['baseline']['control_regime']
     for r in self.config['regimes']:
       if r['name'] == control_regime:
@@ -63,6 +166,17 @@ class Generic(object):
     return None
 
   def get_field_names(self, first_row: str):
+    """getter for a parsable_document's first row field names
+
+    Args:
+      first_row: a string containing the first row of a parsable_document
+
+    Returns:
+      fields: a list of sanitized field names
+
+    Raises:
+      None
+    """
     # function for generating clean field names
     fields = []
     for field in first_row.rstrip().split('\t'):
