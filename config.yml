@@ -122,11 +122,35 @@ regimes:
     etl:
       module: 'sckg.etl.cac.rules'
       class: 'Rules'
-  - name: 'cac_bash_rhel7'
+  - name: 'cac_bash_rhel7_stig'
     description: 'rhel7-script-stig.sh'
     document:
       source: 'https://github.com/ComplianceAsCode/content'
       parsable: 'data/compliance_as_code/build/bash/rhel7-script-stig.sh'
+    etl:
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
+  - name: 'cac_bash_rhel7_pcidss'
+    description: 'rhel7-script-pci-dss.sh'
+    document:
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/rhel7-script-pci-dss.sh'
+    etl:
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
+  - name: 'cac_bash_fedora_pcidss'
+    description: 'fedora-script-pci-dss.sh'
+    document:
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/fedora-script-pci-dss.sh'
+    etl:
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
+  - name: 'cac_bash_debian9'
+    description: 'debian9-script-standard.sh'
+    document:
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/debian9-script-standard.sh'
     etl:
       module: 'sckg.etl.cac.bash'
       class: 'Bash'
@@ -146,3 +170,5 @@ regimes:
     etl:
       module: 'sckg.etl.dod_cci'
       class: 'DoDCCI'
+    meta:
+      updated: '02 Feb 2017'
