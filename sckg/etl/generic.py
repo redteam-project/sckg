@@ -184,16 +184,28 @@ class Generic(object):
     return fields
 
   def parse_baseline(self, rows):
-    # function to parse a generic regime baseline
+    """method to parse a generic tab-delimited tsv file
+
+    Args:
+      rows: a list of rows from the parsable_document
+
+    Returns:
+      baseline_list: a list of dicts where the keys are the column titles
+
+    Raises:
+      None
+    """
     first_row = rows[0]
     fields = self.get_field_names(first_row)
 
     baseline_list = []
     for row in rows[1:]:
+      # skip the first row since it has our column titles
       row_dict = {}
       cols = row.rstrip().split('\t')
       for i in range(len(cols)):
         if cols[i] == '' or cols[i] == ' ':
+          # skip blank fields
           continue
         row_dict[fields[i]] = cols[i]
 
@@ -202,6 +214,19 @@ class Generic(object):
     return baseline_list
 
   def render_template(self, template, *args, **kwargs):
+    """method to render a statement's jinja2 template
+
+    Args:
+      template: the template's name
+      args: positional arguments that will be rendered in the template
+      kwargs: keyword arguments that will be rendered in the template
+
+    Returns:
+      string: a rendered statement in string format
+
+    Raises:
+      None
+    """
     with open(self.template_path + template, 'r') as file:
       j2t = file.read()
 
@@ -220,24 +245,51 @@ class Generic(object):
                                          properties=p)
 
   def clean_dict(self, d: dict):
-    # function for cleaning up bad characters that make cypher barf
+    """method for removing bad characters from a dict's values
+       Dict values can be strings, lists, or dicts. Lists of lists are not
+       supported.
+
+    Args:
+      d: the dict to be cleaned
+
+    Returns:
+      d: the dict with cleaned values
+
+    Raises:
+      None
+    """
+
     def clean(s):
+      """removes backslashes, single quotes, and new lines
+
+      Args:
+        s: string to be cleaned
+
+      Returns:
+        string: cleaned string
+
+      Raises:
+        None
+      """
       return s.replace('\\', '\\\\').replace("'", "\\'").replace('\n', ' ')
 
     for key in d.keys():
       if isinstance(d[key], dict):
+        # nested dict, recurse
         d[key] = self.clean_dict(d[key])
       if isinstance(d[key], str):
         d[key] = clean(d[key])
       if isinstance(d[key], list):
-        # we don't (curently) expect nested lists, only need to check for
-        # nested dicts
         for i in range(len(d[key])):
           if isinstance(d[key][i], dict):
+            # nested dict, recurse
             d[key][i] = self.clean_dict(d[key][i])
           else:
             d[key][i] = clean(d[key][i])
     return d
+
+  # todo: generalize the templates so that these setters can also be generalized
+  # no point in commenting functions that are about to be replaced...
 
   def create_regime(self, regime):
     stmt = self.render_template('regime.j2',
