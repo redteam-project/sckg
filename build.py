@@ -4,7 +4,7 @@ import yaml
 
 from sckg.neo4j import Neo4j
 
-class SCKG(object):
+class Build(object):
 
   def __init__(self):
     with open('config.yml', 'r') as f:
@@ -47,7 +47,7 @@ class SCKG(object):
     etl_instance.load(regime, self.neo4j, stmts)
 
 def main():
-  sckg = SCKG()
+  build = Build()
 
 if __name__ == '__main__':
   main()
