@@ -38,9 +38,13 @@ EOF
 
 ### Building the graph
 
+This project requires Python 3.
+
 To build the graph, ensure your Neo4j database is running, install the dependencies, then call `build.py`.
 
 ```bash
+virtualenv venv
+source venv/bin/activate
 pip install -r requirements
 python build.py
 ```
