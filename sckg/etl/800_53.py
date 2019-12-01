@@ -2,19 +2,38 @@ import re
 from sckg.etl.generic import Generic
 
 class NIST80053(Generic):
+  """NIST 800-53 custom ETL"""
 
   def __init__(self, config):
     super().__init__(config)
 
   def extract(self, regime, parsable_document):
+    """NIST 800-53 extract method
+       This is one of the most complicated extraction methods. NIST publishes
+       a parsable version of their regime, which is great. But in order to
+       properly extract all the info we need for our schema we have to use some
+       regex and a bunch of conditional formatting. See inline comments for
+       more details.
+
+    Args:
+      regime: the regime dict from config
+      parsable_document: path relative to build.py to the regime source doc
+
+    Returns:
+      regime_list: a list of lines from the parsable_document
+
+    Returns:
+      None
+    """
     with open(parsable_document, 'r') as f:
       rows = f.readlines()
 
-    # call parent's generic baseline function
+    # call parent's generic baseline function to get our list of dicts where
+    # the keys are the column titles and values are the row elements
     baseline_80053_list = []
     baseline_list = self.parse_baseline(rows)
 
-    # set up regex
+    # set up regex control and family pattern matching
     control_pattern = '\w{2}-\d{1,2}'
     control_regex = re.compile(control_pattern)
     family_pattern = '^\w{2}'
@@ -24,8 +43,6 @@ class NIST80053(Generic):
     fields = self.get_field_names(first_row)
 
     for control_dict in baseline_list:
-      # do 800-53 specific stuff
-
       # explode baseline_impact and related attributes
       for key in ['baseline_impact', 'related']:
         if control_dict.get(key):
@@ -85,16 +102,39 @@ class NIST80053(Generic):
     return baseline_80053_list
 
   def transform(self, regime, regime_list):
-    # todo: parameterize this
-    render_related = False
+    """NIST 800-53 custom transform method
+       this method breaks convention by returning a dict of stmts instead of a
+       list. this should be changed in the future.
 
+        Args:
+          regime: the regime dict from config
+          regime_list: the list of rows from the parsable_document
+
+        Returns:
+          stmts: a dcit of cypher statements to build this regime
+
+        Raises:
+          Exception: if no baseline is specified for the regime in config
+        """
+
+    # 800-53 includes per-control metadata on so-called 'related controls'
+    # inclusion of related controls is off by default because it drastically
+    # increases the number of relationships for this regime.
+    render_related = regime['meta']['render_related']
+
+    # this currently breaks our convention of returning lists
+    # todo: change this logic and load method to use lists so we match the other claseses
     stmts = {}
+
     # create regime node
     regime_name = regime['description']
     stmt = self.create_regime(regime_name)
     stmts['regime'] = stmt
 
-    # create families
+    # create families. we're using the config metadata for this regime.
+    # currently 800-53 is the only regime that has this config attribute due
+    # to the fact that the family names are impossible to infer from the
+    # control names themselves.
     families = regime['meta']['families']
     family_stmts = []
     for family in families.keys():
@@ -174,6 +214,21 @@ class NIST80053(Generic):
     return stmts
 
   def load(self, regime, neo4j, stmts):
+    """NIST 800-53 custom load method
+       this method currently breaks our convention by processing a stmt dict
+       instead of a list. in the future this should be changed
+
+        Args:
+          regime: the regime dict from config
+          neo4j: the neo4j object that contains the active server connection
+          stmts: dict of the cypher statements to be executed
+
+        Returns:
+          None
+
+        Raises:
+          None
+        """
     neo4j.execute_cypher(stmts['regime'])
     for key in ['families', 'controls']:
       for stmt in stmts[key]:

@@ -17,6 +17,7 @@ regimes:
       module: 'sckg.etl.800_53'
       class: 'NIST80053'
     meta:
+      render_related: False
       families:
         AC: 'Access Control'
         MP: 'Media Protection'
