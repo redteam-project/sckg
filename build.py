@@ -10,6 +10,13 @@ class SCKG(object):
     with open('config.yml', 'r') as f:
       self.config = yaml.safe_load(f.read())
 
+    try:
+      with open('private.yml', 'r') as f:
+        private_regimes = yaml.safe_load(f.read())
+        self.config['regimes'] += private_regimes
+    except FileNotFoundError as e:
+      pass
+
     self.config['cwd'] = os.getcwd()
 
     self.neo4j = Neo4j(self.config)

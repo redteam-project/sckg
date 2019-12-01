@@ -132,3 +132,5 @@ dmypy.json
 secrets/
 *.json.gz
 *_newline.json
+private.yml
+sckg/etl/private
