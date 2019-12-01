@@ -45,7 +45,10 @@ class Build(object):
       regime: the dict regime list element from the configs
 
     Returns:
-       None
+      None
+
+    Raises:
+      None
     """
 
     # first we have to figure out which module and class we're going to use
@@ -63,8 +66,9 @@ class Build(object):
                         regime['document']['parsable']
 
     # this part's a little tricky. we're dynamically instantiating the class
-    # associated with this regime. this way we can have a nicely generic etl
-    # function without a bunch of repeated code.
+    # associated with this regime with the getattr / import_module combo.
+    # this way we can have a nicely generic etl function without a bunch of
+    # repeated code.
     etl_class = getattr(importlib.import_module(module_name),
                         class_name)
     etl_instance = etl_class(self.config)
