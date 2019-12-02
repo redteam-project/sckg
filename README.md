@@ -51,7 +51,7 @@ This can take a while. With this version of sckg there are almost 10,000 nodes a
 
 Once your graph is built you can start querying it in order to plumb the depths of security control regime interrelatedness.
 
-See the Queries Doc for more advanced queries.
+See the [queries doc](docs/QUERIES.md] for more advanced queries.
 
 ### Keeping your browser from melting your laptop
 
