@@ -24,6 +24,8 @@ Currently, this project supports only Neo4j as the backend graph database. The n
 
 [Create a database](https://neo4j.com/developer/neo4j-desktop/#desktop-create-db) and start it.
 
+When Neo4j is newly installed, the default user *neo4j* has the default password *neo4j* . The default password must be changed before access to resources will be permitted.
+
 Once installed, make a file called `neo4j.yml` in a directory called `secrets` and populate it with the connection details for your neo4j database.
 
 ```bash
