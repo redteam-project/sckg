@@ -13,13 +13,17 @@ class Build(object):
     This class will grab config data from config.yml and private.yml, then
     iterate over the regimes from both files to build the graph.
     """
+    self.config = {}
     with open('config.yml', 'r') as f:
       self.config = yaml.safe_load(f.read())
 
     try:
       with open('private.yml', 'r') as f:
         private_regimes = yaml.safe_load(f.read())
-        self.config['regimes'] += private_regimes['regimes']
+        if self.config.get('regimes'):
+          self.config['regimes'] += private_regimes['regimes']
+        else:
+          self.config['regimes'] = private_regimes['regimes']
     except FileNotFoundError as e:
       # It's ok if there's no private config
       pass
