@@ -173,3 +173,16 @@ regimes:
       class: 'DoDCCI'
     meta:
       updated: '02 Feb 2017'
+  - name: 'gpos_stig'
+    description: 'GPOS'
+    document:
+      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_General_Purpose_Operating_System_V1R6_SRG.zip'
+      parsable: 'data/regimes/U_General_Purpose_Operating_System_SRG_V1R6_Manual-xccdf.xml'
+    etl:
+      module: 'sckg.etl.stig'
+      class: 'STIG'
+    baseline:
+      regime_name: 'STIG'
+      baseline_name: 'GPOS'
+      control_regime: '800_53'
+      uid_key: 'control'
