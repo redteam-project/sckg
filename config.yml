@@ -173,3 +173,45 @@ regimes:
       class: 'DoDCCI'
     meta:
       updated: '02 Feb 2017'
+  - name: 'gpospp'
+    description: 'NIAP GPOS'
+    document:
+      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_General_Purpose_Operating_System_V1R6_SRG.zip'
+      parsable: 'data/regimes/U_General_Purpose_Operating_System_SRG_V1R6_Manual-xccdf.xml'
+    etl:
+      module: 'sckg.etl.stig'
+      class: 'STIG'
+    baseline:
+      regime_name: 'STIG'
+      baseline_name: 'NIAP GPOS'
+      control_regime: 'DoD CCI'
+      control_baseline: '02 Feb 2017'
+      uid_key: 'name'
+  - name: 'rhel7_stig'
+    description: 'RHEL7 STIG'
+    document:
+      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip'
+      parsable: 'data/regimes/U_Red_Hat_Enterprise_Linux_7_STIG_V2R5_Manual-xccdf.xml'
+    etl:
+      module: 'sckg.etl.stig'
+      class: 'STIG'
+    baseline:
+      regime_name: 'STIG'
+      baseline_name: 'RHEL7 STIG'
+      control_regime: 'DoD CCI'
+      control_baseline: '02 Feb 2017'
+      uid_key: 'name'
+  - name: 'ubuntu1604_stig'
+    description: 'Ubuntu1604 STIG'
+    document:
+      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Canonical_Ubuntu_16-04_LTS_V1R2_STIG.zip'
+      parsable: 'data/regimes/U_Canonical_Ubuntu_16-04_LTS_STIG_V1R2_Manual-xccdf.xml'
+    etl:
+      module: 'sckg.etl.stig'
+      class: 'STIG'
+    baseline:
+      regime_name: 'STIG'
+      baseline_name: 'Ubuntu1604 STIG'
+      control_regime: 'DoD CCI'
+      control_baseline: '02 Feb 2017'
+      uid_key: 'name'
