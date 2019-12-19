@@ -207,7 +207,7 @@ class NIST80053(Generic):
     for control_dict in regime_list:
       for impact in control_dict.get('baseline_impact', []):
         stmt = self.render_template('baseline_control.j2', regime_name, impact,
-                                    control_dict['name'])
+                                    regime_name, control_dict['name'])
         impact_stmts.append(stmt)
     stmts['impact'] = impact_stmts
 
