@@ -8,210 +8,210 @@ defaults:
     cypher:
       path: 'data/templates/cypher/'
 regimes:
-  - name: '800_53'
-    description: 'NIST 800-53'
-    document:
-      source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
-      parsable: 'data/regimes/nist_800-53r4.tsv'
-    etl:
-      module: 'sckg.etl.800_53'
-      class: 'NIST80053'
-    meta:
-      render_related: False
-      families:
-        AC: 'Access Control'
-        MP: 'Media Protection'
-        AT: 'Awareness and Training'
-        PE: 'Physical and Environmental Protection'
-        AU: 'Audit and Accountability'
-        PL: 'Planning'
-        CA: 'Security Assessment and Authorization'
-        PS: 'Personnel Security'
-        CM: 'Configuration Management'
-        RA: 'Risk Assessment'
-        CP: 'Contingency Planning'
-        SA: 'System and Services Acquisition'
-        IA: 'Identification and Authentication'
-        SC: 'System and Communications Protection'
-        IR: 'Incident Response'
-        SI: 'System and Information Integrity'
-        MA: 'Maintenance'
-        PM: 'Program Management'
-  - name: 'fedramp_high'
-    description: 'FedRAMP High'
-    document:
-      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
-      parsable: 'data/regimes/fedramp_high.tsv'
-    baseline:
-      regime_name: 'FedRAMP'
-      baseline_name: 'High'
-      control_regime: '800_53'
-      uid_key: 'id'
-  - name: 'fedramp_moderate'
-    description: 'FedRAMP Moderate'
-    document:
-      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
-      parsable: 'data/regimes/fedramp_moderate.tsv'
-    baseline:
-      regime_name: 'FedRAMP'
-      baseline_name: 'Moderate'
-      control_regime: '800_53'
-      uid_key: 'id'
-  - name: 'cnssi_1253_ci'
-    description: 'CNSSI 1253 Classified Information Overlay'
-    document:
-      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg=='
-      parsable: 'data/regimes/cnssi_1253_classified_information.tsv'
-    baseline:
-      regime_name: 'CNSSI 1253'
-      baseline_name: 'Classified Information'
-      control_regime: '800_53'
-      uid_key: 'control'
-  - name: 'cnssi_1253_pii'
-    description: 'CNSSI 1253 Privacy Overlay'
-    document:
-      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q=='
-      parsable: 'data/regimes/cnssi_1253_privacy.tsv'
-    baseline:
-      regime_name: 'CNSSI 1253'
-      baseline_name: 'Privacy'
-      control_regime: '800_53'
-      uid_key: 'control'
-  - name: 'dod_srg'
-    description: 'DoD SRG'
-    document:
-      source: 'https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf'
-      parsable: 'data/regimes/dod_srg.tsv'
-    etl:
-      module: 'sckg.etl.dod_srg'
-      class: 'DoDSRG'
-    baseline:
-      regime_name: 'DoD SRG'
-      baseline_name: 'None'
-      control_regime: '800_53'
-      uid_key: 'control'
-  - name: 'cis'
-    description: 'CIS CSC'
-    document:
-      source: 'https://learn.cisecurity.org/benchmarks'
-      parsable: 'data/regimes/cis.tsv'
-    etl:
-      module: 'sckg.etl.cis'
-      class: 'CIS'
-  - name: 'pci_dss'
-    description: 'PCI DSS'
-    document:
-      source: 'https://www.pcisecuritystandards.org/document_library'
-      parsable: 'data/regimes/pcidss_v321.tsv'
-    etl:
-      module: 'sckg.etl.pci_dss'
-      class: 'PCIDSS'
-  - name: 'nist_csf'
-    description: 'NIST CSF'
-    document:
-      source: 'https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf'
-      parsable: 'data/regimes/nist_csf.tsv'
-    etl:
-      module: 'sckg.etl.nist_csf'
-      class: 'NISTCSF'
-  - name: 'cac_rules'
-    description: 'ComplianceAsCode Rules'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      # parsable can be a file or dir
-      parsable: 'data/compliance_as_code/linux_os/guide'
-    etl:
-      module: 'sckg.etl.cac.rules'
-      class: 'Rules'
-  - name: 'cac_bash_rhel7_stig'
-    description: 'rhel7-script-stig.sh'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      parsable: 'data/compliance_as_code/build/bash/rhel7-script-stig.sh'
-    etl:
-      module: 'sckg.etl.cac.bash'
-      class: 'Bash'
-  - name: 'cac_bash_rhel7_pcidss'
-    description: 'rhel7-script-pci-dss.sh'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      parsable: 'data/compliance_as_code/build/bash/rhel7-script-pci-dss.sh'
-    etl:
-      module: 'sckg.etl.cac.bash'
-      class: 'Bash'
-  - name: 'cac_bash_fedora_pcidss'
-    description: 'fedora-script-pci-dss.sh'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      parsable: 'data/compliance_as_code/build/bash/fedora-script-pci-dss.sh'
-    etl:
-      module: 'sckg.etl.cac.bash'
-      class: 'Bash'
-  - name: 'cac_bash_debian9'
-    description: 'debian9-script-standard.sh'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      parsable: 'data/compliance_as_code/build/bash/debian9-script-standard.sh'
-    etl:
-      module: 'sckg.etl.cac.bash'
-      class: 'Bash'
-  - name: 'cac_bash_ubuntu1804'
-    description: 'ubuntu1804-script-standard.sh'
-    document:
-      source: 'https://github.com/ComplianceAsCode/content'
-      parsable: 'data/compliance_as_code/build/bash/ubuntu1804-script-standard.sh'
-    etl:
-      module: 'sckg.etl.cac.bash'
-      class: 'Bash'
-  - name: 'dod_cci'
-    description: 'DoD CCI'
-    document:
-      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip'
-      parsable: 'data/regimes/U_CCI_List.xml'
-    etl:
-      module: 'sckg.etl.dod_cci'
-      class: 'DoDCCI'
-    meta:
-      updated: '02 Feb 2017'
-  - name: 'gpospp'
-    description: 'NIAP GPOS'
-    document:
-      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_General_Purpose_Operating_System_V1R6_SRG.zip'
-      parsable: 'data/regimes/U_General_Purpose_Operating_System_SRG_V1R6_Manual-xccdf.xml'
-    etl:
-      module: 'sckg.etl.stig'
-      class: 'STIG'
-    baseline:
-      regime_name: 'STIG'
-      baseline_name: 'NIAP GPOS'
-      control_regime: 'DoD CCI'
-      control_baseline: '02 Feb 2017'
-      uid_key: 'name'
-  - name: 'rhel7_stig'
-    description: 'RHEL7 STIG'
-    document:
-      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip'
-      parsable: 'data/regimes/U_Red_Hat_Enterprise_Linux_7_STIG_V2R5_Manual-xccdf.xml'
-    etl:
-      module: 'sckg.etl.stig'
-      class: 'STIG'
-    baseline:
-      regime_name: 'STIG'
-      baseline_name: 'RHEL7 STIG'
-      control_regime: 'DoD CCI'
-      control_baseline: '02 Feb 2017'
-      uid_key: 'name'
-  - name: 'ubuntu1604_stig'
-    description: 'Ubuntu1604 STIG'
-    document:
-      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Canonical_Ubuntu_16-04_LTS_V1R2_STIG.zip'
-      parsable: 'data/regimes/U_Canonical_Ubuntu_16-04_LTS_STIG_V1R2_Manual-xccdf.xml'
-    etl:
-      module: 'sckg.etl.stig'
-      class: 'STIG'
-    baseline:
-      regime_name: 'STIG'
-      baseline_name: 'Ubuntu1604 STIG'
-      control_regime: 'DoD CCI'
-      control_baseline: '02 Feb 2017'
-      uid_key: 'name'
+#  - name: '800_53'
+#    description: 'NIST 800-53'
+#    document:
+#      source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
+#      parsable: 'data/regimes/nist_800-53r4.tsv'
+#    etl:
+#      module: 'sckg.etl.800_53'
+#      class: 'NIST80053'
+#    meta:
+#      render_related: False
+#      families:
+#        AC: 'Access Control'
+#        MP: 'Media Protection'
+#        AT: 'Awareness and Training'
+#        PE: 'Physical and Environmental Protection'
+#        AU: 'Audit and Accountability'
+#        PL: 'Planning'
+#        CA: 'Security Assessment and Authorization'
+#        PS: 'Personnel Security'
+#        CM: 'Configuration Management'
+#        RA: 'Risk Assessment'
+#        CP: 'Contingency Planning'
+#        SA: 'System and Services Acquisition'
+#        IA: 'Identification and Authentication'
+#        SC: 'System and Communications Protection'
+#        IR: 'Incident Response'
+#        SI: 'System and Information Integrity'
+#        MA: 'Maintenance'
+#        PM: 'Program Management'
+#  - name: 'fedramp_high'
+#    description: 'FedRAMP High'
+#    document:
+#      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
+#      parsable: 'data/regimes/fedramp_high.tsv'
+#    baseline:
+#      regime_name: 'FedRAMP'
+#      baseline_name: 'High'
+#      control_regime: '800_53'
+#      uid_key: 'id'
+#  - name: 'fedramp_moderate'
+#    description: 'FedRAMP Moderate'
+#    document:
+#      source: 'https://www.fedramp.gov/assets/resources/documents/FedRAMP_Security_Controls_Baseline.xlsx'
+#      parsable: 'data/regimes/fedramp_moderate.tsv'
+#    baseline:
+#      regime_name: 'FedRAMP'
+#      baseline_name: 'Moderate'
+#      control_regime: '800_53'
+#      uid_key: 'id'
+#  - name: 'cnssi_1253_ci'
+#    description: 'CNSSI 1253 Classified Information Overlay'
+#    document:
+#      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg=='
+#      parsable: 'data/regimes/cnssi_1253_classified_information.tsv'
+#    baseline:
+#      regime_name: 'CNSSI 1253'
+#      baseline_name: 'Classified Information'
+#      control_regime: '800_53'
+#      uid_key: 'control'
+#  - name: 'cnssi_1253_pii'
+#    description: 'CNSSI 1253 Privacy Overlay'
+#    document:
+#      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?p+GaEPIY0/MkVrdBz4Wu3Q=='
+#      parsable: 'data/regimes/cnssi_1253_privacy.tsv'
+#    baseline:
+#      regime_name: 'CNSSI 1253'
+#      baseline_name: 'Privacy'
+#      control_regime: '800_53'
+#      uid_key: 'control'
+#  - name: 'dod_srg'
+#    description: 'DoD SRG'
+#    document:
+#      source: 'https://rmf.org/wp-content/uploads/2018/05/Cloud_Computing_SRG_v1r3.pdf'
+#      parsable: 'data/regimes/dod_srg.tsv'
+#    etl:
+#      module: 'sckg.etl.dod_srg'
+#      class: 'DoDSRG'
+#    baseline:
+#      regime_name: 'DoD SRG'
+#      baseline_name: 'None'
+#      control_regime: '800_53'
+#      uid_key: 'control'
+#  - name: 'cis'
+#    description: 'CIS CSC'
+#    document:
+#      source: 'https://learn.cisecurity.org/benchmarks'
+#      parsable: 'data/regimes/cis.tsv'
+#    etl:
+#      module: 'sckg.etl.cis'
+#      class: 'CIS'
+#  - name: 'pci_dss'
+#    description: 'PCI DSS'
+#    document:
+#      source: 'https://www.pcisecuritystandards.org/document_library'
+#      parsable: 'data/regimes/pcidss_v321.tsv'
+#    etl:
+#      module: 'sckg.etl.pci_dss'
+#      class: 'PCIDSS'
+#  - name: 'nist_csf'
+#    description: 'NIST CSF'
+#    document:
+#      source: 'https://nvlpubs.nist.gov/nistpubs/CSWP/NIST.CSWP.04162018.pdf'
+#      parsable: 'data/regimes/nist_csf.tsv'
+#    etl:
+#      module: 'sckg.etl.nist_csf'
+#      class: 'NISTCSF'
+#  - name: 'cac_rules'
+#    description: 'ComplianceAsCode Rules'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      # parsable can be a file or dir
+#      parsable: 'data/compliance_as_code/linux_os/guide'
+#    etl:
+#      module: 'sckg.etl.cac.rules'
+#      class: 'Rules'
+#  - name: 'cac_bash_rhel7_stig'
+#    description: 'rhel7-script-stig.sh'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      parsable: 'data/compliance_as_code/build/bash/rhel7-script-stig.sh'
+#    etl:
+#      module: 'sckg.etl.cac.bash'
+#      class: 'Bash'
+#  - name: 'cac_bash_rhel7_pcidss'
+#    description: 'rhel7-script-pci-dss.sh'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      parsable: 'data/compliance_as_code/build/bash/rhel7-script-pci-dss.sh'
+#    etl:
+#      module: 'sckg.etl.cac.bash'
+#      class: 'Bash'
+#  - name: 'cac_bash_fedora_pcidss'
+#    description: 'fedora-script-pci-dss.sh'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      parsable: 'data/compliance_as_code/build/bash/fedora-script-pci-dss.sh'
+#    etl:
+#      module: 'sckg.etl.cac.bash'
+#      class: 'Bash'
+#  - name: 'cac_bash_debian9'
+#    description: 'debian9-script-standard.sh'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      parsable: 'data/compliance_as_code/build/bash/debian9-script-standard.sh'
+#    etl:
+#      module: 'sckg.etl.cac.bash'
+#      class: 'Bash'
+#  - name: 'cac_bash_ubuntu1804'
+#    description: 'ubuntu1804-script-standard.sh'
+#    document:
+#      source: 'https://github.com/ComplianceAsCode/content'
+#      parsable: 'data/compliance_as_code/build/bash/ubuntu1804-script-standard.sh'
+#    etl:
+#      module: 'sckg.etl.cac.bash'
+#      class: 'Bash'
+#  - name: 'dod_cci'
+#    description: 'DoD CCI'
+#    document:
+#      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/u_cci_list.zip'
+#      parsable: 'data/regimes/U_CCI_List.xml'
+#    etl:
+#      module: 'sckg.etl.dod_cci'
+#      class: 'DoDCCI'
+#    meta:
+#      updated: '02 Feb 2017'
+#  - name: 'gpospp'
+#    description: 'NIAP GPOS'
+#    document:
+#      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_General_Purpose_Operating_System_V1R6_SRG.zip'
+#      parsable: 'data/regimes/U_General_Purpose_Operating_System_SRG_V1R6_Manual-xccdf.xml'
+#    etl:
+#      module: 'sckg.etl.stig'
+#      class: 'STIG'
+#    baseline:
+#      regime_name: 'STIG'
+#      baseline_name: 'NIAP GPOS'
+#      control_regime: 'DoD CCI'
+#      control_baseline: '02 Feb 2017'
+#      uid_key: 'name'
+#  - name: 'rhel7_stig'
+#    description: 'RHEL7 STIG'
+#    document:
+#      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Red_Hat_Enterprise_Linux_7_V2R5_STIG.zip'
+#      parsable: 'data/regimes/U_Red_Hat_Enterprise_Linux_7_STIG_V2R5_Manual-xccdf.xml'
+#    etl:
+#      module: 'sckg.etl.stig'
+#      class: 'STIG'
+#    baseline:
+#      regime_name: 'STIG'
+#      baseline_name: 'RHEL7 STIG'
+#      control_regime: 'DoD CCI'
+#      control_baseline: '02 Feb 2017'
+#      uid_key: 'name'
+#  - name: 'ubuntu1604_stig'
+#    description: 'Ubuntu1604 STIG'
+#    document:
+#      source: 'https://dl.dod.cyber.mil/wp-content/uploads/stigs/zip/U_Canonical_Ubuntu_16-04_LTS_V1R2_STIG.zip'
+#      parsable: 'data/regimes/U_Canonical_Ubuntu_16-04_LTS_STIG_V1R2_Manual-xccdf.xml'
+#    etl:
+#      module: 'sckg.etl.stig'
+#      class: 'STIG'
+#    baseline:
+#      regime_name: 'STIG'
+#      baseline_name: 'Ubuntu1604 STIG'
+#      control_regime: 'DoD CCI'
+#      control_baseline: '02 Feb 2017'
+#      uid_key: 'name'
