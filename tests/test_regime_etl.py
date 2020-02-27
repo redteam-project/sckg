@@ -80,3 +80,25 @@ class TestConfigYaml(unittest.TestCase):
   #   query = 'MATCH (r:regime {name: "CNSSI 1253"})-[:HAS*]->(b:baseline {name: "Privacy"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
   #   r = self.get_regime_lens(name, query)
   #   self.assertEquals(r[0], r[1])
+
+  # todo: add dod srg test case once issue #14 is resolved
+
+  # todo: this currently fails, see issue #17
+  # def test_control_count_cis_csc(self):
+  #   name = 'CIS CSC'
+  #   query = 'MATCH (r:regime {name: "CIS CSC"})-[:HAS*]->(c:control) RETURN c'
+  #   r = self.get_regime_lens(name, query)
+  #   self.assertEquals(r[0], r[1])
+
+  # todo: this currently fails, see issue #18
+  # def test_control_count_pci_dss(self):
+  #   name = 'PCI DSS'
+  #   query = 'MATCH (r:regime {name: "PCI DSS"})-[:HAS*]->(c:control) RETURN c'
+  #   r = self.get_regime_lens(name, query)
+  #   self.assertEquals(r[0], r[1])
+
+  # todo: write test for nist csf
+
+  # todo: write test for cac
+
+  # todo: write test for bash implementations
