@@ -1,4 +1,5 @@
 import importlib
+import magic
 import os
 import unittest
 import yaml
@@ -50,11 +51,13 @@ class TestConfigYaml(unittest.TestCase):
           os.path.isdir((parsable_document))
       )
 
-      if os.path.isfile(parsable_document) and regime.get('baseline'):
+      if os.path.isfile(parsable_document) and regime.get('baseline') and \
+          not 'XML' in magic.from_file(parsable_document):
         with open(parsable_document, 'r') as f:
           lines = f.readlines()
-        pause = True
-        self.assertTrue(regime.get('baseline').get('uid_key') in lines[0].lower().split('\t'))
+        uid_key = regime.get('baseline').get('uid_key')
+        field_names = lines[0].rstrip().lower().split('\t')
+        self.assertTrue(uid_key in field_names)
 
       if regime.get('etl'):
         try:
