@@ -22,8 +22,6 @@ class TestConfigYaml(unittest.TestCase):
       # It's ok if there's no private config
       pass
 
-    self.config['cwd'] = os.getcwd()
-
   def test_defaults(self):
     self.assertTrue(self.config.get('defaults'))
 

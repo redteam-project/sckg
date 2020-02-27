@@ -3,7 +3,7 @@ from neo4j import GraphDatabase
 
 class Neo4j(object):
 
-  def __init__(self, config):
+  def __init__(self, config, debug=True):
     """Init function for Neo4j class, which initializes a connection to the
        Neo4j server. This class will be reused by the other classes to prevent
        multiple connections from being opened.
@@ -22,7 +22,7 @@ class Neo4j(object):
     with open(neo4j_config, 'r') as f:
       self.neo4j_config = yaml.safe_load(f.read())
 
-    self.debug = True
+    self.debug = debug
 
     self.driver = GraphDatabase.driver(
         self.neo4j_config['url'],
