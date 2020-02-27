@@ -48,19 +48,35 @@ class TestConfigYaml(unittest.TestCase):
       lines = f.readlines()
 
     controls = self.get_controls(query)
-    pause = True
     return len(lines) - 1, len(controls)
 
-  def test_regime_80053(self):
+  def test_control_count_80053(self):
     name = 'NIST 800-53'
     query = 'MATCH (r:regime {name: "' + name + '"})-[:HAS*]->(c:control) RETURN c'
     r = self.get_regime_lens(name, query)
     self.assertEquals(r[0], r[1])
 
-  def test_regime_fedramp_high(self):
+  def test_control_count_fedramp_high(self):
     name = 'FedRAMP High'
     query = 'MATCH (r:regime {name: "FedRAMP"})-[:HAS*]->(b:baseline {name: "High"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
     r = self.get_regime_lens(name, query)
     self.assertEquals(r[0], r[1])
 
+  def test_control_count_fedramp_moderate(self):
+    name = 'FedRAMP Moderate'
+    query = 'MATCH (r:regime {name: "FedRAMP"})-[:HAS*]->(b:baseline {name: "Moderate"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
+    r = self.get_regime_lens(name, query)
+    self.assertEquals(r[0], r[1])
 
+  def test_control_count_cnssi_ci(self):
+    name = 'CNSSI 1253 Classified Information Overlay'
+    query = 'MATCH (r:regime {name: "CNSSI 1253"})-[:HAS*]->(b:baseline {name: "Classified Information"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
+    r = self.get_regime_lens(name, query)
+    self.assertEquals(r[0], r[1])
+
+  # todo: this currently fails, see issue #16
+  # def test_control_count_cnssi_pii(self):
+  #   name = 'CNSSI 1253 Privacy Overlay'
+  #   query = 'MATCH (r:regime {name: "CNSSI 1253"})-[:HAS*]->(b:baseline {name: "Privacy"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
+  #   r = self.get_regime_lens(name, query)
+  #   self.assertEquals(r[0], r[1])
