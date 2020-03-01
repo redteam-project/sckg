@@ -1,3 +1,7 @@
+"""National Institute of Standards and TechnologySpecial Publication 800-53
+(NIST 800-53) custom ETL
+"""
+
 import re
 from sckg.etl.generic import Generic
 
@@ -34,13 +38,13 @@ class NIST80053(Generic):
     baseline_list = self.parse_baseline(rows)
 
     # set up regex control and family pattern matching
-    control_pattern = '\w{2}-\d{1,2}'
+    control_pattern = r'\w{2}-\d{1,2}'
     control_regex = re.compile(control_pattern)
-    family_pattern = '^\w{2}'
+    family_pattern = r'^\w{2}'
     family_regex = re.compile(family_pattern)
 
     first_row = rows[0]
-    fields = self.get_field_names(first_row)
+    # fields = self.get_field_names(first_row)
 
     for control_dict in baseline_list:
       # explode baseline_impact and related attributes
@@ -53,8 +57,8 @@ class NIST80053(Generic):
       name = control_dict['name']
       m = re.match(control_regex, name)
       control = m.string[m.start(0):m.end(0)]
-      mf = re.match(family_regex, name)
-      family = m.string[mf.start(0):mf.end(0)]
+      m_family = re.match(family_regex, name)
+      family = m.string[m_family.start(0):m_family.end(0)]
       control_dict['family'] = family
 
       if '(' in name:
@@ -65,7 +69,7 @@ class NIST80053(Generic):
                                  .split('(')))
         # len 0 means family
         if len(name_parts) > 0:
-          last_part = name_parts[-1]
+          # last_part = name_parts[-1]
           del name_parts[-1]
 
           enhancement = ' '
@@ -123,7 +127,8 @@ class NIST80053(Generic):
     render_related = regime['meta']['render_related']
 
     # this currently breaks our convention of returning lists
-    # todo: change this logic and load method to use lists so we match the other claseses
+    # todo: change this logic and load method to use lists so we match the
+    #  other claseses
     stmts = {}
 
     # create regime node
@@ -196,10 +201,15 @@ class NIST80053(Generic):
 
     # add baseline impacts
     baseline_stmts = {
-      'low': self.create_regime_baseline(regime_name, properties={'name': 'LOW'}),
-      'moderate': self.create_regime_baseline(regime_name, properties={
-        'name': 'MODERATE'}),
-      'high': self.create_regime_baseline(regime_name, properties={'name': 'HIGH'})
+        'low': self.create_regime_baseline(regime_name, properties={
+            'name': 'LOW'
+        }),
+        'moderate': self.create_regime_baseline(regime_name, properties={
+            'name': 'MODERATE'
+        }),
+        'high': self.create_regime_baseline(regime_name, properties={
+            'name': 'HIGH'
+        })
     }
     stmts['baselines'] = baseline_stmts
 

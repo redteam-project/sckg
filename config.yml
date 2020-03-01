@@ -14,7 +14,7 @@ regimes:
       source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
       parsable: 'data/regimes/nist_800-53r4.tsv'
     etl:
-      module: 'sckg.etl.800_53'
+      module: 'sckg.etl.nist_800_53'
       class: 'NIST80053'
     meta:
       render_related: False
