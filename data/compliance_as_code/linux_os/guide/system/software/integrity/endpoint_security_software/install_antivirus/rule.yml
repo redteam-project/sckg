@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,rhv4
+prodtype: fedora,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install Virus Scanning Software'
 
@@ -28,7 +28,7 @@ identifiers:
 
 references:
     disa: 366,1239,1668
-    nist: SC-28,SI-3,SI-3(1)(ii)
+    nist: CM-6(a)
     nist-csf: DE.CM-4,DE.DP-3,PR.DS-1
     srg@rhel6: SRG-OS-00270
     stigid@rhel6: "000284"

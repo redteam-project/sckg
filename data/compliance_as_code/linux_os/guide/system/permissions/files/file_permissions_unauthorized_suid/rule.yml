@@ -2,7 +2,7 @@ documentation_complete: true
 
 title: 'Ensure All SUID Executables Are Authorized'
 
-prodtype: rhel6,rhel7,rhel8,ol7,ol8,fedora,wrlinux8,wrlinux1019
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8,wrlinux1019,wrlinux8
 
 description: |-
     The SUID (set user id) bit should be set only on files that were
@@ -31,8 +31,9 @@ identifiers:
 
 references:
     anssi: NT28(R37),NT28(R38)
-    cis: 6.1.13
-    nist: AC-6(1)
+    cis@rhel7: 6.1.13
+    cis@rhel8: 6.1.13
+    nist: CM-6(a),AC-6(1)
     nist-csf: PR.AC-4,PR.DS-5
     isa-62443-2013: 'SR 2.1,SR 5.2'
     isa-62443-2009: 4.3.3.7.3

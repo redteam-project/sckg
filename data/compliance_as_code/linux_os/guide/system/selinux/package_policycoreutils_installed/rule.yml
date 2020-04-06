@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install policycoreutils Package'
 
@@ -28,6 +28,9 @@ identifiers:
     cce@rhel6: 82978-8
     cce@rhel7: 82977-0
     cce@rhel8: 82976-2
+
+references:
+    srg: SRG-OS-000480-GPOS-00227
 
 ocil_clause: 'the package is not installed'
 

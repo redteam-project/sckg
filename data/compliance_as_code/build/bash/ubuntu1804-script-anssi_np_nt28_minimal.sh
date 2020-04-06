@@ -6,7 +6,7 @@
 # This profile contains items to be applied systematically.
 #
 # Benchmark ID:  UBUNTU-BIONIC
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,122 +22,122 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 19) for 'sudo_remove_no_authenticate'
+# BEGIN fix (1 / 19) for 'file_owner_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 1/19: 'sudo_remove_no_authenticate'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
-# END fix for 'sudo_remove_no_authenticate'
-
-###############################################################################
-# BEGIN fix (2 / 19) for 'sudo_remove_nopasswd'
-###############################################################################
-(>&2 echo "Remediating rule 2/19: 'sudo_remove_nopasswd'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
-# END fix for 'sudo_remove_nopasswd'
-
-###############################################################################
-# BEGIN fix (3 / 19) for 'file_permissions_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 3/19: 'file_permissions_etc_shadow'")
-
-chmod 0640 /etc/shadow
-# END fix for 'file_permissions_etc_shadow'
-
-###############################################################################
-# BEGIN fix (4 / 19) for 'file_owner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 4/19: 'file_owner_etc_shadow'")
-
-
-chown 0 /etc/shadow
-# END fix for 'file_owner_etc_shadow'
-
-###############################################################################
-# BEGIN fix (5 / 19) for 'file_owner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 5/19: 'file_owner_etc_group'")
+(>&2 echo "Remediating rule 1/19: 'file_owner_etc_group'")
 
 
 chown 0 /etc/group
 # END fix for 'file_owner_etc_group'
 
 ###############################################################################
-# BEGIN fix (6 / 19) for 'file_permissions_etc_group'
+# BEGIN fix (2 / 19) for 'file_permissions_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 6/19: 'file_permissions_etc_group'")
+(>&2 echo "Remediating rule 2/19: 'file_permissions_etc_group'")
 
 chmod 0644 /etc/group
 # END fix for 'file_permissions_etc_group'
 
 ###############################################################################
-# BEGIN fix (7 / 19) for 'file_groupowner_etc_gshadow'
+# BEGIN fix (3 / 19) for 'file_groupowner_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 7/19: 'file_groupowner_etc_gshadow'")
-
-
-chgrp 42 /etc/gshadow
-# END fix for 'file_groupowner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (8 / 19) for 'file_groupowner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 8/19: 'file_groupowner_etc_passwd'")
-
-
-chgrp 0 /etc/passwd
-# END fix for 'file_groupowner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (9 / 19) for 'file_groupowner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 9/19: 'file_groupowner_etc_shadow'")
+(>&2 echo "Remediating rule 3/19: 'file_groupowner_etc_shadow'")
 
 
 chgrp 42 /etc/shadow
 # END fix for 'file_groupowner_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (10 / 19) for 'file_owner_etc_gshadow'
+# BEGIN fix (4 / 19) for 'file_permissions_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 10/19: 'file_owner_etc_gshadow'")
+(>&2 echo "Remediating rule 4/19: 'file_permissions_etc_shadow'")
 
-
-chown 0 /etc/gshadow
-# END fix for 'file_owner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (11 / 19) for 'file_groupowner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 11/19: 'file_groupowner_etc_group'")
-
-
-chgrp 0 /etc/group
-# END fix for 'file_groupowner_etc_group'
+chmod 0640 /etc/shadow
+# END fix for 'file_permissions_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (12 / 19) for 'file_permissions_etc_gshadow'
+# BEGIN fix (5 / 19) for 'file_groupowner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 12/19: 'file_permissions_etc_gshadow'")
+(>&2 echo "Remediating rule 5/19: 'file_groupowner_etc_gshadow'")
 
-chmod 0640 /etc/gshadow
-# END fix for 'file_permissions_etc_gshadow'
+
+chgrp 42 /etc/gshadow
+# END fix for 'file_groupowner_etc_gshadow'
 
 ###############################################################################
-# BEGIN fix (13 / 19) for 'file_owner_etc_passwd'
+# BEGIN fix (6 / 19) for 'file_owner_etc_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 13/19: 'file_owner_etc_passwd'")
+(>&2 echo "Remediating rule 6/19: 'file_owner_etc_passwd'")
 
 
 chown 0 /etc/passwd
 # END fix for 'file_owner_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (14 / 19) for 'file_permissions_etc_passwd'
+# BEGIN fix (7 / 19) for 'file_owner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 14/19: 'file_permissions_etc_passwd'")
+(>&2 echo "Remediating rule 7/19: 'file_owner_etc_gshadow'")
+
+
+chown 0 /etc/gshadow
+# END fix for 'file_owner_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (8 / 19) for 'file_groupowner_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 8/19: 'file_groupowner_etc_group'")
+
+
+chgrp 0 /etc/group
+# END fix for 'file_groupowner_etc_group'
+
+###############################################################################
+# BEGIN fix (9 / 19) for 'file_permissions_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 9/19: 'file_permissions_etc_passwd'")
 
 chmod 0644 /etc/passwd
 # END fix for 'file_permissions_etc_passwd'
+
+###############################################################################
+# BEGIN fix (10 / 19) for 'file_owner_etc_shadow'
+###############################################################################
+(>&2 echo "Remediating rule 10/19: 'file_owner_etc_shadow'")
+
+
+chown 0 /etc/shadow
+# END fix for 'file_owner_etc_shadow'
+
+###############################################################################
+# BEGIN fix (11 / 19) for 'file_permissions_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 11/19: 'file_permissions_etc_gshadow'")
+
+chmod 0640 /etc/gshadow
+# END fix for 'file_permissions_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (12 / 19) for 'file_groupowner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 12/19: 'file_groupowner_etc_passwd'")
+
+
+chgrp 0 /etc/passwd
+# END fix for 'file_groupowner_etc_passwd'
+
+###############################################################################
+# BEGIN fix (13 / 19) for 'sudo_remove_no_authenticate'
+###############################################################################
+(>&2 echo "Remediating rule 13/19: 'sudo_remove_no_authenticate'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
+# END fix for 'sudo_remove_no_authenticate'
+
+###############################################################################
+# BEGIN fix (14 / 19) for 'sudo_remove_nopasswd'
+###############################################################################
+(>&2 echo "Remediating rule 14/19: 'sudo_remove_nopasswd'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
+# END fix for 'sudo_remove_nopasswd'
 
 ###############################################################################
 # BEGIN fix (15 / 19) for 'apt_conf_disallow_unauthenticated'

@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel7,rhel8,rhv4
+prodtype: rhel7,rhel8,rhv4,wrlinux1019
 
 title: 'Configure Multiple DNS Servers in /etc/resolv.conf'
 
@@ -29,7 +29,7 @@ identifiers:
 
 references:
     disa: "366"
-    nist: SC-22
+    nist: SC-20(a),CM-6(a)
     nist-csf: PR.PT-4
     srg: SRG-OS-000480-GPOS-00227
     stigid@rhel7: "040600"

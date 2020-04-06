@@ -1,3 +1,5 @@
+"""Neo4j graph database class"""
+
 import yaml
 from neo4j import GraphDatabase
 
@@ -30,11 +32,24 @@ class Neo4j(object):
               self.neo4j_config['password'])
     )
 
-  def execute_cypher(self, stmt):
+    # used for query debugging
+    self.node_count = 0
+    self.edge_count = 0
+    if self.debug:
+      with self.driver.session() as session:
+        count_query = 'MATCH (n) WITH n MATCH (n)-[r]-() RETURN COUNT(n), COUNT(r)'
+        count_result = session.run(count_query)
+        for r in count_result:
+          self.node_count = r[0]
+          self.edge_count = r[1]
+
+  def execute_cypher(self, stmt, count=True):
     """executes a cypher statement
 
     Args:
       stmt: a string of cypher
+      count: if true, counts nodes created with each statement, decreases
+             performance
 
     Returns:
       result: result from the cypher statement's execution
@@ -46,6 +61,22 @@ class Neo4j(object):
       if self.debug:
         print(stmt)
       result = session.run(stmt)
+
+      if count:
+        # do 1 of 2 debug queries
+        count_query = 'MATCH (n) WITH n MATCH (n)-[r]-() RETURN COUNT(n), COUNT(r)'
+        count_result = session.run(count_query)
+        nodes_created = 0
+        for r in count_result:
+          nodes_created = r[0]
+          edges_created = r[1]
+        print('// nodes created: ' + str(max(0, nodes_created - self.node_count)))
+        if max(0, nodes_created - self.node_count) > 0:
+          self.node_count = nodes_created
+        print('// edges created: ' + str(max(0, edges_created - self.edge_count)))
+        if max(0, edges_created - self.edge_count) > 0:
+          self.edge_count = edges_created
+
     return result
 
   def load_baseline(self, stmts):

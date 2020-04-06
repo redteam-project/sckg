@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8,fedora,ol8
+prodtype: fedora,ocp4,ol8,rhel8
 
 title: 'Harden the operation of the BPF just-in-time compiler'
 
@@ -15,9 +15,11 @@ severity: medium
 
 identifiers:
     cce@rhel8: 82934-1
+    cce@ocp4: 82505-9
 
 references:
     ospp: FMT_SMF_EXT.1
+    srg: SRG-OS-000480-GPOS-00227
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="net.core.bpf_jit_harden", value="2") }}}
 

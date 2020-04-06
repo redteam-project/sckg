@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel7,rhel8,ol7,ol8
+prodtype: ocp4,ol7,ol8,rhel7,rhel8,sle15
 
 title: 'Install firewalld Package'
 
@@ -14,6 +14,12 @@ severity: medium
 identifiers:
     cce@rhel7: 82999-4
     cce@rhel8: 82998-6
+    cce@ocp4: 82521-6
+
+references:
+    nist: CM-6(a)
+    srg: SRG-OS-000480-GPOS-00227,SRG-OS-000298-GPOS-00116
+    cis@rhel8: 3.4.1.1
 
 ocil_clause: 'the package is not installed'
 

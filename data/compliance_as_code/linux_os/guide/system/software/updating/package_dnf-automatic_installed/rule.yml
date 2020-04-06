@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8,fedora,ol8
+prodtype: fedora,ol8,rhel8
 
 title: 'Install dnf-automatic Package'
 
@@ -17,6 +17,9 @@ identifiers:
     cce@rhel6: 82987-9 
     cce@rhel7: 82986-1
     cce@rhel8: 82985-3
+
+references:
+    srg: SRG-OS-000191-GPOS-00080
 
 ocil_clause: 'the package is not installed'
 

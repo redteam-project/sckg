@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8,fedora,ol8
+prodtype: fedora,ocp4,ol8,rhel8
 
 title: 'Log USBGuard daemon audit events using Linux Audit'
 
@@ -18,9 +18,11 @@ severity: medium
 
 identifiers:
     cce@rhel8: 82168-6
+    cce@ocp4: 82538-0
 
 references:
     ospp: FMT_SMF_EXT.1
+    srg: SRG-OS-000062-GPOS-00031
 
 ocil_clause: 'AuditBackend is not set to LinuxAudit'
 

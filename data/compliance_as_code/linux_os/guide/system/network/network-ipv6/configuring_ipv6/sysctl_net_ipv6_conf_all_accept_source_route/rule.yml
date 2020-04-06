@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel6,rhel7,rhel8,rhv4
+prodtype: ocp4,ol7,ol8,rhel6,rhel7,rhel8,rhv4,wrlinux1019
 
 title: 'Disable Kernel Parameter for Accepting Source-Routed Packets on all IPv6 Interfaces'
 
@@ -22,12 +22,14 @@ identifiers:
     cce@rhel6: 81012-7
     cce@rhel7: 80179-5
     cce@rhel8: 81013-5
+    cce@ocp4: 82480-5
 
 references:
     anssi: NT28(R22)
     cui: 3.1.20
+    cis@rhel8: 3.2.1
     disa: "366"
-    nist: AC-4
+    nist: CM-7(a),CM-7(b),CM-6(a)
     nist-csf: DE.AE-1,ID.AM-3,PR.AC-5,PR.DS-5,PR.PT-4
     srg: SRG-OS-000480-GPOS-00227
     stigid@rhel7: "040830"

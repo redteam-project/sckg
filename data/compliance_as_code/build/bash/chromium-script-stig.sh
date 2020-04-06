@@ -17,7 +17,7 @@
 # upstream project homepage is https://www.open-scap.org/security-policies/scap-security-guide/.
 #
 # Benchmark ID:  CHROMIUM
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -395,13 +395,13 @@ fi
 # END fix for 'chromium_http_authentication'
 
 ###############################################################################
-# BEGIN fix (20 / 37) for 'chromium_default_block_plugins'
+# BEGIN fix (20 / 37) for 'chromium_enable_safe_browsing'
 ###############################################################################
-(>&2 echo "Remediating rule 20/37: 'chromium_default_block_plugins'")
+(>&2 echo "Remediating rule 20/37: 'chromium_enable_safe_browsing'")
 CHROME_POL_FILE="chrome_stig_policy.json"
 CHROME_POL_DIR="/etc/chromium/policies/managed/"
-POL_SETTING="DefaultPluginsSetting"
-POL_SETTING_VAL="3"
+POL_SETTING="SafeBrowsingEnabled"
+POL_SETTING_VAL="true"
 
 grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 
@@ -410,7 +410,7 @@ if ! [ $? -eq 0 ] ; then
 else
    sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 fi
-# END fix for 'chromium_default_block_plugins'
+# END fix for 'chromium_enable_safe_browsing'
 
 ###############################################################################
 # BEGIN fix (21 / 37) for 'chromium_disable_cleartext_passwords'
@@ -431,13 +431,13 @@ fi
 # END fix for 'chromium_disable_cleartext_passwords'
 
 ###############################################################################
-# BEGIN fix (22 / 37) for 'chromium_enable_safe_browsing'
+# BEGIN fix (22 / 37) for 'chromium_default_block_plugins'
 ###############################################################################
-(>&2 echo "Remediating rule 22/37: 'chromium_enable_safe_browsing'")
+(>&2 echo "Remediating rule 22/37: 'chromium_default_block_plugins'")
 CHROME_POL_FILE="chrome_stig_policy.json"
 CHROME_POL_DIR="/etc/chromium/policies/managed/"
-POL_SETTING="SafeBrowsingEnabled"
-POL_SETTING_VAL="true"
+POL_SETTING="DefaultPluginsSetting"
+POL_SETTING_VAL="3"
 
 grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 
@@ -446,7 +446,7 @@ if ! [ $? -eq 0 ] ; then
 else
    sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 fi
-# END fix for 'chromium_enable_safe_browsing'
+# END fix for 'chromium_default_block_plugins'
 
 ###############################################################################
 # BEGIN fix (23 / 37) for 'chromium_enable_encrypted_searching'
@@ -561,13 +561,13 @@ fi
 # END fix for 'chromium_block_desktop_notifications'
 
 ###############################################################################
-# BEGIN fix (29 / 37) for 'chromium_disable_google_sync'
+# BEGIN fix (29 / 37) for 'chromium_disable_network_prediction'
 ###############################################################################
-(>&2 echo "Remediating rule 29/37: 'chromium_disable_google_sync'")
+(>&2 echo "Remediating rule 29/37: 'chromium_disable_network_prediction'")
 CHROME_POL_FILE="chrome_stig_policy.json"
 CHROME_POL_DIR="/etc/chromium/policies/managed/"
-POL_SETTING="SyncDisabled"
-POL_SETTING_VAL="true"
+POL_SETTING="DnsPrefetchingEnabled"
+POL_SETTING_VAL="false"
 
 grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 
@@ -576,7 +576,7 @@ if ! [ $? -eq 0 ] ; then
 else
    sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 fi
-# END fix for 'chromium_disable_google_sync'
+# END fix for 'chromium_disable_network_prediction'
 
 ###############################################################################
 # BEGIN fix (30 / 37) for 'chromium_disable_thirdparty_cookies'
@@ -671,13 +671,13 @@ fi
 # END fix for 'chromium_blacklist_extension_installation'
 
 ###############################################################################
-# BEGIN fix (35 / 37) for 'chromium_disable_network_prediction'
+# BEGIN fix (35 / 37) for 'chromium_disable_google_sync'
 ###############################################################################
-(>&2 echo "Remediating rule 35/37: 'chromium_disable_network_prediction'")
+(>&2 echo "Remediating rule 35/37: 'chromium_disable_google_sync'")
 CHROME_POL_FILE="chrome_stig_policy.json"
 CHROME_POL_DIR="/etc/chromium/policies/managed/"
-POL_SETTING="DnsPrefetchingEnabled"
-POL_SETTING_VAL="false"
+POL_SETTING="SyncDisabled"
+POL_SETTING_VAL="true"
 
 grep -q ${POL_SETTING} ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 
@@ -686,7 +686,7 @@ if ! [ $? -eq 0 ] ; then
 else
    sed -i -e 's/\"'${POL_SETTING}'.*/\"'${POL_SETTING}'\": '${POL_SETTING_VAL}',/g' ${CHROME_POL_DIR}/${CHROME_POL_FILE}
 fi
-# END fix for 'chromium_disable_network_prediction'
+# END fix for 'chromium_disable_google_sync'
 
 ###############################################################################
 # BEGIN fix (36 / 37) for 'chromium_disable_cloud_print_sharing'

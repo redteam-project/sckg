@@ -21,16 +21,18 @@ identifiers:
     cce@rhel6: 27124-7
     cce@rhel7: 27377-1
     cce@rhel8: 80899-8
+    cce@ocp4: 82665-1
 
 references:
     stigid@rhel6: "000234"
     srg@rhel6: SRG-OS-000106
     disa@rhel6: 765,766
-    cis: 5.2.6
+    cis@rhel7: 5.2.6
+    cis@rhel8: 5.2.8
     cjis: 5.5.6
     cui: 3.1.12
     disa: "366"
-    nist: AC-3,AC-17(a),AC-17(b),CM-6(a)
+    nist: AC-17(a),CM-7(a),CM-7(b),CM-6(a)
     nist-csf: PR.AC-4,PR.AC-6,PR.IP-1,PR.PT-3
     ospp: FIA_AFL.1
     srg: SRG-OS-000480-GPOS-00227

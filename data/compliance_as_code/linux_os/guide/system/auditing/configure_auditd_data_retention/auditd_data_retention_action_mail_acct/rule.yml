@@ -19,18 +19,19 @@ identifiers:
     cce@rhel6: 27241-9
     cce@rhel7: 27394-6
     cce@rhel8: 80678-6
+    cce@ocp4: 82675-0
 
 references:
     stigid@rhel6: "000313"
     srg@rhel6: SRG-OS-000046
     disa@rhel6: 139,144
-    cis: 5.2.1.2
+    cis@rhel8: 4.1.2.3
     cjis: 5.4.1.1
     cui: 3.3.1
     disa: 139,1855
     hipaa: 164.312(a)(2)(ii)
     iso27001-2013: A.12.1.3,A.12.4.1,A.12.4.2,A.12.4.3,A.12.4.4,A.12.7.1,A.16.1.4,A.16.1.5,A.16.1.7,A.17.2.1
-    nist: AU-1(b),AU-4,AU-5(1),AU-5(a),IR-5,AU-5(2)
+    nist: IA-5(1),AU-5(a),AU-5(2),CM-6(a)
     nist-csf: DE.AE-3,DE.AE-5,PR.DS-4,PR.PT-1,RS.AN-1,RS.AN-4
     pcidss: Req-10.7.a
     srg: SRG-OS-000343-GPOS-00134

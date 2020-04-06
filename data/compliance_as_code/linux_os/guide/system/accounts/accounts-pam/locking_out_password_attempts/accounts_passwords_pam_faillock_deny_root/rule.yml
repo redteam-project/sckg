@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ol7,ol8,rhel7,rhel8,rhv4,sle15,wrlinux1019
 
 title: 'Configure the root Account for Failed Password Attempts'
 
@@ -32,7 +32,7 @@ identifiers:
 
 references:
     disa: "2238"
-    nist: AC-7(b)
+    nist: CM-6(a),AC-7(b),IA-5(c)
     nist-csf: PR.AC-7
     ospp: FMT_MOF_EXT.1
     srg: SRG-OS-000329-GPOS-00128,SRG-OS-000021-GPOS-00005

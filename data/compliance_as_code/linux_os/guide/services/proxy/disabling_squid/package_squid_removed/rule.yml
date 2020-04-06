@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8
+prodtype: ol7,ol8,rhel6,rhel7,rhel8
 
 title: 'Uninstall squid Package'
 
@@ -18,6 +18,9 @@ identifiers:
     cce@rhel8: 82189-2
 
 {{{ complete_ocil_entry_package(package="squid") }}}
+
+references:
+    cis@rhel8: 2.2.6
 
 template:
     name: package_removed

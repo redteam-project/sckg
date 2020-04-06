@@ -6,7 +6,7 @@
 # This is a *draft* profile for STIG. This profile is being developed under the DoD consensus model to become a STIG in coordination with DISA FSO.
 #
 # Benchmark ID:  Jboss-EAP-6
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,11 +22,11 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 49) for 'jboss_eap_use_dod_approved_certs'
+# BEGIN fix (1 / 49) for 'jboss_eap_configure_security_manager'
 ###############################################################################
-(>&2 echo "Remediating rule 1/49: 'jboss_eap_use_dod_approved_certs'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_use_dod_approved_certs' IS MISSING!")
-# END fix for 'jboss_eap_use_dod_approved_certs'
+(>&2 echo "Remediating rule 1/49: 'jboss_eap_configure_security_manager'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_security_manager' IS MISSING!")
+# END fix for 'jboss_eap_configure_security_manager'
 
 ###############################################################################
 # BEGIN fix (2 / 49) for 'jboss_eap_logs_permissions'
@@ -71,11 +71,11 @@
 # END fix for 'jboss_eap_disable_analytics'
 
 ###############################################################################
-# BEGIN fix (8 / 49) for 'jboss_eap_system_up_to_date'
+# BEGIN fix (8 / 49) for 'jboss_eap_configure_offloading_max'
 ###############################################################################
-(>&2 echo "Remediating rule 8/49: 'jboss_eap_system_up_to_date'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_system_up_to_date' IS MISSING!")
-# END fix for 'jboss_eap_system_up_to_date'
+(>&2 echo "Remediating rule 8/49: 'jboss_eap_configure_offloading_max'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_offloading_max' IS MISSING!")
+# END fix for 'jboss_eap_configure_offloading_max'
 
 ###############################################################################
 # BEGIN fix (9 / 49) for 'jboss_eap_enable_rbac'
@@ -85,11 +85,11 @@
 # END fix for 'jboss_eap_enable_rbac'
 
 ###############################################################################
-# BEGIN fix (10 / 49) for 'jboss_eap_disable_automatic_deployment'
+# BEGIN fix (10 / 49) for 'jboss_eap_configure_multifactor_authentication'
 ###############################################################################
-(>&2 echo "Remediating rule 10/49: 'jboss_eap_disable_automatic_deployment'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_disable_automatic_deployment' IS MISSING!")
-# END fix for 'jboss_eap_disable_automatic_deployment'
+(>&2 echo "Remediating rule 10/49: 'jboss_eap_configure_multifactor_authentication'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_multifactor_authentication' IS MISSING!")
+# END fix for 'jboss_eap_configure_multifactor_authentication'
 
 ###############################################################################
 # BEGIN fix (11 / 49) for 'jboss_eap_roll_over_transfer_logs'
@@ -127,11 +127,11 @@
 # END fix for 'jboss_eap_use_tls'
 
 ###############################################################################
-# BEGIN fix (16 / 49) for 'jboss_eap_remove_jmx'
+# BEGIN fix (16 / 49) for 'jboss_eap_configure_ldap'
 ###############################################################################
-(>&2 echo "Remediating rule 16/49: 'jboss_eap_remove_jmx'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_remove_jmx' IS MISSING!")
-# END fix for 'jboss_eap_remove_jmx'
+(>&2 echo "Remediating rule 16/49: 'jboss_eap_configure_ldap'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_ldap' IS MISSING!")
+# END fix for 'jboss_eap_configure_ldap'
 
 ###############################################################################
 # BEGIN fix (17 / 49) for 'jboss_eap_configure_user_permissions'
@@ -162,11 +162,11 @@
 # END fix for 'jboss_eap_encrypt_keystore_passwords'
 
 ###############################################################################
-# BEGIN fix (21 / 49) for 'jboss_eap_configure_multifactor_authentication'
+# BEGIN fix (21 / 49) for 'jboss_eap_disable_automatic_deployment'
 ###############################################################################
-(>&2 echo "Remediating rule 21/49: 'jboss_eap_configure_multifactor_authentication'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_multifactor_authentication' IS MISSING!")
-# END fix for 'jboss_eap_configure_multifactor_authentication'
+(>&2 echo "Remediating rule 21/49: 'jboss_eap_disable_automatic_deployment'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_disable_automatic_deployment' IS MISSING!")
+# END fix for 'jboss_eap_disable_automatic_deployment'
 
 ###############################################################################
 # BEGIN fix (22 / 49) for 'jboss_eap_disable_replace_welcome_page'
@@ -176,18 +176,18 @@
 # END fix for 'jboss_eap_disable_replace_welcome_page'
 
 ###############################################################################
-# BEGIN fix (23 / 49) for 'jboss_eap_configure_application_authentication'
+# BEGIN fix (23 / 49) for 'jboss_eap_configure_management_authentication'
 ###############################################################################
-(>&2 echo "Remediating rule 23/49: 'jboss_eap_configure_application_authentication'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_application_authentication' IS MISSING!")
-# END fix for 'jboss_eap_configure_application_authentication'
+(>&2 echo "Remediating rule 23/49: 'jboss_eap_configure_management_authentication'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_management_authentication' IS MISSING!")
+# END fix for 'jboss_eap_configure_management_authentication'
 
 ###############################################################################
-# BEGIN fix (24 / 49) for 'jboss_eap_configure_security_realm'
+# BEGIN fix (24 / 49) for 'jboss_eap_configure_application_authentication'
 ###############################################################################
-(>&2 echo "Remediating rule 24/49: 'jboss_eap_configure_security_realm'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_security_realm' IS MISSING!")
-# END fix for 'jboss_eap_configure_security_realm'
+(>&2 echo "Remediating rule 24/49: 'jboss_eap_configure_application_authentication'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_application_authentication' IS MISSING!")
+# END fix for 'jboss_eap_configure_application_authentication'
 
 ###############################################################################
 # BEGIN fix (25 / 49) for 'jboss_eap_configure_syslog'
@@ -197,39 +197,39 @@
 # END fix for 'jboss_eap_configure_syslog'
 
 ###############################################################################
-# BEGIN fix (26 / 49) for 'jboss_eap_vendor_supported'
+# BEGIN fix (26 / 49) for 'jboss_eap_configure_management_network'
 ###############################################################################
-(>&2 echo "Remediating rule 26/49: 'jboss_eap_vendor_supported'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_vendor_supported' IS MISSING!")
-# END fix for 'jboss_eap_vendor_supported'
-
-###############################################################################
-# BEGIN fix (27 / 49) for 'jboss_eap_configure_security_manager'
-###############################################################################
-(>&2 echo "Remediating rule 27/49: 'jboss_eap_configure_security_manager'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_security_manager' IS MISSING!")
-# END fix for 'jboss_eap_configure_security_manager'
-
-###############################################################################
-# BEGIN fix (28 / 49) for 'jboss_eap_configure_offloading_max'
-###############################################################################
-(>&2 echo "Remediating rule 28/49: 'jboss_eap_configure_offloading_max'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_offloading_max' IS MISSING!")
-# END fix for 'jboss_eap_configure_offloading_max'
-
-###############################################################################
-# BEGIN fix (29 / 49) for 'jboss_eap_configure_ldap'
-###############################################################################
-(>&2 echo "Remediating rule 29/49: 'jboss_eap_configure_ldap'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_ldap' IS MISSING!")
-# END fix for 'jboss_eap_configure_ldap'
-
-###############################################################################
-# BEGIN fix (30 / 49) for 'jboss_eap_configure_management_network'
-###############################################################################
-(>&2 echo "Remediating rule 30/49: 'jboss_eap_configure_management_network'")
+(>&2 echo "Remediating rule 26/49: 'jboss_eap_configure_management_network'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_management_network' IS MISSING!")
 # END fix for 'jboss_eap_configure_management_network'
+
+###############################################################################
+# BEGIN fix (27 / 49) for 'jboss_eap_use_dod_approved_certs'
+###############################################################################
+(>&2 echo "Remediating rule 27/49: 'jboss_eap_use_dod_approved_certs'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_use_dod_approved_certs' IS MISSING!")
+# END fix for 'jboss_eap_use_dod_approved_certs'
+
+###############################################################################
+# BEGIN fix (28 / 49) for 'jboss_eap_system_up_to_date'
+###############################################################################
+(>&2 echo "Remediating rule 28/49: 'jboss_eap_system_up_to_date'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_system_up_to_date' IS MISSING!")
+# END fix for 'jboss_eap_system_up_to_date'
+
+###############################################################################
+# BEGIN fix (29 / 49) for 'jboss_eap_remove_jmx'
+###############################################################################
+(>&2 echo "Remediating rule 29/49: 'jboss_eap_remove_jmx'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_remove_jmx' IS MISSING!")
+# END fix for 'jboss_eap_remove_jmx'
+
+###############################################################################
+# BEGIN fix (30 / 49) for 'jboss_eap_vendor_supported'
+###############################################################################
+(>&2 echo "Remediating rule 30/49: 'jboss_eap_vendor_supported'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_vendor_supported' IS MISSING!")
+# END fix for 'jboss_eap_vendor_supported'
 
 ###############################################################################
 # BEGIN fix (31 / 49) for 'jboss_eap_file_permissions'
@@ -309,11 +309,11 @@
 # END fix for 'jboss_eap_configure_ports'
 
 ###############################################################################
-# BEGIN fix (42 / 49) for 'jboss_eap_configure_host_access_restrictions'
+# BEGIN fix (42 / 49) for 'jboss_eap_configure_security_realm'
 ###############################################################################
-(>&2 echo "Remediating rule 42/49: 'jboss_eap_configure_host_access_restrictions'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_host_access_restrictions' IS MISSING!")
-# END fix for 'jboss_eap_configure_host_access_restrictions'
+(>&2 echo "Remediating rule 42/49: 'jboss_eap_configure_security_realm'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_security_realm' IS MISSING!")
+# END fix for 'jboss_eap_configure_security_realm'
 
 ###############################################################################
 # BEGIN fix (43 / 49) for 'jboss_eap_configure_user_roles'
@@ -330,11 +330,11 @@
 # END fix for 'jboss_eap_remove_quickstarts'
 
 ###############################################################################
-# BEGIN fix (45 / 49) for 'jboss_eap_configure_management_authentication'
+# BEGIN fix (45 / 49) for 'jboss_eap_configure_host_access_restrictions'
 ###############################################################################
-(>&2 echo "Remediating rule 45/49: 'jboss_eap_configure_management_authentication'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_management_authentication' IS MISSING!")
-# END fix for 'jboss_eap_configure_management_authentication'
+(>&2 echo "Remediating rule 45/49: 'jboss_eap_configure_host_access_restrictions'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_eap_configure_host_access_restrictions' IS MISSING!")
+# END fix for 'jboss_eap_configure_host_access_restrictions'
 
 ###############################################################################
 # BEGIN fix (46 / 49) for 'jboss_eap_use_secure_ldap_port'

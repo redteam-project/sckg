@@ -1,4 +1,4 @@
-# platform = multi_platform_wrlinux,Red Hat Enterprise Linux 7,Oracle Linux 7,multi_platform_rhv
+# platform = Oracle Linux 7,Red Hat Enterprise Linux 7,multi_platform_wrlinux
 
 # include remediation functions library
 . /usr/share/scap-security-guide/remediation_functions
@@ -26,7 +26,7 @@ BOOT_UUID=$(findmnt --noheadings --output uuid --target /boot)
 
 if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"'  /etc/default/grub; then
 	# modify the GRUB command-line if a boot= arg already exists
-	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/ grub
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/grub
 else
 	# no existing boot=arg is present, append it
 	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 boot=UUID='${BOOT_UUID}'"/'  /etc/default/grub

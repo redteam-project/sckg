@@ -13,14 +13,16 @@ rationale: |-
 severity: unknown
 
 identifiers:
-   cce@rhel6: 81025-9
-   cce@rhel7: 81026-7
-   cce@rhel8: 81027-5
+    cce@rhel6: 81025-9
+    cce@rhel7: 81026-7
+    cce@rhel8: 81027-5
+    cce@ocp4: 82506-7
 
 references:
     anssi: NT28(R23)
     cis: 1.6.1
-    nist: SI-11
+    nist: CM-6(a),AC-6(1)
+    srg: SRG-OS-000324-GPOS-00125
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="fs.protected_hardlinks", value="1") }}}
 
@@ -30,3 +32,5 @@ template:
         sysctlvar: fs.protected_hardlinks
         sysctlval: '1'
         datatype: int
+
+platform: machine

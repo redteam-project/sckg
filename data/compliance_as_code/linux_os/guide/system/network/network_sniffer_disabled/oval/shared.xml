@@ -3,8 +3,10 @@
     <metadata>
       <title>Disable the network sniffer</title>
       <affected family="unix">
-        <platform>multi_platform_wrlinux</platform>
+        <platform>Red Hat Virtualization 4</platform>
         <platform>multi_platform_rhel</platform>
+        <platform>multi_platform_wrlinux</platform>
+        <platform>multi_platform_ol</platform>
       </affected>
       <description>Disable the network sniffer</description>
     </metadata>

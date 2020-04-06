@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel7,rhel8,ol7,ol8
+prodtype: ol7,ol8,rhel7,rhel8
 
 title: 'Disable Cockpit Management Server'
 
@@ -13,6 +13,8 @@ rationale: |-
     Cockpit provides a form of remote login.
 
 severity: medium
+
+platform: machine
 
 ocil: '{{{ ocil_service_disabled(service="cockpit") }}}'
 

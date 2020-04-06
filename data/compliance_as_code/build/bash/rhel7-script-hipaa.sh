@@ -14,7 +14,7 @@
 # Rule identified for securing of electronic protected health information.
 #
 # Benchmark ID:  RHEL-7
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -30,362 +30,9 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 144) for 'encrypt_partitions'
+# BEGIN fix (1 / 144) for 'rsyslog_remote_loghost'
 ###############################################################################
-(>&2 echo "Remediating rule 1/144: 'encrypt_partitions'")
-(>&2 echo "FIX FOR THIS RULE 'encrypt_partitions' IS MISSING!")
-# END fix for 'encrypt_partitions'
-
-###############################################################################
-# BEGIN fix (2 / 144) for 'rpm_verify_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 2/144: 'rpm_verify_permissions'")
-
-# Declare array to hold set of RPM packages we need to correct permissions for
-declare -A SETPERMS_RPM_DICT
-
-# Create a list of files on the system having permissions different from what
-# is expected by the RPM database
-readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
-
-for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
-do
-	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
-	# Use an associative array to store packages as it's keys, not having to care about duplicates.
-	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
-done
-
-# For each of the RPM packages left in the list -- reset its permissions to the
-# correct values
-for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
-do
-	rpm --setperms "${RPM_PACKAGE}"
-done
-# END fix for 'rpm_verify_permissions'
-
-###############################################################################
-# BEGIN fix (3 / 144) for 'rpm_verify_hashes'
-###############################################################################
-(>&2 echo "Remediating rule 3/144: 'rpm_verify_hashes'")
-
-# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
-files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
-# From files names get package names and change newline to space, because rpm writes each package to new line
-packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
-
-yum reinstall -y $packages_to_reinstall
-# END fix for 'rpm_verify_hashes'
-
-###############################################################################
-# BEGIN fix (4 / 144) for 'ensure_gpgcheck_never_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 4/144: 'ensure_gpgcheck_never_disabled'")
-sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
-# END fix for 'ensure_gpgcheck_never_disabled'
-
-###############################################################################
-# BEGIN fix (5 / 144) for 'ensure_redhat_gpgkey_installed'
-###############################################################################
-(>&2 echo "Remediating rule 5/144: 'ensure_redhat_gpgkey_installed'")
-# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
-readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
-readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
-
-# Location of the key we would like to import (once it's integrity verified)
-readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
-
-RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
-
-# Verify /etc/pki/rpm-gpg directory permissions are safe
-if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
-then
-  # If they are safe, try to obtain fingerprints from the key file
-  # (to ensure there won't be e.g. CRC error).
-
-  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
-
-  GPG_RESULT=$?
-  # No CRC error, safe to proceed
-  if [ "${GPG_RESULT}" -eq "0" ]
-  then
-    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
-      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
-      rpm --import "${REDHAT_RELEASE_KEY}"
-    }
-  fi
-fi
-# END fix for 'ensure_redhat_gpgkey_installed'
-
-###############################################################################
-# BEGIN fix (6 / 144) for 'ensure_gpgcheck_globally_activated'
-###############################################################################
-(>&2 echo "Remediating rule 6/144: 'ensure_gpgcheck_globally_activated'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26989-4'
-# END fix for 'ensure_gpgcheck_globally_activated'
-
-###############################################################################
-# BEGIN fix (7 / 144) for 'ensure_gpgcheck_local_packages'
-###############################################################################
-(>&2 echo "Remediating rule 7/144: 'ensure_gpgcheck_local_packages'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' 'CCE-80347-8'
-# END fix for 'ensure_gpgcheck_local_packages'
-
-###############################################################################
-# BEGIN fix (8 / 144) for 'dconf_db_up_to_date'
-###############################################################################
-(>&2 echo "Remediating rule 8/144: 'dconf_db_up_to_date'")
-
-dconf update
-# END fix for 'dconf_db_up_to_date'
-
-###############################################################################
-# BEGIN fix (9 / 144) for 'dconf_gnome_remote_access_encryption'
-###############################################################################
-(>&2 echo "Remediating rule 9/144: 'dconf_gnome_remote_access_encryption'")
-
-
-# Check for setting in any of the DConf db directories
-# If files contain ibus or distro, ignore them.
-# The assignment assumes that individual filenames don't contain :
-readarray -t SETTINGSFILES < <(grep -r "\\[org/gnome/Vino\\]" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
-DCONFFILE="/etc/dconf/db/local.d/00-security-settings"
-DBDIR="/etc/dconf/db/local.d"
-
-mkdir -p "${DBDIR}"
-
-if [ "${#SETTINGSFILES[@]}" -eq 0 ]
-then
-    [ ! -z ${DCONFFILE} ] || echo "" >> ${DCONFFILE}
-    printf '%s\n' "[org/gnome/Vino]" >> ${DCONFFILE}
-    printf '%s=%s\n' "require-encryption" "true" >> ${DCONFFILE}
-else
-    escaped_value="$(sed -e 's/\\/\\\\/g' <<< "true")"
-    if grep -q "^\\s*require-encryption" "${SETTINGSFILES[@]}"
-    then
-        sed -i "s/\\s*require-encryption\\s*=\\s*.*/require-encryption=${escaped_value}/g" "${SETTINGSFILES[@]}"
-    else
-        sed -i "\\|\\[org/gnome/Vino\\]|a\\require-encryption=${escaped_value}" "${SETTINGSFILES[@]}"
-    fi
-fi
-
-dconf update
-# Check for setting in any of the DConf db directories
-LOCKFILES=$(grep -r "^/org/gnome/Vino/require-encryption$" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
-LOCKSFOLDER="/etc/dconf/db/local.d/locks"
-
-mkdir -p "${LOCKSFOLDER}"
-
-if [[ -z "${LOCKFILES}" ]]
-then
-    echo "/org/gnome/Vino/require-encryption" >> "/etc/dconf/db/local.d/locks/00-security-settings-lock"
-fi
-
-dconf update
-# END fix for 'dconf_gnome_remote_access_encryption'
-
-###############################################################################
-# BEGIN fix (10 / 144) for 'dconf_gnome_remote_access_credential_prompt'
-###############################################################################
-(>&2 echo "Remediating rule 10/144: 'dconf_gnome_remote_access_credential_prompt'")
-
-
-# Check for setting in any of the DConf db directories
-# If files contain ibus or distro, ignore them.
-# The assignment assumes that individual filenames don't contain :
-readarray -t SETTINGSFILES < <(grep -r "\\[org/gnome/Vino\\]" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
-DCONFFILE="/etc/dconf/db/local.d/00-security-settings"
-DBDIR="/etc/dconf/db/local.d"
-
-mkdir -p "${DBDIR}"
-
-if [ "${#SETTINGSFILES[@]}" -eq 0 ]
-then
-    [ ! -z ${DCONFFILE} ] || echo "" >> ${DCONFFILE}
-    printf '%s\n' "[org/gnome/Vino]" >> ${DCONFFILE}
-    printf '%s=%s\n' "authentication-methods" "['vnc']" >> ${DCONFFILE}
-else
-    escaped_value="$(sed -e 's/\\/\\\\/g' <<< "['vnc']")"
-    if grep -q "^\\s*authentication-methods" "${SETTINGSFILES[@]}"
-    then
-        sed -i "s/\\s*authentication-methods\\s*=\\s*.*/authentication-methods=${escaped_value}/g" "${SETTINGSFILES[@]}"
-    else
-        sed -i "\\|\\[org/gnome/Vino\\]|a\\authentication-methods=${escaped_value}" "${SETTINGSFILES[@]}"
-    fi
-fi
-
-dconf update
-# Check for setting in any of the DConf db directories
-LOCKFILES=$(grep -r "^/org/gnome/Vino/authentication-methods$" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
-LOCKSFOLDER="/etc/dconf/db/local.d/locks"
-
-mkdir -p "${LOCKSFOLDER}"
-
-if [[ -z "${LOCKFILES}" ]]
-then
-    echo "/org/gnome/Vino/authentication-methods" >> "/etc/dconf/db/local.d/locks/00-security-settings-lock"
-fi
-
-dconf update
-# END fix for 'dconf_gnome_remote_access_credential_prompt'
-
-###############################################################################
-# BEGIN fix (11 / 144) for 'rsyslog_remote_loghost'
-###############################################################################
-(>&2 echo "Remediating rule 11/144: 'rsyslog_remote_loghost'")
+(>&2 echo "Remediating rule 1/144: 'rsyslog_remote_loghost'")
 
 rsyslog_remote_loghost_address="logcollector"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -469,65 +116,65 @@ replace_or_append '/etc/rsyslog.conf' '^\*\.\*' "@@$rsyslog_remote_loghost_addre
 # END fix for 'rsyslog_remote_loghost'
 
 ###############################################################################
-# BEGIN fix (12 / 144) for 'libreswan_approved_tunnels'
+# BEGIN fix (2 / 144) for 'libreswan_approved_tunnels'
 ###############################################################################
-(>&2 echo "Remediating rule 12/144: 'libreswan_approved_tunnels'")
+(>&2 echo "Remediating rule 2/144: 'libreswan_approved_tunnels'")
 (>&2 echo "FIX FOR THIS RULE 'libreswan_approved_tunnels' IS MISSING!")
 # END fix for 'libreswan_approved_tunnels'
 
 ###############################################################################
-# BEGIN fix (13 / 144) for 'grub2_password'
+# BEGIN fix (3 / 144) for 'grub2_password'
 ###############################################################################
-(>&2 echo "Remediating rule 13/144: 'grub2_password'")
+(>&2 echo "Remediating rule 3/144: 'grub2_password'")
 (>&2 echo "FIX FOR THIS RULE 'grub2_password' IS MISSING!")
 # END fix for 'grub2_password'
 
 ###############################################################################
-# BEGIN fix (14 / 144) for 'file_permissions_grub2_cfg'
+# BEGIN fix (4 / 144) for 'file_owner_grub2_cfg'
 ###############################################################################
-(>&2 echo "Remediating rule 14/144: 'file_permissions_grub2_cfg'")
-
-chmod 0600 /boot/grub2/grub.cfg
-# END fix for 'file_permissions_grub2_cfg'
-
-###############################################################################
-# BEGIN fix (15 / 144) for 'file_owner_grub2_cfg'
-###############################################################################
-(>&2 echo "Remediating rule 15/144: 'file_owner_grub2_cfg'")
+(>&2 echo "Remediating rule 4/144: 'file_owner_grub2_cfg'")
 
 
 chown 0 /boot/grub2/grub.cfg
 # END fix for 'file_owner_grub2_cfg'
 
 ###############################################################################
-# BEGIN fix (16 / 144) for 'grub2_uefi_password'
+# BEGIN fix (5 / 144) for 'file_permissions_grub2_cfg'
 ###############################################################################
-(>&2 echo "Remediating rule 16/144: 'grub2_uefi_password'")
-(>&2 echo "FIX FOR THIS RULE 'grub2_uefi_password' IS MISSING!")
-# END fix for 'grub2_uefi_password'
+(>&2 echo "Remediating rule 5/144: 'file_permissions_grub2_cfg'")
+
+chmod 0600 /boot/grub2/grub.cfg
+# END fix for 'file_permissions_grub2_cfg'
 
 ###############################################################################
-# BEGIN fix (17 / 144) for 'file_groupowner_grub2_cfg'
+# BEGIN fix (6 / 144) for 'file_groupowner_grub2_cfg'
 ###############################################################################
-(>&2 echo "Remediating rule 17/144: 'file_groupowner_grub2_cfg'")
+(>&2 echo "Remediating rule 6/144: 'file_groupowner_grub2_cfg'")
 
 
 chgrp 0 /boot/grub2/grub.cfg
 # END fix for 'file_groupowner_grub2_cfg'
 
 ###############################################################################
-# BEGIN fix (18 / 144) for 'grub2_enable_selinux'
+# BEGIN fix (7 / 144) for 'grub2_uefi_password'
 ###############################################################################
-(>&2 echo "Remediating rule 18/144: 'grub2_enable_selinux'")
+(>&2 echo "Remediating rule 7/144: 'grub2_uefi_password'")
+(>&2 echo "FIX FOR THIS RULE 'grub2_uefi_password' IS MISSING!")
+# END fix for 'grub2_uefi_password'
+
+###############################################################################
+# BEGIN fix (8 / 144) for 'grub2_enable_selinux'
+###############################################################################
+(>&2 echo "Remediating rule 8/144: 'grub2_enable_selinux'")
 
 sed -i --follow-symlinks "s/selinux=0//gI" /etc/default/grub /etc/grub2.cfg /etc/grub.d/*
 sed -i --follow-symlinks "s/enforcing=0//gI" /etc/default/grub /etc/grub2.cfg /etc/grub.d/*
 # END fix for 'grub2_enable_selinux'
 
 ###############################################################################
-# BEGIN fix (19 / 144) for 'selinux_policytype'
+# BEGIN fix (9 / 144) for 'selinux_policytype'
 ###############################################################################
-(>&2 echo "Remediating rule 19/144: 'selinux_policytype'")
+(>&2 echo "Remediating rule 9/144: 'selinux_policytype'")
 
 var_selinux_policy_name="targeted"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -611,16 +258,16 @@ replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_n
 # END fix for 'selinux_policytype'
 
 ###############################################################################
-# BEGIN fix (20 / 144) for 'selinux_confinement_of_daemons'
+# BEGIN fix (10 / 144) for 'selinux_confinement_of_daemons'
 ###############################################################################
-(>&2 echo "Remediating rule 20/144: 'selinux_confinement_of_daemons'")
+(>&2 echo "Remediating rule 10/144: 'selinux_confinement_of_daemons'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_confinement_of_daemons' IS MISSING!")
 # END fix for 'selinux_confinement_of_daemons'
 
 ###############################################################################
-# BEGIN fix (21 / 144) for 'selinux_state'
+# BEGIN fix (11 / 144) for 'selinux_state'
 ###############################################################################
-(>&2 echo "Remediating rule 21/144: 'selinux_state'")
+(>&2 echo "Remediating rule 11/144: 'selinux_state'")
 
 var_selinux_state="enforcing"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -707,9 +354,9 @@ fixfiles -f relabel
 # END fix for 'selinux_state'
 
 ###############################################################################
-# BEGIN fix (22 / 144) for 'sebool_selinuxuser_execstack'
+# BEGIN fix (12 / 144) for 'sebool_selinuxuser_execstack'
 ###############################################################################
-(>&2 echo "Remediating rule 22/144: 'sebool_selinuxuser_execstack'")
+(>&2 echo "Remediating rule 12/144: 'sebool_selinuxuser_execstack'")
 
 var_selinuxuser_execstack="false"
 
@@ -717,9 +364,9 @@ setsebool -P selinuxuser_execstack $var_selinuxuser_execstack
 # END fix for 'sebool_selinuxuser_execstack'
 
 ###############################################################################
-# BEGIN fix (23 / 144) for 'sebool_selinuxuser_execmod'
+# BEGIN fix (13 / 144) for 'sebool_selinuxuser_execmod'
 ###############################################################################
-(>&2 echo "Remediating rule 23/144: 'sebool_selinuxuser_execmod'")
+(>&2 echo "Remediating rule 13/144: 'sebool_selinuxuser_execmod'")
 
 var_selinuxuser_execmod="true"
 
@@ -727,9 +374,9 @@ setsebool -P selinuxuser_execmod $var_selinuxuser_execmod
 # END fix for 'sebool_selinuxuser_execmod'
 
 ###############################################################################
-# BEGIN fix (24 / 144) for 'sebool_selinuxuser_execheap'
+# BEGIN fix (14 / 144) for 'sebool_selinuxuser_execheap'
 ###############################################################################
-(>&2 echo "Remediating rule 24/144: 'sebool_selinuxuser_execheap'")
+(>&2 echo "Remediating rule 14/144: 'sebool_selinuxuser_execheap'")
 
 var_selinuxuser_execheap="false"
 
@@ -737,9 +384,38 @@ setsebool -P selinuxuser_execheap $var_selinuxuser_execheap
 # END fix for 'sebool_selinuxuser_execheap'
 
 ###############################################################################
-# BEGIN fix (25 / 144) for 'service_debug-shell_disabled'
+# BEGIN fix (15 / 144) for 'no_empty_passwords'
 ###############################################################################
-(>&2 echo "Remediating rule 25/144: 'service_debug-shell_disabled'")
+(>&2 echo "Remediating rule 15/144: 'no_empty_passwords'")
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
+# END fix for 'no_empty_passwords'
+
+###############################################################################
+# BEGIN fix (16 / 144) for 'no_direct_root_logins'
+###############################################################################
+(>&2 echo "Remediating rule 16/144: 'no_direct_root_logins'")
+echo > /etc/securetty
+# END fix for 'no_direct_root_logins'
+
+###############################################################################
+# BEGIN fix (17 / 144) for 'securetty_root_login_console_only'
+###############################################################################
+(>&2 echo "Remediating rule 17/144: 'securetty_root_login_console_only'")
+sed -i '/^vc\//d' /etc/securetty
+# END fix for 'securetty_root_login_console_only'
+
+###############################################################################
+# BEGIN fix (18 / 144) for 'restrict_serial_port_logins'
+###############################################################################
+(>&2 echo "Remediating rule 18/144: 'restrict_serial_port_logins'")
+sed -i '/ttyS/d' /etc/securetty
+# END fix for 'restrict_serial_port_logins'
+
+###############################################################################
+# BEGIN fix (19 / 144) for 'service_debug-shell_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 19/144: 'service_debug-shell_disabled'")
 
 
 SYSTEMCTL_EXEC='/usr/bin/systemctl'
@@ -759,9 +435,9 @@ fi
 # END fix for 'service_debug-shell_disabled'
 
 ###############################################################################
-# BEGIN fix (26 / 144) for 'require_singleuser_auth'
+# BEGIN fix (20 / 144) for 'require_singleuser_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 26/144: 'require_singleuser_auth'")
+(>&2 echo "Remediating rule 20/144: 'require_singleuser_auth'")
 
 service_file="/usr/lib/systemd/system/rescue.service"
 
@@ -775,9 +451,9 @@ fi
 # END fix for 'require_singleuser_auth'
 
 ###############################################################################
-# BEGIN fix (27 / 144) for 'disable_ctrlaltdel_burstaction'
+# BEGIN fix (21 / 144) for 'disable_ctrlaltdel_burstaction'
 ###############################################################################
-(>&2 echo "Remediating rule 27/144: 'disable_ctrlaltdel_burstaction'")
+(>&2 echo "Remediating rule 21/144: 'disable_ctrlaltdel_burstaction'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -859,9 +535,9 @@ replace_or_append '/etc/systemd/system.conf' '^CtrlAltDelBurstAction=' 'none' 'C
 # END fix for 'disable_ctrlaltdel_burstaction'
 
 ###############################################################################
-# BEGIN fix (28 / 144) for 'grub2_disable_interactive_boot'
+# BEGIN fix (22 / 144) for 'grub2_disable_interactive_boot'
 ###############################################################################
-(>&2 echo "Remediating rule 28/144: 'grub2_disable_interactive_boot'")
+(>&2 echo "Remediating rule 22/144: 'grub2_disable_interactive_boot'")
 
 CONFIRM_SPAWN_YES="systemd.confirm_spawn=\(1\|yes\|true\|on\)"
 CONFIRM_SPAWN_NO="systemd.confirm_spawn=no"
@@ -875,9 +551,9 @@ fi
 # END fix for 'grub2_disable_interactive_boot'
 
 ###############################################################################
-# BEGIN fix (29 / 144) for 'disable_ctrlaltdel_reboot'
+# BEGIN fix (23 / 144) for 'disable_ctrlaltdel_reboot'
 ###############################################################################
-(>&2 echo "Remediating rule 29/144: 'disable_ctrlaltdel_reboot'")
+(>&2 echo "Remediating rule 23/144: 'disable_ctrlaltdel_reboot'")
 # The process to disable ctrl+alt+del has changed in RHEL7. 
 # Reference: https://access.redhat.com/solutions/1123873
 
@@ -885,38 +561,434 @@ systemctl mask ctrl-alt-del.target
 # END fix for 'disable_ctrlaltdel_reboot'
 
 ###############################################################################
-# BEGIN fix (30 / 144) for 'no_direct_root_logins'
+# BEGIN fix (24 / 144) for 'service_autofs_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 30/144: 'no_direct_root_logins'")
-echo > /etc/securetty
-# END fix for 'no_direct_root_logins'
+(>&2 echo "Remediating rule 24/144: 'service_autofs_disabled'")
+
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" stop 'autofs.service'
+"$SYSTEMCTL_EXEC" disable 'autofs.service'
+"$SYSTEMCTL_EXEC" mask 'autofs.service'
+# Disable socket activation if we have a unit file for it
+if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^autofs.socket'; then
+    "$SYSTEMCTL_EXEC" stop 'autofs.socket'
+    "$SYSTEMCTL_EXEC" disable 'autofs.socket'
+    "$SYSTEMCTL_EXEC" mask 'autofs.socket'
+fi
+# The service may not be running because it has been started and failed,
+# so let's reset the state so OVAL checks pass.
+# Service should be 'inactive', not 'failed' after reboot though.
+"$SYSTEMCTL_EXEC" reset-failed 'autofs.service' || true
+# END fix for 'service_autofs_disabled'
 
 ###############################################################################
-# BEGIN fix (31 / 144) for 'securetty_root_login_console_only'
+# BEGIN fix (25 / 144) for 'kernel_module_usb-storage_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 31/144: 'securetty_root_login_console_only'")
-sed -i '/^vc\//d' /etc/securetty
-# END fix for 'securetty_root_login_console_only'
+(>&2 echo "Remediating rule 25/144: 'kernel_module_usb-storage_disabled'")
+if LC_ALL=C grep -q -m 1 "^install usb-storage" /etc/modprobe.d/usb-storage.conf ; then
+	sed -i 's/^install usb-storage.*/install usb-storage /bin/true/g' /etc/modprobe.d/usb-storage.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/usb-storage.conf
+	echo "install usb-storage /bin/true" >> /etc/modprobe.d/usb-storage.conf
+fi
+# END fix for 'kernel_module_usb-storage_disabled'
 
 ###############################################################################
-# BEGIN fix (32 / 144) for 'restrict_serial_port_logins'
+# BEGIN fix (26 / 144) for 'sysctl_kernel_dmesg_restrict'
 ###############################################################################
-(>&2 echo "Remediating rule 32/144: 'restrict_serial_port_logins'")
-sed -i '/ttyS/d' /etc/securetty
-# END fix for 'restrict_serial_port_logins'
+(>&2 echo "Remediating rule 26/144: 'sysctl_kernel_dmesg_restrict'")
+
+
+#
+# Set runtime for kernel.dmesg_restrict
+#
+/sbin/sysctl -q -n -w kernel.dmesg_restrict="1"
+
+#
+# If kernel.dmesg_restrict present in /etc/sysctl.conf, change value to "1"
+#	else, add "kernel.dmesg_restrict = 1" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^kernel.dmesg_restrict' "1" 'CCE-27050-4'
+# END fix for 'sysctl_kernel_dmesg_restrict'
 
 ###############################################################################
-# BEGIN fix (33 / 144) for 'no_empty_passwords'
+# BEGIN fix (27 / 144) for 'sysctl_fs_suid_dumpable'
 ###############################################################################
-(>&2 echo "Remediating rule 33/144: 'no_empty_passwords'")
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
-# END fix for 'no_empty_passwords'
+(>&2 echo "Remediating rule 27/144: 'sysctl_fs_suid_dumpable'")
+
+
+#
+# Set runtime for fs.suid_dumpable
+#
+/sbin/sysctl -q -n -w fs.suid_dumpable="0"
+
+#
+# If fs.suid_dumpable present in /etc/sysctl.conf, change value to "0"
+#	else, add "fs.suid_dumpable = 0" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^fs.suid_dumpable' "0" 'CCE-26900-1'
+# END fix for 'sysctl_fs_suid_dumpable'
 
 ###############################################################################
-# BEGIN fix (34 / 144) for 'service_auditd_enabled'
+# BEGIN fix (28 / 144) for 'sysctl_kernel_exec_shield'
 ###############################################################################
-(>&2 echo "Remediating rule 34/144: 'service_auditd_enabled'")
+(>&2 echo "Remediating rule 28/144: 'sysctl_kernel_exec_shield'")
+
+
+if [ "$(getconf LONG_BIT)" = "32" ] ; then
+  #
+  # Set runtime for kernel.exec-shield
+  #
+  sysctl -q -n -w kernel.exec-shield=1
+
+  #
+  # If kernel.exec-shield present in /etc/sysctl.conf, change value to "1"
+  #	else, add "kernel.exec-shield = 1" to /etc/sysctl.conf
+  #
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+  replace_or_append '/etc/sysctl.conf' '^kernel.exec-shield' '1' 'CCE-27211-2'
+fi
+
+if [ "$(getconf LONG_BIT)" = "64" ] ; then
+  if grep --silent noexec /boot/grub2/grub*.cfg ; then 
+        sed -i "s/noexec.*//g" /etc/default/grub
+        sed -i "s/noexec.*//g" /etc/grub.d/*
+        GRUBCFG=/boot/grub2/*.cfg
+        grub2-mkconfig -o "$GRUBCFG"
+  fi
+fi
+# END fix for 'sysctl_kernel_exec_shield'
+
+###############################################################################
+# BEGIN fix (29 / 144) for 'sysctl_kernel_randomize_va_space'
+###############################################################################
+(>&2 echo "Remediating rule 29/144: 'sysctl_kernel_randomize_va_space'")
+
+
+#
+# Set runtime for kernel.randomize_va_space
+#
+/sbin/sysctl -q -n -w kernel.randomize_va_space="2"
+
+#
+# If kernel.randomize_va_space present in /etc/sysctl.conf, change value to "2"
+#	else, add "kernel.randomize_va_space = 2" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" 'CCE-27127-0'
+# END fix for 'sysctl_kernel_randomize_va_space'
+
+###############################################################################
+# BEGIN fix (30 / 144) for 'service_auditd_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 30/144: 'service_auditd_enabled'")
 
 SYSTEMCTL_EXEC='/usr/bin/systemctl'
 "$SYSTEMCTL_EXEC" start 'auditd.service'
@@ -924,9 +996,9 @@ SYSTEMCTL_EXEC='/usr/bin/systemctl'
 # END fix for 'service_auditd_enabled'
 
 ###############################################################################
-# BEGIN fix (35 / 144) for 'grub2_audit_argument'
+# BEGIN fix (31 / 144) for 'grub2_audit_argument'
 ###############################################################################
-(>&2 echo "Remediating rule 35/144: 'grub2_audit_argument'")
+(>&2 echo "Remediating rule 31/144: 'grub2_audit_argument'")
 
 
 # Correct the form of default kernel command line in GRUB
@@ -943,9 +1015,9 @@ grubby --update-kernel=ALL --args="audit=1"
 # END fix for 'grub2_audit_argument'
 
 ###############################################################################
-# BEGIN fix (36 / 144) for 'auditd_data_retention_flush'
+# BEGIN fix (32 / 144) for 'auditd_data_retention_flush'
 ###############################################################################
-(>&2 echo "Remediating rule 36/144: 'auditd_data_retention_flush'")
+(>&2 echo "Remediating rule 32/144: 'auditd_data_retention_flush'")
 
 var_auditd_flush="data"
 
@@ -978,9 +1050,9 @@ fi
 # END fix for 'auditd_data_retention_flush'
 
 ###############################################################################
-# BEGIN fix (37 / 144) for 'auditd_audispd_syslog_plugin_activated'
+# BEGIN fix (33 / 144) for 'auditd_audispd_syslog_plugin_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 37/144: 'auditd_audispd_syslog_plugin_activated'")
+(>&2 echo "Remediating rule 33/144: 'auditd_audispd_syslog_plugin_activated'")
 
 var_syslog_active="yes"
 
@@ -1067,9 +1139,9 @@ replace_or_append $AUDISP_SYSLOGCONFIG '^active' "$var_syslog_active" "CCE-27341
 # END fix for 'auditd_audispd_syslog_plugin_activated'
 
 ###############################################################################
-# BEGIN fix (38 / 144) for 'audit_rules_sysadmin_actions'
+# BEGIN fix (34 / 144) for 'audit_rules_sysadmin_actions'
 ###############################################################################
-(>&2 echo "Remediating rule 38/144: 'audit_rules_sysadmin_actions'")
+(>&2 echo "Remediating rule 34/144: 'audit_rules_sysadmin_actions'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -1333,14 +1405,14 @@ do
 	fi
 done
 }
-fix_audit_watch_rule "auditctl" "/etc/sudoers.d" "wa" "actions"
-fix_audit_watch_rule "augenrules" "/etc/sudoers.d" "wa" "actions"
+fix_audit_watch_rule "auditctl" "/etc/sudoers.d/" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers.d/" "wa" "actions"
 # END fix for 'audit_rules_sysadmin_actions'
 
 ###############################################################################
-# BEGIN fix (39 / 144) for 'audit_rules_networkconfig_modification'
+# BEGIN fix (35 / 144) for 'audit_rules_networkconfig_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 39/144: 'audit_rules_networkconfig_modification'")
+(>&2 echo "Remediating rule 35/144: 'audit_rules_networkconfig_modification'")
 
 
 # First perform the remediation of the syscall rule
@@ -1483,7 +1555,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -2107,9 +2179,177 @@ fix_audit_watch_rule "augenrules" "/etc/sysconfig/network" "wa" "audit_rules_net
 # END fix for 'audit_rules_networkconfig_modification'
 
 ###############################################################################
-# BEGIN fix (40 / 144) for 'audit_rules_session_events'
+# BEGIN fix (36 / 144) for 'audit_rules_immutable'
 ###############################################################################
-(>&2 echo "Remediating rule 40/144: 'audit_rules_session_events'")
+(>&2 echo "Remediating rule 36/144: 'audit_rules_immutable'")
+
+# Traverse all of:
+#
+# /etc/audit/audit.rules,			(for auditctl case)
+# /etc/audit/rules.d/*.rules			(for augenrules case)
+#
+# files to check if '-e .*' setting is present in that '*.rules' file already.
+# If found, delete such occurrence since auditctl(8) manual page instructs the
+# '-e 2' rule should be placed as the last rule in the configuration
+find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
+
+# Append '-e 2' requirement at the end of both:
+# * /etc/audit/audit.rules file 		(for auditctl case)
+# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
+
+for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
+do
+	echo '' >> $AUDIT_FILE
+	echo '# Set the audit.rules configuration immutable per security requirements' >> $AUDIT_FILE
+	echo '# Reboot is required to change audit rules once this setting is applied' >> $AUDIT_FILE
+	echo '-e 2' >> $AUDIT_FILE
+done
+# END fix for 'audit_rules_immutable'
+
+###############################################################################
+# BEGIN fix (37 / 144) for 'audit_rules_usergroup_modification_shadow'
+###############################################################################
+(>&2 echo "Remediating rule 37/144: 'audit_rules_usergroup_modification_shadow'")
+
+
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix audit file system object watch rule for given path:
+# * if rule exists, also verifies the -w bits match the requirements
+# * if rule doesn't exist yet, appends expected rule form to $files_to_inspect
+#   audit rules file, depending on the tool which was used to load audit rules
+#
+# Expects four arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules'
+# * path                        	value of -w audit rule's argument
+# * required access bits        	value of -p audit rule's argument
+# * key                         	value of -k audit rule's argument
+#
+# Example call:
+#
+#       fix_audit_watch_rule "auditctl" "/etc/localtime" "wa" "audit_time_rules"
+#
+function fix_audit_watch_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local path="$2"
+local required_access_bits="$3"
+local key="$4"
+
+# Check sanity of the input
+if [ $# -ne "4" ]
+then
+	echo "Usage: fix_audit_watch_rule 'tool' 'path' 'bits' 'key'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+#
+# -----------------------------------------------------------------------------------------
+# Tool used to load audit rules	| Rule already defined	|  Audit rules file to inspect	  |
+# -----------------------------------------------------------------------------------------
+#	auditctl		|     Doesn't matter	|  /etc/audit/audit.rules	  |
+# -----------------------------------------------------------------------------------------
+# 	augenrules		|          Yes		|  /etc/audit/rules.d/*.rules	  |
+# 	augenrules		|          No		|  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+declare -a files_to_inspect
+files_to_inspect=()
+
+# Check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	exit 1
+# If the audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# into the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules')
+# If the audit is 'augenrules', then check if rule is already defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to list of files for inspection.
+# If rule isn't defined, add '/etc/audit/rules.d/$key.rules' to list of files for inspection.
+elif [ "$tool" == 'augenrules' ]
+then
+	readarray -t matches < <(grep -P "[\s]*-w[\s]+$path" /etc/audit/rules.d/*.rules)
+
+	# For each of the matched entries
+	for match in "${matches[@]}"
+	do
+		# Extract filepath from the match
+		rulesd_audit_file=$(echo $match | cut -f1 -d ':')
+		# Append that path into list of files for inspection
+		files_to_inspect+=("$rulesd_audit_file")
+	done
+	# Case when particular audit rule isn't defined yet
+	if [ "${#files_to_inspect[@]}" -eq "0" ]
+	then
+		# Append '/etc/audit/rules.d/$key.rules' into list of files for inspection
+		local key_rule_file="/etc/audit/rules.d/$key.rules"
+		# If the $key.rules file doesn't exist yet, create it with correct permissions
+		if [ ! -e "$key_rule_file" ]
+		then
+			touch "$key_rule_file"
+			chmod 0640 "$key_rule_file"
+		fi
+
+		files_to_inspect+=("$key_rule_file")
+	fi
+fi
+
+# Finally perform the inspection and possible subsequent audit rule
+# correction for each of the files previously identified for inspection
+for audit_rules_file in "${files_to_inspect[@]}"
+do
+
+	# Check if audit watch file system object rule for given path already present
+	if grep -q -P -- "[\s]*-w[\s]+$path" "$audit_rules_file"
+	then
+		# Rule is found => verify yet if existing rule definition contains
+		# all of the required access type bits
+
+		# Escape slashes in path for use in sed pattern below
+		local esc_path=${path//$'/'/$'\/'}
+		# Define BRE whitespace class shortcut
+		local sp="[[:space:]]"
+		# Extract current permission access types (e.g. -p [r|w|x|a] values) from audit rule
+		current_access_bits=$(sed -ne "s/$sp*-w$sp\+$esc_path$sp\+-p$sp\+\([rxwa]\{1,4\}\).*/\1/p" "$audit_rules_file")
+		# Split required access bits string into characters array
+		# (to check bit's presence for one bit at a time)
+		for access_bit in $(echo "$required_access_bits" | grep -o .)
+		do
+			# For each from the required access bits (e.g. 'w', 'a') check
+			# if they are already present in current access bits for rule.
+			# If not, append that bit at the end
+			if ! grep -q "$access_bit" <<< "$current_access_bits"
+			then
+				# Concatenate the existing mask with the missing bit
+				current_access_bits="$current_access_bits$access_bit"
+			fi
+		done
+		# Propagate the updated rule's access bits (original + the required
+		# ones) back into the /etc/audit/audit.rules file for that rule
+		sed -i "s/\($sp*-w$sp\+$esc_path$sp\+-p$sp\+\)\([rxwa]\{1,4\}\)\(.*\)/\1$current_access_bits\3/" "$audit_rules_file"
+	else
+		# Rule isn't present yet. Append it at the end of $audit_rules_file file
+		# with proper key
+
+		echo "-w $path -p $required_access_bits -k $key" >> "$audit_rules_file"
+	fi
+done
+}
+fix_audit_watch_rule "auditctl" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+fix_audit_watch_rule "augenrules" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
+# END fix for 'audit_rules_usergroup_modification_shadow'
+
+###############################################################################
+# BEGIN fix (38 / 144) for 'audit_rules_session_events'
+###############################################################################
+(>&2 echo "Remediating rule 38/144: 'audit_rules_session_events'")
 
 
 # Perform the remediation
@@ -2510,177 +2750,9 @@ fix_audit_watch_rule "augenrules" "/var/log/wtmp" "wa" "session"
 # END fix for 'audit_rules_session_events'
 
 ###############################################################################
-# BEGIN fix (41 / 144) for 'audit_rules_immutable'
+# BEGIN fix (39 / 144) for 'audit_rules_media_export'
 ###############################################################################
-(>&2 echo "Remediating rule 41/144: 'audit_rules_immutable'")
-
-# Traverse all of:
-#
-# /etc/audit/audit.rules,			(for auditctl case)
-# /etc/audit/rules.d/*.rules			(for augenrules case)
-#
-# files to check if '-e .*' setting is present in that '*.rules' file already.
-# If found, delete such occurrence since auditctl(8) manual page instructs the
-# '-e 2' rule should be placed as the last rule in the configuration
-find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
-
-# Append '-e 2' requirement at the end of both:
-# * /etc/audit/audit.rules file 		(for auditctl case)
-# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
-
-for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
-do
-	echo '' >> $AUDIT_FILE
-	echo '# Set the audit.rules configuration immutable per security requirements' >> $AUDIT_FILE
-	echo '# Reboot is required to change audit rules once this setting is applied' >> $AUDIT_FILE
-	echo '-e 2' >> $AUDIT_FILE
-done
-# END fix for 'audit_rules_immutable'
-
-###############################################################################
-# BEGIN fix (42 / 144) for 'audit_rules_usergroup_modification_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 42/144: 'audit_rules_usergroup_modification_shadow'")
-
-
-# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix audit file system object watch rule for given path:
-# * if rule exists, also verifies the -w bits match the requirements
-# * if rule doesn't exist yet, appends expected rule form to $files_to_inspect
-#   audit rules file, depending on the tool which was used to load audit rules
-#
-# Expects four arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules'
-# * path                        	value of -w audit rule's argument
-# * required access bits        	value of -p audit rule's argument
-# * key                         	value of -k audit rule's argument
-#
-# Example call:
-#
-#       fix_audit_watch_rule "auditctl" "/etc/localtime" "wa" "audit_time_rules"
-#
-function fix_audit_watch_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local path="$2"
-local required_access_bits="$3"
-local key="$4"
-
-# Check sanity of the input
-if [ $# -ne "4" ]
-then
-	echo "Usage: fix_audit_watch_rule 'tool' 'path' 'bits' 'key'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-#
-# -----------------------------------------------------------------------------------------
-# Tool used to load audit rules	| Rule already defined	|  Audit rules file to inspect	  |
-# -----------------------------------------------------------------------------------------
-#	auditctl		|     Doesn't matter	|  /etc/audit/audit.rules	  |
-# -----------------------------------------------------------------------------------------
-# 	augenrules		|          Yes		|  /etc/audit/rules.d/*.rules	  |
-# 	augenrules		|          No		|  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-declare -a files_to_inspect
-files_to_inspect=()
-
-# Check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	exit 1
-# If the audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# into the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules')
-# If the audit is 'augenrules', then check if rule is already defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to list of files for inspection.
-# If rule isn't defined, add '/etc/audit/rules.d/$key.rules' to list of files for inspection.
-elif [ "$tool" == 'augenrules' ]
-then
-	readarray -t matches < <(grep -P "[\s]*-w[\s]+$path" /etc/audit/rules.d/*.rules)
-
-	# For each of the matched entries
-	for match in "${matches[@]}"
-	do
-		# Extract filepath from the match
-		rulesd_audit_file=$(echo $match | cut -f1 -d ':')
-		# Append that path into list of files for inspection
-		files_to_inspect+=("$rulesd_audit_file")
-	done
-	# Case when particular audit rule isn't defined yet
-	if [ "${#files_to_inspect[@]}" -eq "0" ]
-	then
-		# Append '/etc/audit/rules.d/$key.rules' into list of files for inspection
-		local key_rule_file="/etc/audit/rules.d/$key.rules"
-		# If the $key.rules file doesn't exist yet, create it with correct permissions
-		if [ ! -e "$key_rule_file" ]
-		then
-			touch "$key_rule_file"
-			chmod 0640 "$key_rule_file"
-		fi
-
-		files_to_inspect+=("$key_rule_file")
-	fi
-fi
-
-# Finally perform the inspection and possible subsequent audit rule
-# correction for each of the files previously identified for inspection
-for audit_rules_file in "${files_to_inspect[@]}"
-do
-
-	# Check if audit watch file system object rule for given path already present
-	if grep -q -P -- "[\s]*-w[\s]+$path" "$audit_rules_file"
-	then
-		# Rule is found => verify yet if existing rule definition contains
-		# all of the required access type bits
-
-		# Escape slashes in path for use in sed pattern below
-		local esc_path=${path//$'/'/$'\/'}
-		# Define BRE whitespace class shortcut
-		local sp="[[:space:]]"
-		# Extract current permission access types (e.g. -p [r|w|x|a] values) from audit rule
-		current_access_bits=$(sed -ne "s/$sp*-w$sp\+$esc_path$sp\+-p$sp\+\([rxwa]\{1,4\}\).*/\1/p" "$audit_rules_file")
-		# Split required access bits string into characters array
-		# (to check bit's presence for one bit at a time)
-		for access_bit in $(echo "$required_access_bits" | grep -o .)
-		do
-			# For each from the required access bits (e.g. 'w', 'a') check
-			# if they are already present in current access bits for rule.
-			# If not, append that bit at the end
-			if ! grep -q "$access_bit" <<< "$current_access_bits"
-			then
-				# Concatenate the existing mask with the missing bit
-				current_access_bits="$current_access_bits$access_bit"
-			fi
-		done
-		# Propagate the updated rule's access bits (original + the required
-		# ones) back into the /etc/audit/audit.rules file for that rule
-		sed -i "s/\($sp*-w$sp\+$esc_path$sp\+-p$sp\+\)\([rxwa]\{1,4\}\)\(.*\)/\1$current_access_bits\3/" "$audit_rules_file"
-	else
-		# Rule isn't present yet. Append it at the end of $audit_rules_file file
-		# with proper key
-
-		echo "-w $path -p $required_access_bits -k $key" >> "$audit_rules_file"
-	fi
-done
-}
-fix_audit_watch_rule "auditctl" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
-fix_audit_watch_rule "augenrules" "/etc/shadow" "wa" "audit_rules_usergroup_modification"
-# END fix for 'audit_rules_usergroup_modification_shadow'
-
-###############################################################################
-# BEGIN fix (43 / 144) for 'audit_rules_media_export'
-###############################################################################
-(>&2 echo "Remediating rule 43/144: 'audit_rules_media_export'")
+(>&2 echo "Remediating rule 39/144: 'audit_rules_media_export'")
 
 
 # Perform the remediation of the syscall rule
@@ -2822,7 +2894,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -2919,9 +2991,9 @@ done
 # END fix for 'audit_rules_media_export'
 
 ###############################################################################
-# BEGIN fix (44 / 144) for 'audit_rules_usergroup_modification_opasswd'
+# BEGIN fix (40 / 144) for 'audit_rules_usergroup_modification_opasswd'
 ###############################################################################
-(>&2 echo "Remediating rule 44/144: 'audit_rules_usergroup_modification_opasswd'")
+(>&2 echo "Remediating rule 40/144: 'audit_rules_usergroup_modification_opasswd'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -3059,9 +3131,9 @@ fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_user
 # END fix for 'audit_rules_usergroup_modification_opasswd'
 
 ###############################################################################
-# BEGIN fix (45 / 144) for 'audit_rules_mac_modification'
+# BEGIN fix (41 / 144) for 'audit_rules_mac_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 45/144: 'audit_rules_mac_modification'")
+(>&2 echo "Remediating rule 41/144: 'audit_rules_mac_modification'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -3199,9 +3271,9 @@ fix_audit_watch_rule "augenrules" "/etc/selinux/" "wa" "MAC-policy"
 # END fix for 'audit_rules_mac_modification'
 
 ###############################################################################
-# BEGIN fix (46 / 144) for 'audit_rules_system_shutdown'
+# BEGIN fix (42 / 144) for 'audit_rules_system_shutdown'
 ###############################################################################
-(>&2 echo "Remediating rule 46/144: 'audit_rules_system_shutdown'")
+(>&2 echo "Remediating rule 42/144: 'audit_rules_system_shutdown'")
 
 # Traverse all of:
 #
@@ -3226,9 +3298,9 @@ done
 # END fix for 'audit_rules_system_shutdown'
 
 ###############################################################################
-# BEGIN fix (47 / 144) for 'audit_rules_usergroup_modification_gshadow'
+# BEGIN fix (43 / 144) for 'audit_rules_usergroup_modification_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 47/144: 'audit_rules_usergroup_modification_gshadow'")
+(>&2 echo "Remediating rule 43/144: 'audit_rules_usergroup_modification_gshadow'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -3366,9 +3438,9 @@ fix_audit_watch_rule "augenrules" "/etc/gshadow" "wa" "audit_rules_usergroup_mod
 # END fix for 'audit_rules_usergroup_modification_gshadow'
 
 ###############################################################################
-# BEGIN fix (48 / 144) for 'audit_rules_usergroup_modification_passwd'
+# BEGIN fix (44 / 144) for 'audit_rules_usergroup_modification_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 48/144: 'audit_rules_usergroup_modification_passwd'")
+(>&2 echo "Remediating rule 44/144: 'audit_rules_usergroup_modification_passwd'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -3506,9 +3578,9 @@ fix_audit_watch_rule "augenrules" "/etc/passwd" "wa" "audit_rules_usergroup_modi
 # END fix for 'audit_rules_usergroup_modification_passwd'
 
 ###############################################################################
-# BEGIN fix (49 / 144) for 'audit_rules_usergroup_modification_group'
+# BEGIN fix (45 / 144) for 'audit_rules_usergroup_modification_group'
 ###############################################################################
-(>&2 echo "Remediating rule 49/144: 'audit_rules_usergroup_modification_group'")
+(>&2 echo "Remediating rule 45/144: 'audit_rules_usergroup_modification_group'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -3646,9 +3718,9 @@ fix_audit_watch_rule "augenrules" "/etc/group" "wa" "audit_rules_usergroup_modif
 # END fix for 'audit_rules_usergroup_modification_group'
 
 ###############################################################################
-# BEGIN fix (50 / 144) for 'audit_rules_kernel_module_loading_init'
+# BEGIN fix (46 / 144) for 'audit_rules_kernel_module_loading_init'
 ###############################################################################
-(>&2 echo "Remediating rule 50/144: 'audit_rules_kernel_module_loading_init'")
+(>&2 echo "Remediating rule 46/144: 'audit_rules_kernel_module_loading_init'")
 
 
 # First perform the remediation of the syscall rule
@@ -3794,7 +3866,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -3891,9 +3963,9 @@ done
 # END fix for 'audit_rules_kernel_module_loading_init'
 
 ###############################################################################
-# BEGIN fix (51 / 144) for 'audit_rules_kernel_module_loading_delete'
+# BEGIN fix (47 / 144) for 'audit_rules_kernel_module_loading_delete'
 ###############################################################################
-(>&2 echo "Remediating rule 51/144: 'audit_rules_kernel_module_loading_delete'")
+(>&2 echo "Remediating rule 47/144: 'audit_rules_kernel_module_loading_delete'")
 
 
 # First perform the remediation of the syscall rule
@@ -4039,7 +4111,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -4136,9 +4208,9 @@ done
 # END fix for 'audit_rules_kernel_module_loading_delete'
 
 ###############################################################################
-# BEGIN fix (52 / 144) for 'audit_rules_login_events_lastlog'
+# BEGIN fix (48 / 144) for 'audit_rules_login_events_lastlog'
 ###############################################################################
-(>&2 echo "Remediating rule 52/144: 'audit_rules_login_events_lastlog'")
+(>&2 echo "Remediating rule 48/144: 'audit_rules_login_events_lastlog'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -4276,9 +4348,9 @@ fix_audit_watch_rule "augenrules" "/var/log/lastlog" "wa" "logins"
 # END fix for 'audit_rules_login_events_lastlog'
 
 ###############################################################################
-# BEGIN fix (53 / 144) for 'audit_rules_login_events_faillock'
+# BEGIN fix (49 / 144) for 'audit_rules_login_events_faillock'
 ###############################################################################
-(>&2 echo "Remediating rule 53/144: 'audit_rules_login_events_faillock'")
+(>&2 echo "Remediating rule 49/144: 'audit_rules_login_events_faillock'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -4416,9 +4488,9 @@ fix_audit_watch_rule "augenrules" "/var/run/faillock" "wa" "logins"
 # END fix for 'audit_rules_login_events_faillock'
 
 ###############################################################################
-# BEGIN fix (54 / 144) for 'audit_rules_login_events_tallylog'
+# BEGIN fix (50 / 144) for 'audit_rules_login_events_tallylog'
 ###############################################################################
-(>&2 echo "Remediating rule 54/144: 'audit_rules_login_events_tallylog'")
+(>&2 echo "Remediating rule 50/144: 'audit_rules_login_events_tallylog'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -4556,9 +4628,9 @@ fix_audit_watch_rule "augenrules" "/var/log/tallylog" "wa" "logins"
 # END fix for 'audit_rules_login_events_tallylog'
 
 ###############################################################################
-# BEGIN fix (55 / 144) for 'audit_rules_time_stime'
+# BEGIN fix (51 / 144) for 'audit_rules_time_stime'
 ###############################################################################
-(>&2 echo "Remediating rule 55/144: 'audit_rules_time_stime'")
+(>&2 echo "Remediating rule 51/144: 'audit_rules_time_stime'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -4688,7 +4760,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -4825,9 +4897,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_stime'
 
 ###############################################################################
-# BEGIN fix (56 / 144) for 'audit_rules_time_settimeofday'
+# BEGIN fix (52 / 144) for 'audit_rules_time_settimeofday'
 ###############################################################################
-(>&2 echo "Remediating rule 56/144: 'audit_rules_time_settimeofday'")
+(>&2 echo "Remediating rule 52/144: 'audit_rules_time_settimeofday'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -4957,7 +5029,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -5094,9 +5166,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_settimeofday'
 
 ###############################################################################
-# BEGIN fix (57 / 144) for 'audit_rules_time_watch_localtime'
+# BEGIN fix (53 / 144) for 'audit_rules_time_watch_localtime'
 ###############################################################################
-(>&2 echo "Remediating rule 57/144: 'audit_rules_time_watch_localtime'")
+(>&2 echo "Remediating rule 53/144: 'audit_rules_time_watch_localtime'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -5234,9 +5306,9 @@ fix_audit_watch_rule "augenrules" "/etc/localtime" "wa" "audit_time_rules"
 # END fix for 'audit_rules_time_watch_localtime'
 
 ###############################################################################
-# BEGIN fix (58 / 144) for 'audit_rules_time_clock_settime'
+# BEGIN fix (54 / 144) for 'audit_rules_time_clock_settime'
 ###############################################################################
-(>&2 echo "Remediating rule 58/144: 'audit_rules_time_clock_settime'")
+(>&2 echo "Remediating rule 54/144: 'audit_rules_time_clock_settime'")
 
 
 # First perform the remediation of the syscall rule
@@ -5378,7 +5450,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -5475,9 +5547,9 @@ done
 # END fix for 'audit_rules_time_clock_settime'
 
 ###############################################################################
-# BEGIN fix (59 / 144) for 'audit_rules_time_adjtimex'
+# BEGIN fix (55 / 144) for 'audit_rules_time_adjtimex'
 ###############################################################################
-(>&2 echo "Remediating rule 59/144: 'audit_rules_time_adjtimex'")
+(>&2 echo "Remediating rule 55/144: 'audit_rules_time_adjtimex'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -5607,7 +5679,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -5744,9 +5816,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_adjtimex'
 
 ###############################################################################
-# BEGIN fix (60 / 144) for 'audit_rules_dac_modification_fchown'
+# BEGIN fix (56 / 144) for 'audit_rules_dac_modification_fchown'
 ###############################################################################
-(>&2 echo "Remediating rule 60/144: 'audit_rules_dac_modification_fchown'")
+(>&2 echo "Remediating rule 56/144: 'audit_rules_dac_modification_fchown'")
 
 
 # First perform the remediation of the syscall rule
@@ -5889,7 +5961,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -5986,9 +6058,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchown'
 
 ###############################################################################
-# BEGIN fix (61 / 144) for 'audit_rules_dac_modification_setxattr'
+# BEGIN fix (57 / 144) for 'audit_rules_dac_modification_setxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 61/144: 'audit_rules_dac_modification_setxattr'")
+(>&2 echo "Remediating rule 57/144: 'audit_rules_dac_modification_setxattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -6131,7 +6203,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -6228,9 +6300,9 @@ done
 # END fix for 'audit_rules_dac_modification_setxattr'
 
 ###############################################################################
-# BEGIN fix (62 / 144) for 'audit_rules_dac_modification_chown'
+# BEGIN fix (58 / 144) for 'audit_rules_dac_modification_chown'
 ###############################################################################
-(>&2 echo "Remediating rule 62/144: 'audit_rules_dac_modification_chown'")
+(>&2 echo "Remediating rule 58/144: 'audit_rules_dac_modification_chown'")
 
 
 # First perform the remediation of the syscall rule
@@ -6373,7 +6445,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -6470,251 +6542,9 @@ done
 # END fix for 'audit_rules_dac_modification_chown'
 
 ###############################################################################
-# BEGIN fix (63 / 144) for 'audit_rules_dac_modification_removexattr'
+# BEGIN fix (59 / 144) for 'audit_rules_dac_modification_fchownat'
 ###############################################################################
-(>&2 echo "Remediating rule 63/144: 'audit_rules_dac_modification_removexattr'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S removexattr.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S removexattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_removexattr'
-
-###############################################################################
-# BEGIN fix (64 / 144) for 'audit_rules_dac_modification_fchownat'
-###############################################################################
-(>&2 echo "Remediating rule 64/144: 'audit_rules_dac_modification_fchownat'")
+(>&2 echo "Remediating rule 59/144: 'audit_rules_dac_modification_fchownat'")
 
 
 # First perform the remediation of the syscall rule
@@ -6857,7 +6687,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -6954,9 +6784,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchownat'
 
 ###############################################################################
-# BEGIN fix (65 / 144) for 'audit_rules_dac_modification_chmod'
+# BEGIN fix (60 / 144) for 'audit_rules_dac_modification_chmod'
 ###############################################################################
-(>&2 echo "Remediating rule 65/144: 'audit_rules_dac_modification_chmod'")
+(>&2 echo "Remediating rule 60/144: 'audit_rules_dac_modification_chmod'")
 
 
 # First perform the remediation of the syscall rule
@@ -7099,7 +6929,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -7194,6 +7024,1216 @@ return $retval
 	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 done
 # END fix for 'audit_rules_dac_modification_chmod'
+
+###############################################################################
+# BEGIN fix (61 / 144) for 'audit_rules_dac_modification_removexattr'
+###############################################################################
+(>&2 echo "Remediating rule 61/144: 'audit_rules_dac_modification_removexattr'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S removexattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S removexattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_removexattr'
+
+###############################################################################
+# BEGIN fix (62 / 144) for 'audit_rules_dac_modification_fchmod'
+###############################################################################
+(>&2 echo "Remediating rule 62/144: 'audit_rules_dac_modification_fchmod'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fchmod.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fchmod -F auid>=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_fchmod'
+
+###############################################################################
+# BEGIN fix (63 / 144) for 'audit_rules_dac_modification_lsetxattr'
+###############################################################################
+(>&2 echo "Remediating rule 63/144: 'audit_rules_dac_modification_lsetxattr'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S lsetxattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S lsetxattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_lsetxattr'
+
+###############################################################################
+# BEGIN fix (64 / 144) for 'audit_rules_dac_modification_fremovexattr'
+###############################################################################
+(>&2 echo "Remediating rule 64/144: 'audit_rules_dac_modification_fremovexattr'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fremovexattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fremovexattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_fremovexattr'
+
+###############################################################################
+# BEGIN fix (65 / 144) for 'audit_rules_dac_modification_lchown'
+###############################################################################
+(>&2 echo "Remediating rule 65/144: 'audit_rules_dac_modification_lchown'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S lchown.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S lchown -F auid>=1000 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_lchown'
 
 ###############################################################################
 # BEGIN fix (66 / 144) for 'audit_rules_dac_modification_fsetxattr'
@@ -7341,7 +8381,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -7438,977 +8478,9 @@ done
 # END fix for 'audit_rules_dac_modification_fsetxattr'
 
 ###############################################################################
-# BEGIN fix (67 / 144) for 'audit_rules_dac_modification_fchmod'
+# BEGIN fix (67 / 144) for 'audit_rules_dac_modification_fchmodat'
 ###############################################################################
-(>&2 echo "Remediating rule 67/144: 'audit_rules_dac_modification_fchmod'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S fchmod.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S fchmod -F auid>=1000 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_fchmod'
-
-###############################################################################
-# BEGIN fix (68 / 144) for 'audit_rules_dac_modification_lsetxattr'
-###############################################################################
-(>&2 echo "Remediating rule 68/144: 'audit_rules_dac_modification_lsetxattr'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S lsetxattr.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S lsetxattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_lsetxattr'
-
-###############################################################################
-# BEGIN fix (69 / 144) for 'audit_rules_dac_modification_fremovexattr'
-###############################################################################
-(>&2 echo "Remediating rule 69/144: 'audit_rules_dac_modification_fremovexattr'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S fremovexattr.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S fremovexattr -F auid>=1000 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_fremovexattr'
-
-###############################################################################
-# BEGIN fix (70 / 144) for 'audit_rules_dac_modification_lchown'
-###############################################################################
-(>&2 echo "Remediating rule 70/144: 'audit_rules_dac_modification_lchown'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S lchown.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S lchown -F auid>=1000 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_lchown'
-
-###############################################################################
-# BEGIN fix (71 / 144) for 'audit_rules_dac_modification_fchmodat'
-###############################################################################
-(>&2 echo "Remediating rule 71/144: 'audit_rules_dac_modification_fchmodat'")
+(>&2 echo "Remediating rule 67/144: 'audit_rules_dac_modification_fchmodat'")
 
 
 # First perform the remediation of the syscall rule
@@ -8551,7 +8623,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8648,9 +8720,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchmodat'
 
 ###############################################################################
-# BEGIN fix (72 / 144) for 'audit_rules_dac_modification_lremovexattr'
+# BEGIN fix (68 / 144) for 'audit_rules_dac_modification_lremovexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 72/144: 'audit_rules_dac_modification_lremovexattr'")
+(>&2 echo "Remediating rule 68/144: 'audit_rules_dac_modification_lremovexattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -8793,7 +8865,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8890,14 +8962,14 @@ done
 # END fix for 'audit_rules_dac_modification_lremovexattr'
 
 ###############################################################################
-# BEGIN fix (73 / 144) for 'audit_rules_unsuccessful_file_modification_truncate'
+# BEGIN fix (69 / 144) for 'audit_rules_unsuccessful_file_modification_truncate'
 ###############################################################################
-(>&2 echo "Remediating rule 73/144: 'audit_rules_unsuccessful_file_modification_truncate'")
+(>&2 echo "Remediating rule 69/144: 'audit_rules_unsuccessful_file_modification_truncate'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -8943,67 +9015,14 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_truncate'
 
 ###############################################################################
-# BEGIN fix (74 / 144) for 'audit_rules_unsuccessful_file_modification_openat'
+# BEGIN fix (70 / 144) for 'audit_rules_unsuccessful_file_modification_creat'
 ###############################################################################
-(>&2 echo "Remediating rule 74/144: 'audit_rules_unsuccessful_file_modification_openat'")
+(>&2 echo "Remediating rule 70/144: 'audit_rules_unsuccessful_file_modification_creat'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
-		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
-
-		## The purpose of these rules is to meet the requirements for Operating
-		## System Protection Profile (OSPP)v4.2. These rules depends on having
-		## 10-base-config.rules, 11-loginuid.rules, and 43-module-load.rules installed.
-
-		## Unsuccessful file creation (open with O_CREAT)
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-
-		## Unsuccessful file modifications (open for write or truncate)
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-
-		## Unsuccessful file access (any other opens) This has to go last.
-		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-	EOF
-}
-create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
-# END fix for 'audit_rules_unsuccessful_file_modification_openat'
-
-###############################################################################
-# BEGIN fix (75 / 144) for 'audit_rules_unsuccessful_file_modification_creat'
-###############################################################################
-(>&2 echo "Remediating rule 75/144: 'audit_rules_unsuccessful_file_modification_creat'")
-function create_audit_remediation_unsuccessful_file_modification_detailed {
-	mkdir -p "$(dirname "$1")"
-	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
-	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -9049,14 +9068,14 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_creat'
 
 ###############################################################################
-# BEGIN fix (76 / 144) for 'audit_rules_unsuccessful_file_modification_open'
+# BEGIN fix (71 / 144) for 'audit_rules_unsuccessful_file_modification_open'
 ###############################################################################
-(>&2 echo "Remediating rule 76/144: 'audit_rules_unsuccessful_file_modification_open'")
+(>&2 echo "Remediating rule 71/144: 'audit_rules_unsuccessful_file_modification_open'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -9102,14 +9121,14 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_open'
 
 ###############################################################################
-# BEGIN fix (77 / 144) for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
+# BEGIN fix (72 / 144) for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
 ###############################################################################
-(>&2 echo "Remediating rule 77/144: 'audit_rules_unsuccessful_file_modification_open_by_handle_at'")
+(>&2 echo "Remediating rule 72/144: 'audit_rules_unsuccessful_file_modification_open_by_handle_at'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -9155,14 +9174,14 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
 
 ###############################################################################
-# BEGIN fix (78 / 144) for 'audit_rules_unsuccessful_file_modification_ftruncate'
+# BEGIN fix (73 / 144) for 'audit_rules_unsuccessful_file_modification_ftruncate'
 ###############################################################################
-(>&2 echo "Remediating rule 78/144: 'audit_rules_unsuccessful_file_modification_ftruncate'")
+(>&2 echo "Remediating rule 73/144: 'audit_rules_unsuccessful_file_modification_ftruncate'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -9208,9 +9227,62 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_ftruncate'
 
 ###############################################################################
-# BEGIN fix (79 / 144) for 'audit_rules_execution_setsebool'
+# BEGIN fix (74 / 144) for 'audit_rules_unsuccessful_file_modification_openat'
 ###############################################################################
-(>&2 echo "Remediating rule 79/144: 'audit_rules_execution_setsebool'")
+(>&2 echo "Remediating rule 74/144: 'audit_rules_unsuccessful_file_modification_openat'")
+function create_audit_remediation_unsuccessful_file_modification_detailed {
+	mkdir -p "$(dirname "$1")"
+	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
+	cat <<-EOF > "$1"
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
+		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
+
+		## The purpose of these rules is to meet the requirements for Operating
+		## System Protection Profile (OSPP)v4.2. These rules depends on having
+		## 10-base-config.rules, 11-loginuid.rules, and 43-module-load.rules installed.
+
+		## Unsuccessful file creation (open with O_CREAT)
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+
+		## Unsuccessful file modifications (open for write or truncate)
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+
+		## Unsuccessful file access (any other opens) This has to go last.
+		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+	EOF
+}
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+# END fix for 'audit_rules_unsuccessful_file_modification_openat'
+
+###############################################################################
+# BEGIN fix (75 / 144) for 'audit_rules_execution_setsebool'
+###############################################################################
+(>&2 echo "Remediating rule 75/144: 'audit_rules_execution_setsebool'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/setsebool\\s\\+.*"
@@ -9348,7 +9420,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9444,9 +9516,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_execution_setsebool'
 
 ###############################################################################
-# BEGIN fix (80 / 144) for 'audit_rules_execution_semanage'
+# BEGIN fix (76 / 144) for 'audit_rules_execution_semanage'
 ###############################################################################
-(>&2 echo "Remediating rule 80/144: 'audit_rules_execution_semanage'")
+(>&2 echo "Remediating rule 76/144: 'audit_rules_execution_semanage'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/semanage\\s\\+.*"
@@ -9584,7 +9656,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9680,9 +9752,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_execution_semanage'
 
 ###############################################################################
-# BEGIN fix (81 / 144) for 'audit_rules_execution_chcon'
+# BEGIN fix (77 / 144) for 'audit_rules_execution_chcon'
 ###############################################################################
-(>&2 echo "Remediating rule 81/144: 'audit_rules_execution_chcon'")
+(>&2 echo "Remediating rule 77/144: 'audit_rules_execution_chcon'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/chcon\\s\\+.*"
@@ -9820,7 +9892,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9916,9 +9988,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_execution_chcon'
 
 ###############################################################################
-# BEGIN fix (82 / 144) for 'audit_rules_execution_restorecon'
+# BEGIN fix (78 / 144) for 'audit_rules_execution_restorecon'
 ###############################################################################
-(>&2 echo "Remediating rule 82/144: 'audit_rules_execution_restorecon'")
+(>&2 echo "Remediating rule 78/144: 'audit_rules_execution_restorecon'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/restorecon\\s\\+.*"
@@ -10056,7 +10128,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10152,9 +10224,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_execution_restorecon'
 
 ###############################################################################
-# BEGIN fix (83 / 144) for 'audit_rules_file_deletion_events_rmdir'
+# BEGIN fix (79 / 144) for 'audit_rules_file_deletion_events_rmdir'
 ###############################################################################
-(>&2 echo "Remediating rule 83/144: 'audit_rules_file_deletion_events_rmdir'")
+(>&2 echo "Remediating rule 79/144: 'audit_rules_file_deletion_events_rmdir'")
 
 
 # First perform the remediation of the syscall rule
@@ -10296,7 +10368,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10393,9 +10465,9 @@ done
 # END fix for 'audit_rules_file_deletion_events_rmdir'
 
 ###############################################################################
-# BEGIN fix (84 / 144) for 'audit_rules_file_deletion_events_unlinkat'
+# BEGIN fix (80 / 144) for 'audit_rules_file_deletion_events_unlinkat'
 ###############################################################################
-(>&2 echo "Remediating rule 84/144: 'audit_rules_file_deletion_events_unlinkat'")
+(>&2 echo "Remediating rule 80/144: 'audit_rules_file_deletion_events_unlinkat'")
 
 
 # First perform the remediation of the syscall rule
@@ -10537,7 +10609,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10634,9 +10706,9 @@ done
 # END fix for 'audit_rules_file_deletion_events_unlinkat'
 
 ###############################################################################
-# BEGIN fix (85 / 144) for 'audit_rules_file_deletion_events_rename'
+# BEGIN fix (81 / 144) for 'audit_rules_file_deletion_events_rename'
 ###############################################################################
-(>&2 echo "Remediating rule 85/144: 'audit_rules_file_deletion_events_rename'")
+(>&2 echo "Remediating rule 81/144: 'audit_rules_file_deletion_events_rename'")
 
 
 # First perform the remediation of the syscall rule
@@ -10778,7 +10850,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10875,9 +10947,9 @@ done
 # END fix for 'audit_rules_file_deletion_events_rename'
 
 ###############################################################################
-# BEGIN fix (86 / 144) for 'audit_rules_file_deletion_events_renameat'
+# BEGIN fix (82 / 144) for 'audit_rules_file_deletion_events_renameat'
 ###############################################################################
-(>&2 echo "Remediating rule 86/144: 'audit_rules_file_deletion_events_renameat'")
+(>&2 echo "Remediating rule 82/144: 'audit_rules_file_deletion_events_renameat'")
 
 
 # First perform the remediation of the syscall rule
@@ -11019,7 +11091,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11116,9 +11188,9 @@ done
 # END fix for 'audit_rules_file_deletion_events_renameat'
 
 ###############################################################################
-# BEGIN fix (87 / 144) for 'audit_rules_file_deletion_events_unlink'
+# BEGIN fix (83 / 144) for 'audit_rules_file_deletion_events_unlink'
 ###############################################################################
-(>&2 echo "Remediating rule 87/144: 'audit_rules_file_deletion_events_unlink'")
+(>&2 echo "Remediating rule 83/144: 'audit_rules_file_deletion_events_unlink'")
 
 
 # First perform the remediation of the syscall rule
@@ -11260,7 +11332,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11357,9 +11429,9 @@ done
 # END fix for 'audit_rules_file_deletion_events_unlink'
 
 ###############################################################################
-# BEGIN fix (88 / 144) for 'audit_rules_privileged_commands_passwd'
+# BEGIN fix (84 / 144) for 'audit_rules_privileged_commands_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 88/144: 'audit_rules_privileged_commands_passwd'")
+(>&2 echo "Remediating rule 84/144: 'audit_rules_privileged_commands_passwd'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/passwd\\s\\+.*"
@@ -11497,7 +11569,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11593,9 +11665,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_passwd'
 
 ###############################################################################
-# BEGIN fix (89 / 144) for 'audit_rules_privileged_commands_sudo'
+# BEGIN fix (85 / 144) for 'audit_rules_privileged_commands_sudo'
 ###############################################################################
-(>&2 echo "Remediating rule 89/144: 'audit_rules_privileged_commands_sudo'")
+(>&2 echo "Remediating rule 85/144: 'audit_rules_privileged_commands_sudo'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/sudo\\s\\+.*"
@@ -11733,7 +11805,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11829,9 +11901,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_sudo'
 
 ###############################################################################
-# BEGIN fix (90 / 144) for 'audit_rules_privileged_commands_postdrop'
+# BEGIN fix (86 / 144) for 'audit_rules_privileged_commands_postdrop'
 ###############################################################################
-(>&2 echo "Remediating rule 90/144: 'audit_rules_privileged_commands_postdrop'")
+(>&2 echo "Remediating rule 86/144: 'audit_rules_privileged_commands_postdrop'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/postdrop\\s\\+.*"
@@ -11969,7 +12041,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -12065,9 +12137,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_postdrop'
 
 ###############################################################################
-# BEGIN fix (91 / 144) for 'audit_rules_privileged_commands_chsh'
+# BEGIN fix (87 / 144) for 'audit_rules_privileged_commands_chsh'
 ###############################################################################
-(>&2 echo "Remediating rule 91/144: 'audit_rules_privileged_commands_chsh'")
+(>&2 echo "Remediating rule 87/144: 'audit_rules_privileged_commands_chsh'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/chsh\\s\\+.*"
@@ -12205,7 +12277,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -12301,9 +12373,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_chsh'
 
 ###############################################################################
-# BEGIN fix (92 / 144) for 'audit_rules_privileged_commands_gpasswd'
+# BEGIN fix (88 / 144) for 'audit_rules_privileged_commands_gpasswd'
 ###############################################################################
-(>&2 echo "Remediating rule 92/144: 'audit_rules_privileged_commands_gpasswd'")
+(>&2 echo "Remediating rule 88/144: 'audit_rules_privileged_commands_gpasswd'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/gpasswd\\s\\+.*"
@@ -12441,7 +12513,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -12537,9 +12609,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_gpasswd'
 
 ###############################################################################
-# BEGIN fix (93 / 144) for 'audit_rules_privileged_commands_chage'
+# BEGIN fix (89 / 144) for 'audit_rules_privileged_commands_chage'
 ###############################################################################
-(>&2 echo "Remediating rule 93/144: 'audit_rules_privileged_commands_chage'")
+(>&2 echo "Remediating rule 89/144: 'audit_rules_privileged_commands_chage'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/chage\\s\\+.*"
@@ -12677,7 +12749,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -12773,9 +12845,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_chage'
 
 ###############################################################################
-# BEGIN fix (94 / 144) for 'audit_rules_privileged_commands_userhelper'
+# BEGIN fix (90 / 144) for 'audit_rules_privileged_commands_userhelper'
 ###############################################################################
-(>&2 echo "Remediating rule 94/144: 'audit_rules_privileged_commands_userhelper'")
+(>&2 echo "Remediating rule 90/144: 'audit_rules_privileged_commands_userhelper'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/userhelper\\s\\+.*"
@@ -12913,7 +12985,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -13009,9 +13081,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_userhelper'
 
 ###############################################################################
-# BEGIN fix (95 / 144) for 'audit_rules_privileged_commands_pam_timestamp_check'
+# BEGIN fix (91 / 144) for 'audit_rules_privileged_commands_pam_timestamp_check'
 ###############################################################################
-(>&2 echo "Remediating rule 95/144: 'audit_rules_privileged_commands_pam_timestamp_check'")
+(>&2 echo "Remediating rule 91/144: 'audit_rules_privileged_commands_pam_timestamp_check'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/pam_timestamp_check\\s\\+.*"
@@ -13149,7 +13221,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -13245,9 +13317,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_pam_timestamp_check'
 
 ###############################################################################
-# BEGIN fix (96 / 144) for 'audit_rules_privileged_commands_crontab'
+# BEGIN fix (92 / 144) for 'audit_rules_privileged_commands_crontab'
 ###############################################################################
-(>&2 echo "Remediating rule 96/144: 'audit_rules_privileged_commands_crontab'")
+(>&2 echo "Remediating rule 92/144: 'audit_rules_privileged_commands_crontab'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/crontab\\s\\+.*"
@@ -13385,7 +13457,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -13481,9 +13553,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_crontab'
 
 ###############################################################################
-# BEGIN fix (97 / 144) for 'audit_rules_privileged_commands_umount'
+# BEGIN fix (93 / 144) for 'audit_rules_privileged_commands_umount'
 ###############################################################################
-(>&2 echo "Remediating rule 97/144: 'audit_rules_privileged_commands_umount'")
+(>&2 echo "Remediating rule 93/144: 'audit_rules_privileged_commands_umount'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/umount\\s\\+.*"
@@ -13621,7 +13693,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -13717,9 +13789,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_umount'
 
 ###############################################################################
-# BEGIN fix (98 / 144) for 'audit_rules_privileged_commands_unix_chkpwd'
+# BEGIN fix (94 / 144) for 'audit_rules_privileged_commands_unix_chkpwd'
 ###############################################################################
-(>&2 echo "Remediating rule 98/144: 'audit_rules_privileged_commands_unix_chkpwd'")
+(>&2 echo "Remediating rule 94/144: 'audit_rules_privileged_commands_unix_chkpwd'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/unix_chkpwd\\s\\+.*"
@@ -13857,7 +13929,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -13953,9 +14025,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_unix_chkpwd'
 
 ###############################################################################
-# BEGIN fix (99 / 144) for 'audit_rules_privileged_commands_ssh_keysign'
+# BEGIN fix (95 / 144) for 'audit_rules_privileged_commands_ssh_keysign'
 ###############################################################################
-(>&2 echo "Remediating rule 99/144: 'audit_rules_privileged_commands_ssh_keysign'")
+(>&2 echo "Remediating rule 95/144: 'audit_rules_privileged_commands_ssh_keysign'")
 
 
 PATTERN="-a always,exit -F path=/usr/libexec/openssh/ssh-keysign\\s\\+.*"
@@ -14093,7 +14165,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -14189,9 +14261,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_ssh_keysign'
 
 ###############################################################################
-# BEGIN fix (100 / 144) for 'audit_rules_privileged_commands_sudoedit'
+# BEGIN fix (96 / 144) for 'audit_rules_privileged_commands_sudoedit'
 ###############################################################################
-(>&2 echo "Remediating rule 100/144: 'audit_rules_privileged_commands_sudoedit'")
+(>&2 echo "Remediating rule 96/144: 'audit_rules_privileged_commands_sudoedit'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/sudoedit\\s\\+.*"
@@ -14329,7 +14401,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -14425,9 +14497,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_sudoedit'
 
 ###############################################################################
-# BEGIN fix (101 / 144) for 'audit_rules_privileged_commands_postqueue'
+# BEGIN fix (97 / 144) for 'audit_rules_privileged_commands_postqueue'
 ###############################################################################
-(>&2 echo "Remediating rule 101/144: 'audit_rules_privileged_commands_postqueue'")
+(>&2 echo "Remediating rule 97/144: 'audit_rules_privileged_commands_postqueue'")
 
 
 PATTERN="-a always,exit -F path=/usr/sbin/postqueue\\s\\+.*"
@@ -14565,7 +14637,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -14661,9 +14733,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_postqueue'
 
 ###############################################################################
-# BEGIN fix (102 / 144) for 'audit_rules_privileged_commands_su'
+# BEGIN fix (98 / 144) for 'audit_rules_privileged_commands_su'
 ###############################################################################
-(>&2 echo "Remediating rule 102/144: 'audit_rules_privileged_commands_su'")
+(>&2 echo "Remediating rule 98/144: 'audit_rules_privileged_commands_su'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/su\\s\\+.*"
@@ -14801,7 +14873,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -14897,9 +14969,9 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_su'
 
 ###############################################################################
-# BEGIN fix (103 / 144) for 'audit_rules_privileged_commands_newgrp'
+# BEGIN fix (99 / 144) for 'audit_rules_privileged_commands_newgrp'
 ###############################################################################
-(>&2 echo "Remediating rule 103/144: 'audit_rules_privileged_commands_newgrp'")
+(>&2 echo "Remediating rule 99/144: 'audit_rules_privileged_commands_newgrp'")
 
 
 PATTERN="-a always,exit -F path=/usr/bin/newgrp\\s\\+.*"
@@ -15037,7 +15109,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -15133,429 +15205,357 @@ fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 # END fix for 'audit_rules_privileged_commands_newgrp'
 
 ###############################################################################
-# BEGIN fix (104 / 144) for 'service_autofs_disabled'
+# BEGIN fix (100 / 144) for 'encrypt_partitions'
 ###############################################################################
-(>&2 echo "Remediating rule 104/144: 'service_autofs_disabled'")
+(>&2 echo "Remediating rule 100/144: 'encrypt_partitions'")
+(>&2 echo "FIX FOR THIS RULE 'encrypt_partitions' IS MISSING!")
+# END fix for 'encrypt_partitions'
 
+###############################################################################
+# BEGIN fix (101 / 144) for 'rpm_verify_permissions'
+###############################################################################
+(>&2 echo "Remediating rule 101/144: 'rpm_verify_permissions'")
 
-SYSTEMCTL_EXEC='/usr/bin/systemctl'
-"$SYSTEMCTL_EXEC" stop 'autofs.service'
-"$SYSTEMCTL_EXEC" disable 'autofs.service'
-"$SYSTEMCTL_EXEC" mask 'autofs.service'
-# Disable socket activation if we have a unit file for it
-if "$SYSTEMCTL_EXEC" list-unit-files | grep -q '^autofs.socket'; then
-    "$SYSTEMCTL_EXEC" stop 'autofs.socket'
-    "$SYSTEMCTL_EXEC" disable 'autofs.socket'
-    "$SYSTEMCTL_EXEC" mask 'autofs.socket'
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
+
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
+
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
+do
+	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
+done
+
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+	rpm --setperms "${RPM_PACKAGE}"
+done
+# END fix for 'rpm_verify_permissions'
+
+###############################################################################
+# BEGIN fix (102 / 144) for 'rpm_verify_hashes'
+###############################################################################
+(>&2 echo "Remediating rule 102/144: 'rpm_verify_hashes'")
+
+# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
+files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
+# From files names get package names and change newline to space, because rpm writes each package to new line
+packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
+
+yum reinstall -y $packages_to_reinstall
+# END fix for 'rpm_verify_hashes'
+
+###############################################################################
+# BEGIN fix (103 / 144) for 'ensure_gpgcheck_never_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 103/144: 'ensure_gpgcheck_never_disabled'")
+sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
+# END fix for 'ensure_gpgcheck_never_disabled'
+
+###############################################################################
+# BEGIN fix (104 / 144) for 'ensure_redhat_gpgkey_installed'
+###############################################################################
+(>&2 echo "Remediating rule 104/144: 'ensure_redhat_gpgkey_installed'")
+# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
+readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
+readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
+
+# Location of the key we would like to import (once it's integrity verified)
+readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
+
+RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
+
+# Verify /etc/pki/rpm-gpg directory permissions are safe
+if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
+then
+  # If they are safe, try to obtain fingerprints from the key file
+  # (to ensure there won't be e.g. CRC error).
+
+  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
+
+  GPG_RESULT=$?
+  # No CRC error, safe to proceed
+  if [ "${GPG_RESULT}" -eq "0" ]
+  then
+    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
+      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
+      rpm --import "${REDHAT_RELEASE_KEY}"
+    }
+  fi
 fi
-# The service may not be running because it has been started and failed,
-# so let's reset the state so OVAL checks pass.
-# Service should be 'inactive', not 'failed' after reboot though.
-"$SYSTEMCTL_EXEC" reset-failed 'autofs.service' || true
-# END fix for 'service_autofs_disabled'
+# END fix for 'ensure_redhat_gpgkey_installed'
 
 ###############################################################################
-# BEGIN fix (105 / 144) for 'kernel_module_usb-storage_disabled'
+# BEGIN fix (105 / 144) for 'ensure_gpgcheck_globally_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 105/144: 'kernel_module_usb-storage_disabled'")
-if LC_ALL=C grep -q -m 1 "^install usb-storage" /etc/modprobe.d/usb-storage.conf ; then
-	sed -i 's/^install usb-storage.*/install usb-storage /bin/true/g' /etc/modprobe.d/usb-storage.conf
+(>&2 echo "Remediating rule 105/144: 'ensure_gpgcheck_globally_activated'")
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26989-4'
+# END fix for 'ensure_gpgcheck_globally_activated'
+
+###############################################################################
+# BEGIN fix (106 / 144) for 'ensure_gpgcheck_local_packages'
+###############################################################################
+(>&2 echo "Remediating rule 106/144: 'ensure_gpgcheck_local_packages'")
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' 'CCE-80347-8'
+# END fix for 'ensure_gpgcheck_local_packages'
+
+###############################################################################
+# BEGIN fix (107 / 144) for 'dconf_db_up_to_date'
+###############################################################################
+(>&2 echo "Remediating rule 107/144: 'dconf_db_up_to_date'")
+
+dconf update
+# END fix for 'dconf_db_up_to_date'
+
+###############################################################################
+# BEGIN fix (108 / 144) for 'dconf_gnome_remote_access_encryption'
+###############################################################################
+(>&2 echo "Remediating rule 108/144: 'dconf_gnome_remote_access_encryption'")
+
+
+# Check for setting in any of the DConf db directories
+# If files contain ibus or distro, ignore them.
+# The assignment assumes that individual filenames don't contain :
+readarray -t SETTINGSFILES < <(grep -r "\\[org/gnome/Vino\\]" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
+DCONFFILE="/etc/dconf/db/local.d/00-security-settings"
+DBDIR="/etc/dconf/db/local.d"
+
+mkdir -p "${DBDIR}"
+
+if [ "${#SETTINGSFILES[@]}" -eq 0 ]
+then
+    [ ! -z ${DCONFFILE} ] || echo "" >> ${DCONFFILE}
+    printf '%s\n' "[org/gnome/Vino]" >> ${DCONFFILE}
+    printf '%s=%s\n' "require-encryption" "true" >> ${DCONFFILE}
 else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/usb-storage.conf
-	echo "install usb-storage /bin/true" >> /etc/modprobe.d/usb-storage.conf
-fi
-# END fix for 'kernel_module_usb-storage_disabled'
-
-###############################################################################
-# BEGIN fix (106 / 144) for 'sysctl_kernel_dmesg_restrict'
-###############################################################################
-(>&2 echo "Remediating rule 106/144: 'sysctl_kernel_dmesg_restrict'")
-
-
-#
-# Set runtime for kernel.dmesg_restrict
-#
-/sbin/sysctl -q -n -w kernel.dmesg_restrict="1"
-
-#
-# If kernel.dmesg_restrict present in /etc/sysctl.conf, change value to "1"
-#	else, add "kernel.dmesg_restrict = 1" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^kernel.dmesg_restrict' "1" 'CCE-27050-4'
-# END fix for 'sysctl_kernel_dmesg_restrict'
-
-###############################################################################
-# BEGIN fix (107 / 144) for 'sysctl_fs_suid_dumpable'
-###############################################################################
-(>&2 echo "Remediating rule 107/144: 'sysctl_fs_suid_dumpable'")
-
-
-#
-# Set runtime for fs.suid_dumpable
-#
-/sbin/sysctl -q -n -w fs.suid_dumpable="0"
-
-#
-# If fs.suid_dumpable present in /etc/sysctl.conf, change value to "0"
-#	else, add "fs.suid_dumpable = 0" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^fs.suid_dumpable' "0" 'CCE-26900-1'
-# END fix for 'sysctl_fs_suid_dumpable'
-
-###############################################################################
-# BEGIN fix (108 / 144) for 'sysctl_kernel_exec_shield'
-###############################################################################
-(>&2 echo "Remediating rule 108/144: 'sysctl_kernel_exec_shield'")
-
-
-if [ "$(getconf LONG_BIT)" = "32" ] ; then
-  #
-  # Set runtime for kernel.exec-shield
-  #
-  sysctl -q -n -w kernel.exec-shield=1
-
-  #
-  # If kernel.exec-shield present in /etc/sysctl.conf, change value to "1"
-  #	else, add "kernel.exec-shield = 1" to /etc/sysctl.conf
-  #
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-  replace_or_append '/etc/sysctl.conf' '^kernel.exec-shield' '1' 'CCE-27211-2'
+    escaped_value="$(sed -e 's/\\/\\\\/g' <<< "true")"
+    if grep -q "^\\s*require-encryption" "${SETTINGSFILES[@]}"
+    then
+        sed -i "s/\\s*require-encryption\\s*=\\s*.*/require-encryption=${escaped_value}/g" "${SETTINGSFILES[@]}"
+    else
+        sed -i "\\|\\[org/gnome/Vino\\]|a\\require-encryption=${escaped_value}" "${SETTINGSFILES[@]}"
+    fi
 fi
 
-if [ "$(getconf LONG_BIT)" = "64" ] ; then
-  if grep --silent noexec /boot/grub2/grub*.cfg ; then 
-        sed -i "s/noexec.*//g" /etc/default/grub
-        sed -i "s/noexec.*//g" /etc/grub.d/*
-        GRUBCFG=`ls | grep '.cfg$'`
-        grub2-mkconfig -o "/boot/grub2/$GRUBCFG"
-  fi
+dconf update
+# Check for setting in any of the DConf db directories
+LOCKFILES=$(grep -r "^/org/gnome/Vino/require-encryption$" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
+LOCKSFOLDER="/etc/dconf/db/local.d/locks"
+
+mkdir -p "${LOCKSFOLDER}"
+
+if [[ -z "${LOCKFILES}" ]]
+then
+    echo "/org/gnome/Vino/require-encryption" >> "/etc/dconf/db/local.d/locks/00-security-settings-lock"
 fi
-# END fix for 'sysctl_kernel_exec_shield'
+
+dconf update
+# END fix for 'dconf_gnome_remote_access_encryption'
 
 ###############################################################################
-# BEGIN fix (109 / 144) for 'sysctl_kernel_randomize_va_space'
+# BEGIN fix (109 / 144) for 'dconf_gnome_remote_access_credential_prompt'
 ###############################################################################
-(>&2 echo "Remediating rule 109/144: 'sysctl_kernel_randomize_va_space'")
+(>&2 echo "Remediating rule 109/144: 'dconf_gnome_remote_access_credential_prompt'")
 
 
-#
-# Set runtime for kernel.randomize_va_space
-#
-/sbin/sysctl -q -n -w kernel.randomize_va_space="2"
+# Check for setting in any of the DConf db directories
+# If files contain ibus or distro, ignore them.
+# The assignment assumes that individual filenames don't contain :
+readarray -t SETTINGSFILES < <(grep -r "\\[org/gnome/Vino\\]" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
+DCONFFILE="/etc/dconf/db/local.d/00-security-settings"
+DBDIR="/etc/dconf/db/local.d"
 
-#
-# If kernel.randomize_va_space present in /etc/sysctl.conf, change value to "2"
-#	else, add "kernel.randomize_va_space = 2" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
+mkdir -p "${DBDIR}"
 
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+if [ "${#SETTINGSFILES[@]}" -eq 0 ]
+then
+    [ ! -z ${DCONFFILE} ] || echo "" >> ${DCONFFILE}
+    printf '%s\n' "[org/gnome/Vino]" >> ${DCONFFILE}
+    printf '%s=%s\n' "authentication-methods" "['vnc']" >> ${DCONFFILE}
+else
+    escaped_value="$(sed -e 's/\\/\\\\/g' <<< "['vnc']")"
+    if grep -q "^\\s*authentication-methods" "${SETTINGSFILES[@]}"
+    then
+        sed -i "s/\\s*authentication-methods\\s*=\\s*.*/authentication-methods=${escaped_value}/g" "${SETTINGSFILES[@]}"
+    else
+        sed -i "\\|\\[org/gnome/Vino\\]|a\\authentication-methods=${escaped_value}" "${SETTINGSFILES[@]}"
+    fi
+fi
 
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
+dconf update
+# Check for setting in any of the DConf db directories
+LOCKFILES=$(grep -r "^/org/gnome/Vino/authentication-methods$" "/etc/dconf/db/" | grep -v 'distro\|ibus' | cut -d":" -f1)
+LOCKSFOLDER="/etc/dconf/db/local.d/locks"
 
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
+mkdir -p "${LOCKSFOLDER}"
 
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+if [[ -z "${LOCKFILES}" ]]
+then
+    echo "/org/gnome/Vino/authentication-methods" >> "/etc/dconf/db/local.d/locks/00-security-settings-lock"
+fi
 
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" 'CCE-27127-0'
-# END fix for 'sysctl_kernel_randomize_va_space'
+dconf update
+# END fix for 'dconf_gnome_remote_access_credential_prompt'
 
 ###############################################################################
 # BEGIN fix (110 / 144) for 'package_rsh_removed'
@@ -15906,9 +15906,34 @@ fi
 # END fix for 'use_kerberos_security_all_exports'
 
 ###############################################################################
-# BEGIN fix (130 / 144) for 'sshd_disable_empty_passwords'
+# BEGIN fix (130 / 144) for 'sshd_enable_strictmodes'
 ###############################################################################
-(>&2 echo "Remediating rule 130/144: 'sshd_disable_empty_passwords'")
+(>&2 echo "Remediating rule 130/144: 'sshd_enable_strictmodes'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*StrictModes\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "StrictModes yes" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "StrictModes yes" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_enable_strictmodes'
+
+###############################################################################
+# BEGIN fix (131 / 144) for 'sshd_disable_empty_passwords'
+###############################################################################
+(>&2 echo "Remediating rule 131/144: 'sshd_disable_empty_passwords'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*PermitEmptyPasswords\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -15931,9 +15956,9 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_disable_empty_passwords'
 
 ###############################################################################
-# BEGIN fix (131 / 144) for 'sshd_set_keepalive'
+# BEGIN fix (132 / 144) for 'sshd_set_keepalive'
 ###############################################################################
-(>&2 echo "Remediating rule 131/144: 'sshd_set_keepalive'")
+(>&2 echo "Remediating rule 132/144: 'sshd_set_keepalive'")
 
 var_sshd_set_keepalive="0"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -16017,9 +16042,93 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_k
 # END fix for 'sshd_set_keepalive'
 
 ###############################################################################
-# BEGIN fix (132 / 144) for 'sshd_enable_warning_banner'
+# BEGIN fix (133 / 144) for 'sshd_disable_rhosts_rsa'
 ###############################################################################
-(>&2 echo "Remediating rule 132/144: 'sshd_enable_warning_banner'")
+(>&2 echo "Remediating rule 133/144: 'sshd_disable_rhosts_rsa'")
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' 'CCE-80373-4' '%s %s'
+# END fix for 'sshd_disable_rhosts_rsa'
+
+###############################################################################
+# BEGIN fix (134 / 144) for 'sshd_enable_warning_banner'
+###############################################################################
+(>&2 echo "Remediating rule 134/144: 'sshd_enable_warning_banner'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -16042,9 +16151,9 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_enable_warning_banner'
 
 ###############################################################################
-# BEGIN fix (133 / 144) for 'sshd_use_approved_macs'
+# BEGIN fix (135 / 144) for 'sshd_use_approved_macs'
 ###############################################################################
-(>&2 echo "Remediating rule 133/144: 'sshd_use_approved_macs'")
+(>&2 echo "Remediating rule 135/144: 'sshd_use_approved_macs'")
 
 sshd_approved_macs="hmac-sha2-512,hmac-sha2-256,hmac-sha1,hmac-sha1-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -16128,34 +16237,9 @@ replace_or_append '/etc/ssh/sshd_config' '^MACs' "$sshd_approved_macs" 'CCE-2745
 # END fix for 'sshd_use_approved_macs'
 
 ###############################################################################
-# BEGIN fix (134 / 144) for 'sshd_do_not_permit_user_env'
+# BEGIN fix (136 / 144) for 'sshd_disable_kerb_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 134/144: 'sshd_do_not_permit_user_env'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_do_not_permit_user_env'
-
-###############################################################################
-# BEGIN fix (135 / 144) for 'sshd_disable_kerb_auth'
-###############################################################################
-(>&2 echo "Remediating rule 135/144: 'sshd_disable_kerb_auth'")
+(>&2 echo "Remediating rule 136/144: 'sshd_disable_kerb_auth'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*KerberosAuthentication\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -16178,9 +16262,9 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_disable_kerb_auth'
 
 ###############################################################################
-# BEGIN fix (136 / 144) for 'sshd_allow_only_protocol2'
+# BEGIN fix (137 / 144) for 'sshd_allow_only_protocol2'
 ###############################################################################
-(>&2 echo "Remediating rule 136/144: 'sshd_allow_only_protocol2'")
+(>&2 echo "Remediating rule 137/144: 'sshd_allow_only_protocol2'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -16203,9 +16287,36 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_allow_only_protocol2'
 
 ###############################################################################
-# BEGIN fix (137 / 144) for 'sshd_disable_rhosts_rsa'
+# BEGIN fix (138 / 144) for 'sshd_do_not_permit_user_env'
 ###############################################################################
-(>&2 echo "Remediating rule 137/144: 'sshd_disable_rhosts_rsa'")
+(>&2 echo "Remediating rule 138/144: 'sshd_do_not_permit_user_env'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_do_not_permit_user_env'
+
+###############################################################################
+# BEGIN fix (139 / 144) for 'sshd_use_approved_ciphers'
+###############################################################################
+(>&2 echo "Remediating rule 139/144: 'sshd_use_approved_ciphers'")
+
+sshd_approved_ciphers="aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc,rijndael-cbc@lysator.liu.se"
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -16283,97 +16394,13 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' 'CCE-80373-4' '%s %s'
-# END fix for 'sshd_disable_rhosts_rsa'
-
-###############################################################################
-# BEGIN fix (138 / 144) for 'sshd_use_approved_ciphers'
-###############################################################################
-(>&2 echo "Remediating rule 138/144: 'sshd_use_approved_ciphers'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/ssh/sshd_config' '^Ciphers' 'aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc' 'CCE-27295-5' '%s %s'
+replace_or_append '/etc/ssh/sshd_config' '^Ciphers' "$sshd_approved_ciphers" 'CCE-27295-5' '%s %s'
 # END fix for 'sshd_use_approved_ciphers'
 
 ###############################################################################
-# BEGIN fix (139 / 144) for 'disable_host_auth'
+# BEGIN fix (140 / 144) for 'disable_host_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 139/144: 'disable_host_auth'")
+(>&2 echo "Remediating rule 140/144: 'disable_host_auth'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*HostbasedAuthentication\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -16394,31 +16421,6 @@ fi
 # Clean up after ourselves.
 rm "/etc/ssh/sshd_config.bak"
 # END fix for 'disable_host_auth'
-
-###############################################################################
-# BEGIN fix (140 / 144) for 'sshd_enable_strictmodes'
-###############################################################################
-(>&2 echo "Remediating rule 140/144: 'sshd_enable_strictmodes'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*StrictModes\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "StrictModes yes" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "StrictModes yes" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_enable_strictmodes'
 
 ###############################################################################
 # BEGIN fix (141 / 144) for 'sshd_use_priv_separation'

@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ol7,ol8,rhel7,rhel8,rhv4,wrlinux1019
 
 title: 'Set Password Maximum Consecutive Repeating Characters'
 
@@ -30,7 +30,7 @@ identifiers:
 
 references:
     disa: "195"
-    nist: IA-5,IA-5(c)
+    nist: IA-5(c),CM-6(a),IA-5(4)
     nist-csf: PR.AC-1,PR.AC-6,PR.AC-7
     srg: SRG-OS-000072-GPOS-00040
     stigid@rhel7: "010180"

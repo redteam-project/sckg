@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel7,rhel8,rhv4
+prodtype: rhel7,rhel8,rhv4,wrlinux1019
 
 title: 'Set Existing Passwords Maximum Age'
 
@@ -20,9 +20,10 @@ severity: medium
 
 identifiers:
     cce@rhel7: 80522-6
+    cce@rhel8: 82473-0
 
 references:
-    nist: IA-5(1)(d)
+    nist: IA-5(f),IA-5(1)(d),CM-6(a)
     disa: "199"
     srg: SRG-OS-000076-GPOS-00044
     vmmsrg: SRG-OS-000076-VMM-000430

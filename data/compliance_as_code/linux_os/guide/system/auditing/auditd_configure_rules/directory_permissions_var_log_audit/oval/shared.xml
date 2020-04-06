@@ -2,9 +2,7 @@
   <definition class="compliance" id="directory_permissions_var_log_audit" version="1">
     <metadata>
       <title>Verify /var/log/audit Directory Permissions</title>
-      <affected family="unix">
-        <platform>multi_platform_rhel</platform>
-      </affected>
+      {{{- oval_affected(products) }}}
       <description>Checks for correct permissions for /var/log/audit.</description>
     </metadata>
     <criteria operator="OR">

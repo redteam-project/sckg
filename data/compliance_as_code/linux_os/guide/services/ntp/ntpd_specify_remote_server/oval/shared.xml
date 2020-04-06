@@ -2,11 +2,7 @@
   <definition class="compliance" id="ntpd_specify_remote_server" version="2">
     <metadata>
       <title>Specify a Remote ntpd NTP Server for Time Data</title>
-      <affected family="unix">
-        <platform>multi_platform_rhel</platform>
-        <platform>multi_platform_fedora</platform>
-        <platform>multi_platform_ol</platform>
-      </affected>
+      {{{- oval_affected(products) }}}
       <description>A remote ntpd NTP Server for time synchronization should be
       specified (and dependencies are met)</description>
     </metadata>

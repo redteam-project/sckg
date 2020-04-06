@@ -21,12 +21,13 @@ identifiers:
     cce@rhel6: 27014-0
     cce@rhel7: 80195-1
     cce@rhel8: 80794-1
+    cce@ocp4: 82689-1
 
 references:
     stigid@rhel6: "000138"
     srg@rhel6: SRG-OS-999999
     disa: "366"
-    nist: AU-9
+    nist: CM-6(a)
     nist-csf: PR.PT-1
     pcidss: Req-10.7
     isa-62443-2013: 'SR 2.10,SR 2.11,SR 2.12,SR 2.8,SR 2.9'

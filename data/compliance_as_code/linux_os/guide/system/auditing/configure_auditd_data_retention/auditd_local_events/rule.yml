@@ -16,9 +16,11 @@ severity: medium
 identifiers:
     cce@rhel7: 82355-9
     cce@rhel8: 82233-8
+    cce@ocp4: 82509-1
 
 references:
     ospp: FAU_GEN.1.1.c
+    srg: SRG-OS-000062-GPOS-00031
 
 ocil_clause: local_events isn't set to yes
 

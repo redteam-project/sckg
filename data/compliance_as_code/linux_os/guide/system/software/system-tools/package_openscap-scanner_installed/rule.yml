@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install openscap-scanner Package'
 
@@ -19,6 +19,9 @@ identifiers:
     cce@rhel7: 82219-7
     cce@rhel8: 82220-5
 
+references:
+    srg: SRG-OS-000480-GPOS-00227,SRG-OS-000191-GPOS-00080
+    
 ocil_clause: 'the package is not installed'
 
 ocil: '{{{ ocil_package(package="openscap-scanner") }}}'

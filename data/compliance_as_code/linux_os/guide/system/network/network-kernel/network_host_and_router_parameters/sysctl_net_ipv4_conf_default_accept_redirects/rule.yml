@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ocp4,ol7,ol8,rhel6,rhel7,rhel8,rhv4,sle15
 
 title: 'Disable Kernel Parameter for Accepting ICMP Redirects by Default on IPv4 Interfaces'
 
@@ -20,16 +20,17 @@ identifiers:
     cce@rhel6: 27015-7
     cce@rhel7: 80163-9
     cce@rhel8: 80919-4
+    cce@ocp4: 82470-6
 
 references:
     anssi: NT28(R22)
     stigid@rhel6: "000091"
     srg@rhel6: SRG-OS-999999
-    cis: 3.2.2
+    cis@rhel8: 3.2.2
     cjis: 5.10.1.1
     cui: 3.1.20
     disa: "1551"
-    nist: AC-4,CM-7,SC-5,SC-7
+    nist: CM-7(a),CM-7(b),CM-6(a),SC-7(a)
     nist-csf: DE.AE-1,DE.CM-1,ID.AM-3,PR.AC-5,PR.DS-4,PR.DS-5,PR.IP-1,PR.PT-3,PR.PT-4
     srg: SRG-OS-000480-GPOS-00227
     stigid@rhel7: "040640"
@@ -40,8 +41,6 @@ references:
     cis-csc: 1,11,12,13,14,15,16,18,2,3,4,6,7,8,9
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="net.ipv4.conf.default.accept_redirects", value="0") }}}
-
-platform: machine
 
 template:
     name: sysctl

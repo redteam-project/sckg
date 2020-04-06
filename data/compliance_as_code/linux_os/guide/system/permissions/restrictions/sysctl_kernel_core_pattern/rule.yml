@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8,fedora,ol8
+prodtype: fedora,ocp4,ol8,rhel8
 
 title: 'Disable storing core dumps'
 
@@ -15,9 +15,11 @@ severity: unknown
 
 identifiers:
     cce@rhel8: 82215-5
+    cce@ocp4: 82527-3
 
 references:
     ospp: FMT_SMF_EXT.1
+    srg: SRG-OS-000480-GPOS-00227
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="kernel.core_pattern", value="|/bin/false") }}}
 

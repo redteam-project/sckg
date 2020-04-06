@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: opensuse,sle11,sle12
+prodtype: opensuse,sle11,sle12,sle15
 
 title: 'Install the OpenSSH Client and Server Package'
 
@@ -17,7 +17,7 @@ severity: medium
 
 references:
     disa: 2418,2420,2421,2422
-    nist: SC-8
+    nist: CM-6(a)
     srg: SRG-OS-000423-GPOS-00187
 
 ocil_clause: 'the package is not installed'

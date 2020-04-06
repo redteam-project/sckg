@@ -6,7 +6,7 @@
 # This profile contains items for GNU/Linux installations exposed to unauthenticated flows or multiple sources.
 #
 # Benchmark ID:  UBUNTU-BIONIC
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,79 +22,9 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 45) for 'partition_for_home'
+# BEGIN fix (1 / 45) for 'ensure_logrotate_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 1/45: 'partition_for_home'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
-# END fix for 'partition_for_home'
-
-###############################################################################
-# BEGIN fix (2 / 45) for 'partition_for_tmp'
-###############################################################################
-(>&2 echo "Remediating rule 2/45: 'partition_for_tmp'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
-# END fix for 'partition_for_tmp'
-
-###############################################################################
-# BEGIN fix (3 / 45) for 'partition_for_var'
-###############################################################################
-(>&2 echo "Remediating rule 3/45: 'partition_for_var'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
-# END fix for 'partition_for_var'
-
-###############################################################################
-# BEGIN fix (4 / 45) for 'partition_for_var_log_audit'
-###############################################################################
-(>&2 echo "Remediating rule 4/45: 'partition_for_var_log_audit'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
-# END fix for 'partition_for_var_log_audit'
-
-###############################################################################
-# BEGIN fix (5 / 45) for 'partition_for_var_log'
-###############################################################################
-(>&2 echo "Remediating rule 5/45: 'partition_for_var_log'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
-# END fix for 'partition_for_var_log'
-
-###############################################################################
-# BEGIN fix (6 / 45) for 'sudo_remove_no_authenticate'
-###############################################################################
-(>&2 echo "Remediating rule 6/45: 'sudo_remove_no_authenticate'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
-# END fix for 'sudo_remove_no_authenticate'
-
-###############################################################################
-# BEGIN fix (7 / 45) for 'sudo_remove_nopasswd'
-###############################################################################
-(>&2 echo "Remediating rule 7/45: 'sudo_remove_nopasswd'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
-# END fix for 'sudo_remove_nopasswd'
-
-###############################################################################
-# BEGIN fix (8 / 45) for 'rsyslog_files_ownership'
-###############################################################################
-(>&2 echo "Remediating rule 8/45: 'rsyslog_files_ownership'")
-(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_ownership' IS MISSING!")
-# END fix for 'rsyslog_files_ownership'
-
-###############################################################################
-# BEGIN fix (9 / 45) for 'rsyslog_files_groupownership'
-###############################################################################
-(>&2 echo "Remediating rule 9/45: 'rsyslog_files_groupownership'")
-(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_groupownership' IS MISSING!")
-# END fix for 'rsyslog_files_groupownership'
-
-###############################################################################
-# BEGIN fix (10 / 45) for 'rsyslog_files_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 10/45: 'rsyslog_files_permissions'")
-(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_permissions' IS MISSING!")
-# END fix for 'rsyslog_files_permissions'
-
-###############################################################################
-# BEGIN fix (11 / 45) for 'ensure_logrotate_activated'
-###############################################################################
-(>&2 echo "Remediating rule 11/45: 'ensure_logrotate_activated'")
+(>&2 echo "Remediating rule 1/45: 'ensure_logrotate_activated'")
 
 LOGROTATE_CONF_FILE="/etc/logrotate.conf"
 CRON_DAILY_LOGROTATE_FILE="/etc/cron.daily/logrotate"
@@ -113,157 +43,227 @@ fi
 # END fix for 'ensure_logrotate_activated'
 
 ###############################################################################
-# BEGIN fix (12 / 45) for 'package_audit_installed'
+# BEGIN fix (2 / 45) for 'rsyslog_files_groupownership'
 ###############################################################################
-(>&2 echo "Remediating rule 12/45: 'package_audit_installed'")
-(>&2 echo "FIX FOR THIS RULE 'package_audit_installed' IS MISSING!")
-# END fix for 'package_audit_installed'
+(>&2 echo "Remediating rule 2/45: 'rsyslog_files_groupownership'")
+(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_groupownership' IS MISSING!")
+# END fix for 'rsyslog_files_groupownership'
 
 ###############################################################################
-# BEGIN fix (13 / 45) for 'service_auditd_enabled'
+# BEGIN fix (3 / 45) for 'rsyslog_files_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 13/45: 'service_auditd_enabled'")
-(>&2 echo "FIX FOR THIS RULE 'service_auditd_enabled' IS MISSING!")
-# END fix for 'service_auditd_enabled'
+(>&2 echo "Remediating rule 3/45: 'rsyslog_files_ownership'")
+(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_ownership' IS MISSING!")
+# END fix for 'rsyslog_files_ownership'
 
 ###############################################################################
-# BEGIN fix (14 / 45) for 'sysctl_fs_protected_hardlinks'
+# BEGIN fix (4 / 45) for 'rsyslog_files_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 14/45: 'sysctl_fs_protected_hardlinks'")
+(>&2 echo "Remediating rule 4/45: 'rsyslog_files_permissions'")
+(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_permissions' IS MISSING!")
+# END fix for 'rsyslog_files_permissions'
+
+###############################################################################
+# BEGIN fix (5 / 45) for 'sysctl_fs_protected_hardlinks'
+###############################################################################
+(>&2 echo "Remediating rule 5/45: 'sysctl_fs_protected_hardlinks'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_fs_protected_hardlinks' IS MISSING!")
 # END fix for 'sysctl_fs_protected_hardlinks'
 
 ###############################################################################
-# BEGIN fix (15 / 45) for 'sysctl_fs_protected_symlinks'
+# BEGIN fix (6 / 45) for 'sysctl_fs_protected_symlinks'
 ###############################################################################
-(>&2 echo "Remediating rule 15/45: 'sysctl_fs_protected_symlinks'")
+(>&2 echo "Remediating rule 6/45: 'sysctl_fs_protected_symlinks'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_fs_protected_symlinks' IS MISSING!")
 # END fix for 'sysctl_fs_protected_symlinks'
 
 ###############################################################################
-# BEGIN fix (16 / 45) for 'file_permissions_systemmap'
+# BEGIN fix (7 / 45) for 'file_permissions_systemmap'
 ###############################################################################
-(>&2 echo "Remediating rule 16/45: 'file_permissions_systemmap'")
+(>&2 echo "Remediating rule 7/45: 'file_permissions_systemmap'")
 (>&2 echo "FIX FOR THIS RULE 'file_permissions_systemmap' IS MISSING!")
 # END fix for 'file_permissions_systemmap'
 
 ###############################################################################
-# BEGIN fix (17 / 45) for 'file_permissions_etc_shadow'
+# BEGIN fix (8 / 45) for 'file_owner_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 17/45: 'file_permissions_etc_shadow'")
-
-chmod 0640 /etc/shadow
-# END fix for 'file_permissions_etc_shadow'
-
-###############################################################################
-# BEGIN fix (18 / 45) for 'file_owner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 18/45: 'file_owner_etc_shadow'")
-
-
-chown 0 /etc/shadow
-# END fix for 'file_owner_etc_shadow'
-
-###############################################################################
-# BEGIN fix (19 / 45) for 'file_owner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 19/45: 'file_owner_etc_group'")
+(>&2 echo "Remediating rule 8/45: 'file_owner_etc_group'")
 
 
 chown 0 /etc/group
 # END fix for 'file_owner_etc_group'
 
 ###############################################################################
-# BEGIN fix (20 / 45) for 'file_permissions_etc_group'
+# BEGIN fix (9 / 45) for 'file_permissions_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 20/45: 'file_permissions_etc_group'")
+(>&2 echo "Remediating rule 9/45: 'file_permissions_etc_group'")
 
 chmod 0644 /etc/group
 # END fix for 'file_permissions_etc_group'
 
 ###############################################################################
-# BEGIN fix (21 / 45) for 'file_groupowner_etc_gshadow'
+# BEGIN fix (10 / 45) for 'file_groupowner_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 21/45: 'file_groupowner_etc_gshadow'")
-
-
-chgrp 42 /etc/gshadow
-# END fix for 'file_groupowner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (22 / 45) for 'file_groupowner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 22/45: 'file_groupowner_etc_passwd'")
-
-
-chgrp 0 /etc/passwd
-# END fix for 'file_groupowner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (23 / 45) for 'file_groupowner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 23/45: 'file_groupowner_etc_shadow'")
+(>&2 echo "Remediating rule 10/45: 'file_groupowner_etc_shadow'")
 
 
 chgrp 42 /etc/shadow
 # END fix for 'file_groupowner_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (24 / 45) for 'file_owner_etc_gshadow'
+# BEGIN fix (11 / 45) for 'file_permissions_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 24/45: 'file_owner_etc_gshadow'")
+(>&2 echo "Remediating rule 11/45: 'file_permissions_etc_shadow'")
 
-
-chown 0 /etc/gshadow
-# END fix for 'file_owner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (25 / 45) for 'file_groupowner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 25/45: 'file_groupowner_etc_group'")
-
-
-chgrp 0 /etc/group
-# END fix for 'file_groupowner_etc_group'
+chmod 0640 /etc/shadow
+# END fix for 'file_permissions_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (26 / 45) for 'file_permissions_etc_gshadow'
+# BEGIN fix (12 / 45) for 'file_groupowner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 26/45: 'file_permissions_etc_gshadow'")
+(>&2 echo "Remediating rule 12/45: 'file_groupowner_etc_gshadow'")
 
-chmod 0640 /etc/gshadow
-# END fix for 'file_permissions_etc_gshadow'
+
+chgrp 42 /etc/gshadow
+# END fix for 'file_groupowner_etc_gshadow'
 
 ###############################################################################
-# BEGIN fix (27 / 45) for 'file_owner_etc_passwd'
+# BEGIN fix (13 / 45) for 'file_owner_etc_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 27/45: 'file_owner_etc_passwd'")
+(>&2 echo "Remediating rule 13/45: 'file_owner_etc_passwd'")
 
 
 chown 0 /etc/passwd
 # END fix for 'file_owner_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (28 / 45) for 'file_permissions_etc_passwd'
+# BEGIN fix (14 / 45) for 'file_owner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 28/45: 'file_permissions_etc_passwd'")
+(>&2 echo "Remediating rule 14/45: 'file_owner_etc_gshadow'")
+
+
+chown 0 /etc/gshadow
+# END fix for 'file_owner_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (15 / 45) for 'file_groupowner_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 15/45: 'file_groupowner_etc_group'")
+
+
+chgrp 0 /etc/group
+# END fix for 'file_groupowner_etc_group'
+
+###############################################################################
+# BEGIN fix (16 / 45) for 'file_permissions_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 16/45: 'file_permissions_etc_passwd'")
 
 chmod 0644 /etc/passwd
 # END fix for 'file_permissions_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (29 / 45) for 'sysctl_fs_suid_dumpable'
+# BEGIN fix (17 / 45) for 'file_owner_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 29/45: 'sysctl_fs_suid_dumpable'")
+(>&2 echo "Remediating rule 17/45: 'file_owner_etc_shadow'")
+
+
+chown 0 /etc/shadow
+# END fix for 'file_owner_etc_shadow'
+
+###############################################################################
+# BEGIN fix (18 / 45) for 'file_permissions_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 18/45: 'file_permissions_etc_gshadow'")
+
+chmod 0640 /etc/gshadow
+# END fix for 'file_permissions_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (19 / 45) for 'file_groupowner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 19/45: 'file_groupowner_etc_passwd'")
+
+
+chgrp 0 /etc/passwd
+# END fix for 'file_groupowner_etc_passwd'
+
+###############################################################################
+# BEGIN fix (20 / 45) for 'sysctl_fs_suid_dumpable'
+###############################################################################
+(>&2 echo "Remediating rule 20/45: 'sysctl_fs_suid_dumpable'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_fs_suid_dumpable' IS MISSING!")
 # END fix for 'sysctl_fs_suid_dumpable'
 
 ###############################################################################
-# BEGIN fix (30 / 45) for 'sysctl_kernel_randomize_va_space'
+# BEGIN fix (21 / 45) for 'sysctl_kernel_randomize_va_space'
 ###############################################################################
-(>&2 echo "Remediating rule 30/45: 'sysctl_kernel_randomize_va_space'")
+(>&2 echo "Remediating rule 21/45: 'sysctl_kernel_randomize_va_space'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_kernel_randomize_va_space' IS MISSING!")
 # END fix for 'sysctl_kernel_randomize_va_space'
+
+###############################################################################
+# BEGIN fix (22 / 45) for 'package_audit_installed'
+###############################################################################
+(>&2 echo "Remediating rule 22/45: 'package_audit_installed'")
+(>&2 echo "FIX FOR THIS RULE 'package_audit_installed' IS MISSING!")
+# END fix for 'package_audit_installed'
+
+###############################################################################
+# BEGIN fix (23 / 45) for 'service_auditd_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 23/45: 'service_auditd_enabled'")
+(>&2 echo "FIX FOR THIS RULE 'service_auditd_enabled' IS MISSING!")
+# END fix for 'service_auditd_enabled'
+
+###############################################################################
+# BEGIN fix (24 / 45) for 'partition_for_home'
+###############################################################################
+(>&2 echo "Remediating rule 24/45: 'partition_for_home'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
+# END fix for 'partition_for_home'
+
+###############################################################################
+# BEGIN fix (25 / 45) for 'partition_for_tmp'
+###############################################################################
+(>&2 echo "Remediating rule 25/45: 'partition_for_tmp'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
+# END fix for 'partition_for_tmp'
+
+###############################################################################
+# BEGIN fix (26 / 45) for 'partition_for_var'
+###############################################################################
+(>&2 echo "Remediating rule 26/45: 'partition_for_var'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
+# END fix for 'partition_for_var'
+
+###############################################################################
+# BEGIN fix (27 / 45) for 'partition_for_var_log_audit'
+###############################################################################
+(>&2 echo "Remediating rule 27/45: 'partition_for_var_log_audit'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
+# END fix for 'partition_for_var_log_audit'
+
+###############################################################################
+# BEGIN fix (28 / 45) for 'partition_for_var_log'
+###############################################################################
+(>&2 echo "Remediating rule 28/45: 'partition_for_var_log'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
+# END fix for 'partition_for_var_log'
+
+###############################################################################
+# BEGIN fix (29 / 45) for 'sudo_remove_no_authenticate'
+###############################################################################
+(>&2 echo "Remediating rule 29/45: 'sudo_remove_no_authenticate'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
+# END fix for 'sudo_remove_no_authenticate'
+
+###############################################################################
+# BEGIN fix (30 / 45) for 'sudo_remove_nopasswd'
+###############################################################################
+(>&2 echo "Remediating rule 30/45: 'sudo_remove_nopasswd'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
+# END fix for 'sudo_remove_nopasswd'
 
 ###############################################################################
 # BEGIN fix (31 / 45) for 'apt_conf_disallow_unauthenticated'
@@ -403,16 +403,9 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_set_keepalive'
 
 ###############################################################################
-# BEGIN fix (43 / 45) for 'sshd_set_idle_timeout'
+# BEGIN fix (43 / 45) for 'sshd_allow_only_protocol2'
 ###############################################################################
-(>&2 echo "Remediating rule 43/45: 'sshd_set_idle_timeout'")
-(>&2 echo "FIX FOR THIS RULE 'sshd_set_idle_timeout' IS MISSING!")
-# END fix for 'sshd_set_idle_timeout'
-
-###############################################################################
-# BEGIN fix (44 / 45) for 'sshd_allow_only_protocol2'
-###############################################################################
-(>&2 echo "Remediating rule 44/45: 'sshd_allow_only_protocol2'")
+(>&2 echo "Remediating rule 43/45: 'sshd_allow_only_protocol2'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -433,6 +426,13 @@ fi
 # Clean up after ourselves.
 rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_allow_only_protocol2'
+
+###############################################################################
+# BEGIN fix (44 / 45) for 'sshd_set_idle_timeout'
+###############################################################################
+(>&2 echo "Remediating rule 44/45: 'sshd_set_idle_timeout'")
+(>&2 echo "FIX FOR THIS RULE 'sshd_set_idle_timeout' IS MISSING!")
+# END fix for 'sshd_set_idle_timeout'
 
 ###############################################################################
 # BEGIN fix (45 / 45) for 'sshd_disable_root_login'

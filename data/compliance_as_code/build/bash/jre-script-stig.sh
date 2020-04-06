@@ -14,7 +14,7 @@
 # (JRE) as well as Red Hat with OpenJDK.
 #
 # Benchmark ID:  JRE
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -147,22 +147,9 @@ fi
 # END fix for 'java_jre_deployment_config_properties'
 
 ###############################################################################
-# BEGIN fix (10 / 11) for 'java_jre_deployment_config_mandatory'
+# BEGIN fix (10 / 11) for 'java_jre_deployment_config_exists'
 ###############################################################################
-(>&2 echo "Remediating rule 10/11: 'java_jre_deployment_config_mandatory'")
-JAVA_CONFIG="/etc/.java/deployment/deployment.config"
-
-grep -q "^deployment.system.config.mandatory=false$" ${JAVA_CONFIG} && \
-sed -i "s/deployment.system.config.mandatory=.*/deployment.system.config.mandatory=false/g" ${JAVA_CONFIG}
-if ! [ $? -eq 0 ] ; then
-  echo "deployment.system.config.mandatory=false" >> ${JAVA_CONFIG}
-fi
-# END fix for 'java_jre_deployment_config_mandatory'
-
-###############################################################################
-# BEGIN fix (11 / 11) for 'java_jre_deployment_config_exists'
-###############################################################################
-(>&2 echo "Remediating rule 11/11: 'java_jre_deployment_config_exists'")
+(>&2 echo "Remediating rule 10/11: 'java_jre_deployment_config_exists'")
 JAVA_CONFIG="/etc/.java/deployment/deployment.config"
 JAVA_DIR="/etc/.java/deployment"
 
@@ -176,4 +163,17 @@ fi
 
 chmod 644 ${JAVA_CONFIG}
 # END fix for 'java_jre_deployment_config_exists'
+
+###############################################################################
+# BEGIN fix (11 / 11) for 'java_jre_deployment_config_mandatory'
+###############################################################################
+(>&2 echo "Remediating rule 11/11: 'java_jre_deployment_config_mandatory'")
+JAVA_CONFIG="/etc/.java/deployment/deployment.config"
+
+grep -q "^deployment.system.config.mandatory=false$" ${JAVA_CONFIG} && \
+sed -i "s/deployment.system.config.mandatory=.*/deployment.system.config.mandatory=false/g" ${JAVA_CONFIG}
+if ! [ $? -eq 0 ] ; then
+  echo "deployment.system.config.mandatory=false" >> ${JAVA_CONFIG}
+fi
+# END fix for 'java_jre_deployment_config_mandatory'
 

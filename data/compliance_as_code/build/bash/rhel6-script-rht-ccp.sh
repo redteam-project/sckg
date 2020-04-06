@@ -6,7 +6,7 @@
 # This is a *draft* SCAP profile for Red Hat Certified Cloud Providers
 #
 # Benchmark ID:  RHEL-6
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,178 +22,34 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 93) for 'partition_for_var'
+# BEGIN fix (1 / 93) for 'service_ip6tables_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 1/93: 'partition_for_var'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
-# END fix for 'partition_for_var'
+(>&2 echo "Remediating rule 1/93: 'service_ip6tables_enabled'")
 
-###############################################################################
-# BEGIN fix (2 / 93) for 'partition_for_tmp'
-###############################################################################
-(>&2 echo "Remediating rule 2/93: 'partition_for_tmp'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
-# END fix for 'partition_for_tmp'
+/sbin/service 'ip6tables' start
+/sbin/chkconfig --level 0123456 'ip6tables' on
+# END fix for 'service_ip6tables_enabled'
 
 ###############################################################################
-# BEGIN fix (3 / 93) for 'partition_for_var_log_audit'
+# BEGIN fix (2 / 93) for 'service_iptables_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 3/93: 'partition_for_var_log_audit'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
-# END fix for 'partition_for_var_log_audit'
+(>&2 echo "Remediating rule 2/93: 'service_iptables_enabled'")
 
-###############################################################################
-# BEGIN fix (4 / 93) for 'partition_for_var_log'
-###############################################################################
-(>&2 echo "Remediating rule 4/93: 'partition_for_var_log'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
-# END fix for 'partition_for_var_log'
+/sbin/service 'iptables' start
+/sbin/chkconfig --level 0123456 'iptables' on
+# END fix for 'service_iptables_enabled'
 
 ###############################################################################
-# BEGIN fix (5 / 93) for 'package_aide_installed'
+# BEGIN fix (3 / 93) for 'set_iptables_default_rule'
 ###############################################################################
-(>&2 echo "Remediating rule 5/93: 'package_aide_installed'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-# END fix for 'package_aide_installed'
+(>&2 echo "Remediating rule 3/93: 'set_iptables_default_rule'")
+sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/iptables
+# END fix for 'set_iptables_default_rule'
 
 ###############################################################################
-# BEGIN fix (6 / 93) for 'ensure_gpgcheck_globally_activated'
+# BEGIN fix (4 / 93) for 'kernel_module_ipv6_option_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 6/93: 'ensure_gpgcheck_globally_activated'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26709-6'
-# END fix for 'ensure_gpgcheck_globally_activated'
-
-###############################################################################
-# BEGIN fix (7 / 93) for 'security_patches_up_to_date'
-###############################################################################
-(>&2 echo "Remediating rule 7/93: 'security_patches_up_to_date'")
-yum -y update
-# END fix for 'security_patches_up_to_date'
-
-###############################################################################
-# BEGIN fix (8 / 93) for 'ensure_redhat_gpgkey_installed'
-###############################################################################
-(>&2 echo "Remediating rule 8/93: 'ensure_redhat_gpgkey_installed'")
-# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
-readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
-readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
-
-# Location of the key we would like to import (once it's integrity verified)
-readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
-
-RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
-
-# Verify /etc/pki/rpm-gpg directory permissions are safe
-if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
-then
-  # If they are safe, try to obtain fingerprints from the key file
-  # (to ensure there won't be e.g. CRC error).
-
-  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
-
-  GPG_RESULT=$?
-  # No CRC error, safe to proceed
-  if [ "${GPG_RESULT}" -eq "0" ]
-  then
-    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
-      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
-      rpm --import "${REDHAT_RELEASE_KEY}"
-    }
-  fi
-fi
-# END fix for 'ensure_redhat_gpgkey_installed'
-
-###############################################################################
-# BEGIN fix (9 / 93) for 'ensure_gpgcheck_never_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 9/93: 'ensure_gpgcheck_never_disabled'")
-sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
-# END fix for 'ensure_gpgcheck_never_disabled'
-
-###############################################################################
-# BEGIN fix (10 / 93) for 'kernel_module_ipv6_option_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 10/93: 'kernel_module_ipv6_option_disabled'")
+(>&2 echo "Remediating rule 4/93: 'kernel_module_ipv6_option_disabled'")
 
 # Prevent the IPv6 kernel module (ipv6) from loading the IPv6 networking stack
 echo "options ipv6 disable=1" > /etc/modprobe.d/ipv6.conf
@@ -205,7 +61,7 @@ echo "options ipv6 disable=1" > /etc/modprobe.d/ipv6.conf
 
 declare -a IPV6_SETTINGS=("net.ipv6.conf.all.disable_ipv6" "net.ipv6.conf.default.disable_ipv6")
 
-for setting in ${IPV6_SETTINGS[@]}
+for setting in "${IPV6_SETTINGS[@]}"
 do
 	# Set runtime =1 for setting
 	/sbin/sysctl -q -n -w "$setting=1"
@@ -223,34 +79,9 @@ done
 # END fix for 'kernel_module_ipv6_option_disabled'
 
 ###############################################################################
-# BEGIN fix (11 / 93) for 'service_ip6tables_enabled'
+# BEGIN fix (5 / 93) for 'kernel_module_dccp_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 11/93: 'service_ip6tables_enabled'")
-
-/sbin/service 'ip6tables' start
-/sbin/chkconfig --level 0123456 'ip6tables' on
-# END fix for 'service_ip6tables_enabled'
-
-###############################################################################
-# BEGIN fix (12 / 93) for 'service_iptables_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 12/93: 'service_iptables_enabled'")
-
-/sbin/service 'iptables' start
-/sbin/chkconfig --level 0123456 'iptables' on
-# END fix for 'service_iptables_enabled'
-
-###############################################################################
-# BEGIN fix (13 / 93) for 'set_iptables_default_rule'
-###############################################################################
-(>&2 echo "Remediating rule 13/93: 'set_iptables_default_rule'")
-sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/iptables
-# END fix for 'set_iptables_default_rule'
-
-###############################################################################
-# BEGIN fix (14 / 93) for 'kernel_module_dccp_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 14/93: 'kernel_module_dccp_disabled'")
+(>&2 echo "Remediating rule 5/93: 'kernel_module_dccp_disabled'")
 if LC_ALL=C grep -q -m 1 "^install dccp" /etc/modprobe.d/dccp.conf ; then
 	sed -i 's/^install dccp.*/install dccp /bin/true/g' /etc/modprobe.d/dccp.conf
 else
@@ -260,9 +91,9 @@ fi
 # END fix for 'kernel_module_dccp_disabled'
 
 ###############################################################################
-# BEGIN fix (15 / 93) for 'kernel_module_tipc_disabled'
+# BEGIN fix (6 / 93) for 'kernel_module_tipc_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 15/93: 'kernel_module_tipc_disabled'")
+(>&2 echo "Remediating rule 6/93: 'kernel_module_tipc_disabled'")
 if LC_ALL=C grep -q -m 1 "^install tipc" /etc/modprobe.d/tipc.conf ; then
 	sed -i 's/^install tipc.*/install tipc /bin/true/g' /etc/modprobe.d/tipc.conf
 else
@@ -272,9 +103,9 @@ fi
 # END fix for 'kernel_module_tipc_disabled'
 
 ###############################################################################
-# BEGIN fix (16 / 93) for 'kernel_module_sctp_disabled'
+# BEGIN fix (7 / 93) for 'kernel_module_sctp_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 16/93: 'kernel_module_sctp_disabled'")
+(>&2 echo "Remediating rule 7/93: 'kernel_module_sctp_disabled'")
 if LC_ALL=C grep -q -m 1 "^install sctp" /etc/modprobe.d/sctp.conf ; then
 	sed -i 's/^install sctp.*/install sctp /bin/true/g' /etc/modprobe.d/sctp.conf
 else
@@ -284,9 +115,9 @@ fi
 # END fix for 'kernel_module_sctp_disabled'
 
 ###############################################################################
-# BEGIN fix (17 / 93) for 'kernel_module_rds_disabled'
+# BEGIN fix (8 / 93) for 'kernel_module_rds_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 17/93: 'kernel_module_rds_disabled'")
+(>&2 echo "Remediating rule 8/93: 'kernel_module_rds_disabled'")
 if LC_ALL=C grep -q -m 1 "^install rds" /etc/modprobe.d/rds.conf ; then
 	sed -i 's/^install rds.*/install rds /bin/true/g' /etc/modprobe.d/rds.conf
 else
@@ -296,17 +127,17 @@ fi
 # END fix for 'kernel_module_rds_disabled'
 
 ###############################################################################
-# BEGIN fix (18 / 93) for 'grub_legacy_enable_selinux'
+# BEGIN fix (9 / 93) for 'grub_legacy_enable_selinux'
 ###############################################################################
-(>&2 echo "Remediating rule 18/93: 'grub_legacy_enable_selinux'")
+(>&2 echo "Remediating rule 9/93: 'grub_legacy_enable_selinux'")
 sed -i --follow-symlinks "s/selinux=0//gI" /etc/grub.conf
 sed -i --follow-symlinks "s/enforcing=0//gI" /etc/grub.conf
 # END fix for 'grub_legacy_enable_selinux'
 
 ###############################################################################
-# BEGIN fix (19 / 93) for 'selinux_policytype'
+# BEGIN fix (10 / 93) for 'selinux_policytype'
 ###############################################################################
-(>&2 echo "Remediating rule 19/93: 'selinux_policytype'")
+(>&2 echo "Remediating rule 10/93: 'selinux_policytype'")
 
 var_selinux_policy_name="targeted"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -390,16 +221,16 @@ replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_n
 # END fix for 'selinux_policytype'
 
 ###############################################################################
-# BEGIN fix (20 / 93) for 'selinux_all_devicefiles_labeled'
+# BEGIN fix (11 / 93) for 'selinux_all_devicefiles_labeled'
 ###############################################################################
-(>&2 echo "Remediating rule 20/93: 'selinux_all_devicefiles_labeled'")
+(>&2 echo "Remediating rule 11/93: 'selinux_all_devicefiles_labeled'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_all_devicefiles_labeled' IS MISSING!")
 # END fix for 'selinux_all_devicefiles_labeled'
 
 ###############################################################################
-# BEGIN fix (21 / 93) for 'selinux_state'
+# BEGIN fix (12 / 93) for 'selinux_state'
 ###############################################################################
-(>&2 echo "Remediating rule 21/93: 'selinux_state'")
+(>&2 echo "Remediating rule 12/93: 'selinux_state'")
 
 var_selinux_state="enforcing"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -486,42 +317,129 @@ fixfiles -f relabel
 # END fix for 'selinux_state'
 
 ###############################################################################
-# BEGIN fix (22 / 93) for 'file_owner_grub_conf'
+# BEGIN fix (13 / 93) for 'file_owner_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 22/93: 'file_owner_grub_conf'")
+(>&2 echo "Remediating rule 13/93: 'file_owner_grub_conf'")
 
 
 chown 0 /boot/grub/grub.conf
 # END fix for 'file_owner_grub_conf'
 
 ###############################################################################
-# BEGIN fix (23 / 93) for 'grub_legacy_password'
+# BEGIN fix (14 / 93) for 'grub_legacy_password'
 ###############################################################################
-(>&2 echo "Remediating rule 23/93: 'grub_legacy_password'")
+(>&2 echo "Remediating rule 14/93: 'grub_legacy_password'")
 (>&2 echo "FIX FOR THIS RULE 'grub_legacy_password' IS MISSING!")
 # END fix for 'grub_legacy_password'
 
 ###############################################################################
-# BEGIN fix (24 / 93) for 'file_groupowner_grub_conf'
+# BEGIN fix (15 / 93) for 'file_groupowner_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 24/93: 'file_groupowner_grub_conf'")
+(>&2 echo "Remediating rule 15/93: 'file_groupowner_grub_conf'")
 
 
 chgrp 0 /boot/grub/grub.conf
 # END fix for 'file_groupowner_grub_conf'
 
 ###############################################################################
-# BEGIN fix (25 / 93) for 'file_permissions_grub_conf'
+# BEGIN fix (16 / 93) for 'file_permissions_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 25/93: 'file_permissions_grub_conf'")
+(>&2 echo "Remediating rule 16/93: 'file_permissions_grub_conf'")
 
 chmod 0600 /boot/grub/grub.conf
 # END fix for 'file_permissions_grub_conf'
 
 ###############################################################################
-# BEGIN fix (26 / 93) for 'set_password_hashing_algorithm_logindefs'
+# BEGIN fix (17 / 93) for 'accounts_password_minlen_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 26/93: 'set_password_hashing_algorithm_logindefs'")
+(>&2 echo "Remediating rule 17/93: 'accounts_password_minlen_login_defs'")
+
+declare var_accounts_password_minlen_login_defs
+var_accounts_password_minlen_login_defs="6"
+
+grep -q ^PASS_MIN_LEN /etc/login.defs && \
+sed -i "s/PASS_MIN_LEN.*/PASS_MIN_LEN\t$var_accounts_password_minlen_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]
+then
+  echo -e "PASS_MIN_LEN\t$var_accounts_password_minlen_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_password_minlen_login_defs'
+
+###############################################################################
+# BEGIN fix (18 / 93) for 'accounts_minimum_age_login_defs'
+###############################################################################
+(>&2 echo "Remediating rule 18/93: 'accounts_minimum_age_login_defs'")
+
+var_accounts_minimum_age_login_defs="7"
+
+grep -q ^PASS_MIN_DAYS /etc/login.defs && \
+  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_minimum_age_login_defs'
+
+###############################################################################
+# BEGIN fix (19 / 93) for 'accounts_maximum_age_login_defs'
+###############################################################################
+(>&2 echo "Remediating rule 19/93: 'accounts_maximum_age_login_defs'")
+
+var_accounts_maximum_age_login_defs="60"
+
+grep -q ^PASS_MAX_DAYS /etc/login.defs && \
+  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_maximum_age_login_defs'
+
+###############################################################################
+# BEGIN fix (20 / 93) for 'accounts_password_warn_age_login_defs'
+###############################################################################
+(>&2 echo "Remediating rule 20/93: 'accounts_password_warn_age_login_defs'")
+
+var_accounts_password_warn_age_login_defs="7"
+
+grep -q ^PASS_WARN_AGE /etc/login.defs && \
+  sed -i "s/PASS_WARN_AGE.*/PASS_WARN_AGE     $var_accounts_password_warn_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_WARN_AGE      $var_accounts_password_warn_age_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_password_warn_age_login_defs'
+
+###############################################################################
+# BEGIN fix (21 / 93) for 'accounts_password_all_shadowed'
+###############################################################################
+(>&2 echo "Remediating rule 21/93: 'accounts_password_all_shadowed'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
+# END fix for 'accounts_password_all_shadowed'
+
+###############################################################################
+# BEGIN fix (22 / 93) for 'no_empty_passwords'
+###############################################################################
+(>&2 echo "Remediating rule 22/93: 'no_empty_passwords'")
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
+# END fix for 'no_empty_passwords'
+
+###############################################################################
+# BEGIN fix (23 / 93) for 'accounts_no_uid_except_zero'
+###############################################################################
+(>&2 echo "Remediating rule 23/93: 'accounts_no_uid_except_zero'")
+awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
+# END fix for 'accounts_no_uid_except_zero'
+
+###############################################################################
+# BEGIN fix (24 / 93) for 'no_shelllogin_for_systemaccounts'
+###############################################################################
+(>&2 echo "Remediating rule 24/93: 'no_shelllogin_for_systemaccounts'")
+(>&2 echo "FIX FOR THIS RULE 'no_shelllogin_for_systemaccounts' IS MISSING!")
+# END fix for 'no_shelllogin_for_systemaccounts'
+
+###############################################################################
+# BEGIN fix (25 / 93) for 'set_password_hashing_algorithm_logindefs'
+###############################################################################
+(>&2 echo "Remediating rule 25/93: 'set_password_hashing_algorithm_logindefs'")
 if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
 	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
 else
@@ -531,9 +449,9 @@ fi
 # END fix for 'set_password_hashing_algorithm_logindefs'
 
 ###############################################################################
-# BEGIN fix (27 / 93) for 'set_password_hashing_algorithm_libuserconf'
+# BEGIN fix (26 / 93) for 'set_password_hashing_algorithm_libuserconf'
 ###############################################################################
-(>&2 echo "Remediating rule 27/93: 'set_password_hashing_algorithm_libuserconf'")
+(>&2 echo "Remediating rule 26/93: 'set_password_hashing_algorithm_libuserconf'")
 
 LIBUSER_CONF="/etc/libuser.conf"
 CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
@@ -550,9 +468,9 @@ fi
 # END fix for 'set_password_hashing_algorithm_libuserconf'
 
 ###############################################################################
-# BEGIN fix (28 / 93) for 'set_password_hashing_algorithm_systemauth'
+# BEGIN fix (27 / 93) for 'set_password_hashing_algorithm_systemauth'
 ###############################################################################
-(>&2 echo "Remediating rule 28/93: 'set_password_hashing_algorithm_systemauth'")
+(>&2 echo "Remediating rule 27/93: 'set_password_hashing_algorithm_systemauth'")
 
 AUTH_FILES[0]="/etc/pam.d/system-auth"
 AUTH_FILES[1]="/etc/pam.d/password-auth"
@@ -566,9 +484,9 @@ done
 # END fix for 'set_password_hashing_algorithm_systemauth'
 
 ###############################################################################
-# BEGIN fix (29 / 93) for 'accounts_password_pam_unix_remember'
+# BEGIN fix (28 / 93) for 'accounts_password_pam_unix_remember'
 ###############################################################################
-(>&2 echo "Remediating rule 29/93: 'accounts_password_pam_unix_remember'")
+(>&2 echo "Remediating rule 28/93: 'accounts_password_pam_unix_remember'")
 
 var_password_pam_unix_remember="5"
 
@@ -586,129 +504,98 @@ done
 # END fix for 'accounts_password_pam_unix_remember'
 
 ###############################################################################
-# BEGIN fix (30 / 93) for 'accounts_passwords_pam_faillock_deny'
+# BEGIN fix (29 / 93) for 'accounts_passwords_pam_faillock_deny'
 ###############################################################################
-(>&2 echo "Remediating rule 30/93: 'accounts_passwords_pam_faillock_deny'")
+(>&2 echo "Remediating rule 29/93: 'accounts_passwords_pam_faillock_deny'")
 
 var_accounts_passwords_pam_faillock_deny="5"
-function include_set_faillock_option {
-	:
-}
 
-function insert_preauth {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth required pam_faillock.so preauth present?
-	if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth required pam_faillock.so preauth is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent $option=$value" "$pam_file"
-	fi
-}
-
-function insert_authfail {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth default pam_faillock.so authfail present?
-	if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth default pam_faillock.so authfail is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail $option=$value" "$pam_file"
-	fi
-}
-
-function insert_account {
-	local pam_file="$1"
-	if ! grep -qE "^\s*account\s+required\s+pam_faillock\.so.*$" "$pam_file" ; then
-		sed -E -i --follow-symlinks "/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so" "$pam_file"
-	fi
-}
-
-function set_faillock_option {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	insert_preauth "$pam_file" "$option" "$value"
-	insert_authfail "$pam_file" "$option" "$value"
-	insert_account "$pam_file"
-}
-include_set_faillock_option
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
+AUTH_FILES=("/etc/pam.d/system-auth" "/etc/pam.d/password-auth")
 
 for pam_file in "${AUTH_FILES[@]}"
 do
-	set_faillock_option "$pam_file" "deny" "$var_accounts_passwords_pam_faillock_deny"
+    # is auth required pam_faillock.so preauth present?
+    if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth required pam_faillock.so preauth is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    # is auth default pam_faillock.so authfail present?
+    if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth default pam_faillock.so authfail is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    if ! grep -qE '^\s*account\s+required\s+pam_faillock\.so.*$' "$pam_file" ; then
+        sed -E -i --follow-symlinks '/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so' "$pam_file"
+    fi
 done
 # END fix for 'accounts_passwords_pam_faillock_deny'
 
 ###############################################################################
-# BEGIN fix (31 / 93) for 'cracklib_accounts_password_pam_retry'
+# BEGIN fix (30 / 93) for 'cracklib_accounts_password_pam_retry'
 ###############################################################################
-(>&2 echo "Remediating rule 31/93: 'cracklib_accounts_password_pam_retry'")
+(>&2 echo "Remediating rule 30/93: 'cracklib_accounts_password_pam_retry'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_retry' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_retry'
 
 ###############################################################################
-# BEGIN fix (32 / 93) for 'cracklib_accounts_password_pam_ocredit'
+# BEGIN fix (31 / 93) for 'cracklib_accounts_password_pam_ocredit'
 ###############################################################################
-(>&2 echo "Remediating rule 32/93: 'cracklib_accounts_password_pam_ocredit'")
+(>&2 echo "Remediating rule 31/93: 'cracklib_accounts_password_pam_ocredit'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ocredit' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_ocredit'
 
 ###############################################################################
-# BEGIN fix (33 / 93) for 'cracklib_accounts_password_pam_dcredit'
+# BEGIN fix (32 / 93) for 'cracklib_accounts_password_pam_dcredit'
 ###############################################################################
-(>&2 echo "Remediating rule 33/93: 'cracklib_accounts_password_pam_dcredit'")
+(>&2 echo "Remediating rule 32/93: 'cracklib_accounts_password_pam_dcredit'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_dcredit' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_dcredit'
 
 ###############################################################################
-# BEGIN fix (34 / 93) for 'cracklib_accounts_password_pam_ucredit'
+# BEGIN fix (33 / 93) for 'cracklib_accounts_password_pam_ucredit'
 ###############################################################################
-(>&2 echo "Remediating rule 34/93: 'cracklib_accounts_password_pam_ucredit'")
+(>&2 echo "Remediating rule 33/93: 'cracklib_accounts_password_pam_ucredit'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ucredit' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_ucredit'
 
 ###############################################################################
-# BEGIN fix (35 / 93) for 'cracklib_accounts_password_pam_lcredit'
+# BEGIN fix (34 / 93) for 'cracklib_accounts_password_pam_lcredit'
 ###############################################################################
-(>&2 echo "Remediating rule 35/93: 'cracklib_accounts_password_pam_lcredit'")
+(>&2 echo "Remediating rule 34/93: 'cracklib_accounts_password_pam_lcredit'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_lcredit' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_lcredit'
 
 ###############################################################################
-# BEGIN fix (36 / 93) for 'cracklib_accounts_password_pam_difok'
+# BEGIN fix (35 / 93) for 'cracklib_accounts_password_pam_difok'
 ###############################################################################
-(>&2 echo "Remediating rule 36/93: 'cracklib_accounts_password_pam_difok'")
+(>&2 echo "Remediating rule 35/93: 'cracklib_accounts_password_pam_difok'")
 (>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_difok' IS MISSING!")
 # END fix for 'cracklib_accounts_password_pam_difok'
 
 ###############################################################################
-# BEGIN fix (37 / 93) for 'require_singleuser_auth'
+# BEGIN fix (36 / 93) for 'require_singleuser_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 37/93: 'require_singleuser_auth'")
+(>&2 echo "Remediating rule 36/93: 'require_singleuser_auth'")
 
 grep -q ^SINGLE /etc/sysconfig/init && \
   sed -i "s/SINGLE.*/SINGLE=\/sbin\/sulogin/g" /etc/sysconfig/init
@@ -718,225 +605,113 @@ fi
 # END fix for 'require_singleuser_auth'
 
 ###############################################################################
-# BEGIN fix (38 / 93) for 'accounts_password_minlen_login_defs'
+# BEGIN fix (37 / 93) for 'file_owner_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 38/93: 'accounts_password_minlen_login_defs'")
-
-declare var_accounts_password_minlen_login_defs
-var_accounts_password_minlen_login_defs="6"
-
-grep -q ^PASS_MIN_LEN /etc/login.defs && \
-sed -i "s/PASS_MIN_LEN.*/PASS_MIN_LEN\t$var_accounts_password_minlen_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]
-then
-  echo -e "PASS_MIN_LEN\t$var_accounts_password_minlen_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_password_minlen_login_defs'
-
-###############################################################################
-# BEGIN fix (39 / 93) for 'accounts_minimum_age_login_defs'
-###############################################################################
-(>&2 echo "Remediating rule 39/93: 'accounts_minimum_age_login_defs'")
-
-var_accounts_minimum_age_login_defs="7"
-
-grep -q ^PASS_MIN_DAYS /etc/login.defs && \
-  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]; then
-    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_minimum_age_login_defs'
-
-###############################################################################
-# BEGIN fix (40 / 93) for 'accounts_maximum_age_login_defs'
-###############################################################################
-(>&2 echo "Remediating rule 40/93: 'accounts_maximum_age_login_defs'")
-
-var_accounts_maximum_age_login_defs="60"
-
-grep -q ^PASS_MAX_DAYS /etc/login.defs && \
-  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]; then
-    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_maximum_age_login_defs'
-
-###############################################################################
-# BEGIN fix (41 / 93) for 'accounts_password_warn_age_login_defs'
-###############################################################################
-(>&2 echo "Remediating rule 41/93: 'accounts_password_warn_age_login_defs'")
-
-var_accounts_password_warn_age_login_defs="7"
-
-grep -q ^PASS_WARN_AGE /etc/login.defs && \
-  sed -i "s/PASS_WARN_AGE.*/PASS_WARN_AGE     $var_accounts_password_warn_age_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]; then
-    echo "PASS_WARN_AGE      $var_accounts_password_warn_age_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_password_warn_age_login_defs'
-
-###############################################################################
-# BEGIN fix (42 / 93) for 'accounts_no_uid_except_zero'
-###############################################################################
-(>&2 echo "Remediating rule 42/93: 'accounts_no_uid_except_zero'")
-awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
-# END fix for 'accounts_no_uid_except_zero'
-
-###############################################################################
-# BEGIN fix (43 / 93) for 'no_shelllogin_for_systemaccounts'
-###############################################################################
-(>&2 echo "Remediating rule 43/93: 'no_shelllogin_for_systemaccounts'")
-(>&2 echo "FIX FOR THIS RULE 'no_shelllogin_for_systemaccounts' IS MISSING!")
-# END fix for 'no_shelllogin_for_systemaccounts'
-
-###############################################################################
-# BEGIN fix (44 / 93) for 'no_empty_passwords'
-###############################################################################
-(>&2 echo "Remediating rule 44/93: 'no_empty_passwords'")
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
-# END fix for 'no_empty_passwords'
-
-###############################################################################
-# BEGIN fix (45 / 93) for 'accounts_password_all_shadowed'
-###############################################################################
-(>&2 echo "Remediating rule 45/93: 'accounts_password_all_shadowed'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
-# END fix for 'accounts_password_all_shadowed'
-
-###############################################################################
-# BEGIN fix (46 / 93) for 'file_permissions_var_log_audit'
-###############################################################################
-(>&2 echo "Remediating rule 46/93: 'file_permissions_var_log_audit'")
-
-if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
-  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
-  if ! [ "${GROUP}" == 'root' ] ; then
-    chmod 0640 /var/log/audit/audit.log
-    chmod 0440 /var/log/audit/audit.log.*
-  else
-    chmod 0600 /var/log/audit/audit.log
-    chmod 0400 /var/log/audit/audit.log.*
-  fi
-
-  chmod 0640 /etc/audit/audit*
-  chmod 0640 /etc/audit/rules.d/*
-else
-  chmod 0600 /var/log/audit/audit.log
-  chmod 0400 /var/log/audit/audit.log.*
-  chmod 0640 /etc/audit/audit*
-  chmod 0640 /etc/audit/rules.d/*
-fi
-# END fix for 'file_permissions_var_log_audit'
-
-###############################################################################
-# BEGIN fix (47 / 93) for 'file_permissions_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 47/93: 'file_permissions_etc_shadow'")
-
-chmod 0000 /etc/shadow
-# END fix for 'file_permissions_etc_shadow'
-
-###############################################################################
-# BEGIN fix (48 / 93) for 'file_owner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 48/93: 'file_owner_etc_shadow'")
-
-
-chown 0 /etc/shadow
-# END fix for 'file_owner_etc_shadow'
-
-###############################################################################
-# BEGIN fix (49 / 93) for 'file_owner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 49/93: 'file_owner_etc_group'")
+(>&2 echo "Remediating rule 37/93: 'file_owner_etc_group'")
 
 
 chown 0 /etc/group
 # END fix for 'file_owner_etc_group'
 
 ###############################################################################
-# BEGIN fix (50 / 93) for 'file_permissions_etc_group'
+# BEGIN fix (38 / 93) for 'file_permissions_etc_group'
 ###############################################################################
-(>&2 echo "Remediating rule 50/93: 'file_permissions_etc_group'")
+(>&2 echo "Remediating rule 38/93: 'file_permissions_etc_group'")
 
 chmod 0644 /etc/group
 # END fix for 'file_permissions_etc_group'
 
 ###############################################################################
-# BEGIN fix (51 / 93) for 'file_groupowner_etc_gshadow'
+# BEGIN fix (39 / 93) for 'file_groupowner_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 51/93: 'file_groupowner_etc_gshadow'")
-
-
-chgrp 0 /etc/gshadow
-# END fix for 'file_groupowner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (52 / 93) for 'file_groupowner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 52/93: 'file_groupowner_etc_passwd'")
-
-
-chgrp 0 /etc/passwd
-# END fix for 'file_groupowner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (53 / 93) for 'file_groupowner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 53/93: 'file_groupowner_etc_shadow'")
+(>&2 echo "Remediating rule 39/93: 'file_groupowner_etc_shadow'")
 
 
 chgrp 0 /etc/shadow
 # END fix for 'file_groupowner_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (54 / 93) for 'file_owner_etc_gshadow'
+# BEGIN fix (40 / 93) for 'file_permissions_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 54/93: 'file_owner_etc_gshadow'")
+(>&2 echo "Remediating rule 40/93: 'file_permissions_etc_shadow'")
 
-
-chown 0 /etc/gshadow
-# END fix for 'file_owner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (55 / 93) for 'file_groupowner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 55/93: 'file_groupowner_etc_group'")
-
-
-chgrp 0 /etc/group
-# END fix for 'file_groupowner_etc_group'
+chmod 0000 /etc/shadow
+# END fix for 'file_permissions_etc_shadow'
 
 ###############################################################################
-# BEGIN fix (56 / 93) for 'file_permissions_etc_gshadow'
+# BEGIN fix (41 / 93) for 'file_groupowner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 56/93: 'file_permissions_etc_gshadow'")
+(>&2 echo "Remediating rule 41/93: 'file_groupowner_etc_gshadow'")
 
-chmod 0000 /etc/gshadow
-# END fix for 'file_permissions_etc_gshadow'
+
+chgrp 0 /etc/gshadow
+# END fix for 'file_groupowner_etc_gshadow'
 
 ###############################################################################
-# BEGIN fix (57 / 93) for 'file_owner_etc_passwd'
+# BEGIN fix (42 / 93) for 'file_owner_etc_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 57/93: 'file_owner_etc_passwd'")
+(>&2 echo "Remediating rule 42/93: 'file_owner_etc_passwd'")
 
 
 chown 0 /etc/passwd
 # END fix for 'file_owner_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (58 / 93) for 'file_permissions_etc_passwd'
+# BEGIN fix (43 / 93) for 'file_owner_etc_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 58/93: 'file_permissions_etc_passwd'")
+(>&2 echo "Remediating rule 43/93: 'file_owner_etc_gshadow'")
+
+
+chown 0 /etc/gshadow
+# END fix for 'file_owner_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (44 / 93) for 'file_groupowner_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 44/93: 'file_groupowner_etc_group'")
+
+
+chgrp 0 /etc/group
+# END fix for 'file_groupowner_etc_group'
+
+###############################################################################
+# BEGIN fix (45 / 93) for 'file_permissions_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 45/93: 'file_permissions_etc_passwd'")
 
 chmod 0644 /etc/passwd
 # END fix for 'file_permissions_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (59 / 93) for 'file_ownership_library_dirs'
+# BEGIN fix (46 / 93) for 'file_owner_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 59/93: 'file_ownership_library_dirs'")
+(>&2 echo "Remediating rule 46/93: 'file_owner_etc_shadow'")
+
+
+chown 0 /etc/shadow
+# END fix for 'file_owner_etc_shadow'
+
+###############################################################################
+# BEGIN fix (47 / 93) for 'file_permissions_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 47/93: 'file_permissions_etc_gshadow'")
+
+chmod 0000 /etc/gshadow
+# END fix for 'file_permissions_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (48 / 93) for 'file_groupowner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 48/93: 'file_groupowner_etc_passwd'")
+
+
+chgrp 0 /etc/passwd
+# END fix for 'file_groupowner_etc_passwd'
+
+###############################################################################
+# BEGIN fix (49 / 93) for 'file_ownership_library_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 49/93: 'file_ownership_library_dirs'")
 for LIBDIR in /usr/lib /usr/lib64 /lib /lib64
 do
   if [ -d $LIBDIR ]
@@ -947,9 +722,9 @@ done
 # END fix for 'file_ownership_library_dirs'
 
 ###############################################################################
-# BEGIN fix (60 / 93) for 'file_permissions_binary_dirs'
+# BEGIN fix (50 / 93) for 'file_permissions_binary_dirs'
 ###############################################################################
-(>&2 echo "Remediating rule 60/93: 'file_permissions_binary_dirs'")
+(>&2 echo "Remediating rule 50/93: 'file_permissions_binary_dirs'")
 DIRS="/bin /usr/bin /usr/local/bin /sbin /usr/sbin /usr/local/sbin /usr/libexec"
 for dirPath in $DIRS; do
 	find "$dirPath" -perm /022 -exec chmod go-w '{}' \;
@@ -957,9 +732,9 @@ done
 # END fix for 'file_permissions_binary_dirs'
 
 ###############################################################################
-# BEGIN fix (61 / 93) for 'file_ownership_binary_dirs'
+# BEGIN fix (51 / 93) for 'file_ownership_binary_dirs'
 ###############################################################################
-(>&2 echo "Remediating rule 61/93: 'file_ownership_binary_dirs'")
+(>&2 echo "Remediating rule 51/93: 'file_ownership_binary_dirs'")
 find /bin/ \
 /usr/bin/ \
 /usr/local/bin/ \
@@ -971,9 +746,9 @@ find /bin/ \
 # END fix for 'file_ownership_binary_dirs'
 
 ###############################################################################
-# BEGIN fix (62 / 93) for 'file_permissions_library_dirs'
+# BEGIN fix (52 / 93) for 'file_permissions_library_dirs'
 ###############################################################################
-(>&2 echo "Remediating rule 62/93: 'file_permissions_library_dirs'")
+(>&2 echo "Remediating rule 52/93: 'file_permissions_library_dirs'")
 DIRS="/lib /lib64 /usr/lib /usr/lib64"
 for dirPath in $DIRS; do
 	find "$dirPath" -perm /022 -type f -exec chmod go-w '{}' \;
@@ -981,25 +756,25 @@ done
 # END fix for 'file_permissions_library_dirs'
 
 ###############################################################################
-# BEGIN fix (63 / 93) for 'service_autofs_disabled'
+# BEGIN fix (53 / 93) for 'service_autofs_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 63/93: 'service_autofs_disabled'")
+(>&2 echo "Remediating rule 53/93: 'service_autofs_disabled'")
 
 /sbin/service 'autofs' stop
 /sbin/chkconfig --level 0123456 'autofs' off
 # END fix for 'service_autofs_disabled'
 
 ###############################################################################
-# BEGIN fix (64 / 93) for 'sysctl_kernel_exec_shield'
+# BEGIN fix (54 / 93) for 'sysctl_kernel_exec_shield'
 ###############################################################################
-(>&2 echo "Remediating rule 64/93: 'sysctl_kernel_exec_shield'")
+(>&2 echo "Remediating rule 54/93: 'sysctl_kernel_exec_shield'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_kernel_exec_shield' IS MISSING!")
 # END fix for 'sysctl_kernel_exec_shield'
 
 ###############################################################################
-# BEGIN fix (65 / 93) for 'sysctl_kernel_randomize_va_space'
+# BEGIN fix (55 / 93) for 'sysctl_kernel_randomize_va_space'
 ###############################################################################
-(>&2 echo "Remediating rule 65/93: 'sysctl_kernel_randomize_va_space'")
+(>&2 echo "Remediating rule 55/93: 'sysctl_kernel_randomize_va_space'")
 
 
 #
@@ -1090,6 +865,202 @@ function replace_or_append {
 }
 replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" 'CCE-26999-3'
 # END fix for 'sysctl_kernel_randomize_va_space'
+
+###############################################################################
+# BEGIN fix (56 / 93) for 'file_permissions_var_log_audit'
+###############################################################################
+(>&2 echo "Remediating rule 56/93: 'file_permissions_var_log_audit'")
+
+if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
+  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
+  if ! [ "${GROUP}" == 'root' ] ; then
+    chmod 0640 /var/log/audit/audit.log
+    chmod 0440 /var/log/audit/audit.log.*
+  else
+    chmod 0600 /var/log/audit/audit.log
+    chmod 0400 /var/log/audit/audit.log.*
+  fi
+
+  chmod 0640 /etc/audit/audit*
+  chmod 0640 /etc/audit/rules.d/*
+else
+  chmod 0600 /var/log/audit/audit.log
+  chmod 0400 /var/log/audit/audit.log.*
+  chmod 0640 /etc/audit/audit*
+  chmod 0640 /etc/audit/rules.d/*
+fi
+# END fix for 'file_permissions_var_log_audit'
+
+###############################################################################
+# BEGIN fix (57 / 93) for 'partition_for_var'
+###############################################################################
+(>&2 echo "Remediating rule 57/93: 'partition_for_var'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
+# END fix for 'partition_for_var'
+
+###############################################################################
+# BEGIN fix (58 / 93) for 'partition_for_tmp'
+###############################################################################
+(>&2 echo "Remediating rule 58/93: 'partition_for_tmp'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
+# END fix for 'partition_for_tmp'
+
+###############################################################################
+# BEGIN fix (59 / 93) for 'partition_for_var_log_audit'
+###############################################################################
+(>&2 echo "Remediating rule 59/93: 'partition_for_var_log_audit'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
+# END fix for 'partition_for_var_log_audit'
+
+###############################################################################
+# BEGIN fix (60 / 93) for 'partition_for_var_log'
+###############################################################################
+(>&2 echo "Remediating rule 60/93: 'partition_for_var_log'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
+# END fix for 'partition_for_var_log'
+
+###############################################################################
+# BEGIN fix (61 / 93) for 'package_aide_installed'
+###############################################################################
+(>&2 echo "Remediating rule 61/93: 'package_aide_installed'")
+
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+# END fix for 'package_aide_installed'
+
+###############################################################################
+# BEGIN fix (62 / 93) for 'ensure_gpgcheck_globally_activated'
+###############################################################################
+(>&2 echo "Remediating rule 62/93: 'ensure_gpgcheck_globally_activated'")
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26709-6'
+# END fix for 'ensure_gpgcheck_globally_activated'
+
+###############################################################################
+# BEGIN fix (63 / 93) for 'security_patches_up_to_date'
+###############################################################################
+(>&2 echo "Remediating rule 63/93: 'security_patches_up_to_date'")
+
+
+yum -y update
+# END fix for 'security_patches_up_to_date'
+
+###############################################################################
+# BEGIN fix (64 / 93) for 'ensure_redhat_gpgkey_installed'
+###############################################################################
+(>&2 echo "Remediating rule 64/93: 'ensure_redhat_gpgkey_installed'")
+# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
+readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
+readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
+
+# Location of the key we would like to import (once it's integrity verified)
+readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
+
+RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
+
+# Verify /etc/pki/rpm-gpg directory permissions are safe
+if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
+then
+  # If they are safe, try to obtain fingerprints from the key file
+  # (to ensure there won't be e.g. CRC error).
+
+  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
+
+  GPG_RESULT=$?
+  # No CRC error, safe to proceed
+  if [ "${GPG_RESULT}" -eq "0" ]
+  then
+    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
+      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
+      rpm --import "${REDHAT_RELEASE_KEY}"
+    }
+  fi
+fi
+# END fix for 'ensure_redhat_gpgkey_installed'
+
+###############################################################################
+# BEGIN fix (65 / 93) for 'ensure_gpgcheck_never_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 65/93: 'ensure_gpgcheck_never_disabled'")
+sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
+# END fix for 'ensure_gpgcheck_never_disabled'
 
 ###############################################################################
 # BEGIN fix (66 / 93) for 'package_rsh-server_removed'
@@ -1409,9 +1380,59 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_k
 # END fix for 'sshd_set_keepalive'
 
 ###############################################################################
-# BEGIN fix (87 / 93) for 'sshd_set_idle_timeout'
+# BEGIN fix (87 / 93) for 'sshd_enable_warning_banner'
 ###############################################################################
-(>&2 echo "Remediating rule 87/93: 'sshd_set_idle_timeout'")
+(>&2 echo "Remediating rule 87/93: 'sshd_enable_warning_banner'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_enable_warning_banner'
+
+###############################################################################
+# BEGIN fix (88 / 93) for 'sshd_allow_only_protocol2'
+###############################################################################
+(>&2 echo "Remediating rule 88/93: 'sshd_allow_only_protocol2'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_allow_only_protocol2'
+
+###############################################################################
+# BEGIN fix (89 / 93) for 'sshd_set_idle_timeout'
+###############################################################################
+(>&2 echo "Remediating rule 89/93: 'sshd_set_idle_timeout'")
 
 sshd_idle_timeout_value="300"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -1495,34 +1516,9 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeo
 # END fix for 'sshd_set_idle_timeout'
 
 ###############################################################################
-# BEGIN fix (88 / 93) for 'sshd_enable_warning_banner'
+# BEGIN fix (90 / 93) for 'sshd_do_not_permit_user_env'
 ###############################################################################
-(>&2 echo "Remediating rule 88/93: 'sshd_enable_warning_banner'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_enable_warning_banner'
-
-###############################################################################
-# BEGIN fix (89 / 93) for 'sshd_do_not_permit_user_env'
-###############################################################################
-(>&2 echo "Remediating rule 89/93: 'sshd_do_not_permit_user_env'")
+(>&2 echo "Remediating rule 90/93: 'sshd_do_not_permit_user_env'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -1534,40 +1530,15 @@ line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C s
 if [ -z "$line_number" ]; then
     # There was no match of '^Match', insert at
     # the end of the file.
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
 else
     head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
     tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
 fi
 # Clean up after ourselves.
 rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_do_not_permit_user_env'
-
-###############################################################################
-# BEGIN fix (90 / 93) for 'sshd_allow_only_protocol2'
-###############################################################################
-(>&2 echo "Remediating rule 90/93: 'sshd_allow_only_protocol2'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_allow_only_protocol2'
 
 ###############################################################################
 # BEGIN fix (91 / 93) for 'sshd_use_approved_ciphers'

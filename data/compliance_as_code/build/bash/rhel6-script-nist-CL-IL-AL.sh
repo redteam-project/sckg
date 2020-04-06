@@ -8,7 +8,7 @@
 # on security controls to meet low confidentiality, low integrity, and low assurance.
 #
 # Benchmark ID:  RHEL-6
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -24,358 +24,9 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 270) for 'partition_for_home'
+# BEGIN fix (1 / 270) for 'package_rsyslog_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 1/270: 'partition_for_home'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
-# END fix for 'partition_for_home'
-
-###############################################################################
-# BEGIN fix (2 / 270) for 'partition_for_var'
-###############################################################################
-(>&2 echo "Remediating rule 2/270: 'partition_for_var'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
-# END fix for 'partition_for_var'
-
-###############################################################################
-# BEGIN fix (3 / 270) for 'partition_for_tmp'
-###############################################################################
-(>&2 echo "Remediating rule 3/270: 'partition_for_tmp'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
-# END fix for 'partition_for_tmp'
-
-###############################################################################
-# BEGIN fix (4 / 270) for 'partition_for_var_log_audit'
-###############################################################################
-(>&2 echo "Remediating rule 4/270: 'partition_for_var_log_audit'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
-# END fix for 'partition_for_var_log_audit'
-
-###############################################################################
-# BEGIN fix (5 / 270) for 'partition_for_var_log'
-###############################################################################
-(>&2 echo "Remediating rule 5/270: 'partition_for_var_log'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
-# END fix for 'partition_for_var_log'
-
-###############################################################################
-# BEGIN fix (6 / 270) for 'disable_prelink'
-###############################################################################
-(>&2 echo "Remediating rule 6/270: 'disable_prelink'")
-# prelink not installed
-if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
-    return 0
-fi
-
-if grep -q ^PRELINKING /etc/sysconfig/prelink
-then
-    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
-else
-    printf '\n' >> /etc/sysconfig/prelink
-    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' >> /etc/sysconfig/prelink
-fi
-
-# Undo previous prelink changes to binaries if prelink is available.
-if test -x /usr/sbin/prelink; then
-    /usr/sbin/prelink -ua
-fi
-# END fix for 'disable_prelink'
-
-###############################################################################
-# BEGIN fix (7 / 270) for 'rpm_verify_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 7/270: 'rpm_verify_permissions'")
-
-# Declare array to hold set of RPM packages we need to correct permissions for
-declare -A SETPERMS_RPM_DICT
-
-# Create a list of files on the system having permissions different from what
-# is expected by the RPM database
-readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
-
-for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
-do
-	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
-	# Use an associative array to store packages as it's keys, not having to care about duplicates.
-	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
-done
-
-# For each of the RPM packages left in the list -- reset its permissions to the
-# correct values
-for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
-do
-	rpm --setperms "${RPM_PACKAGE}"
-done
-# END fix for 'rpm_verify_permissions'
-
-###############################################################################
-# BEGIN fix (8 / 270) for 'rpm_verify_hashes'
-###############################################################################
-(>&2 echo "Remediating rule 8/270: 'rpm_verify_hashes'")
-
-# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
-files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
-# From files names get package names and change newline to space, because rpm writes each package to new line
-packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
-
-yum reinstall -y $packages_to_reinstall
-# END fix for 'rpm_verify_hashes'
-
-###############################################################################
-# BEGIN fix (9 / 270) for 'package_aide_installed'
-###############################################################################
-(>&2 echo "Remediating rule 9/270: 'package_aide_installed'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-# END fix for 'package_aide_installed'
-
-###############################################################################
-# BEGIN fix (10 / 270) for 'aide_periodic_cron_checking'
-###############################################################################
-(>&2 echo "Remediating rule 10/270: 'aide_periodic_cron_checking'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-
-if ! grep -q "/usr/sbin/aide --check" /etc/crontab ; then
-    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
-fi
-# END fix for 'aide_periodic_cron_checking'
-
-###############################################################################
-# BEGIN fix (11 / 270) for 'aide_build_database'
-###############################################################################
-(>&2 echo "Remediating rule 11/270: 'aide_build_database'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-
-/usr/sbin/aide --init
-/bin/cp -p /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
-# END fix for 'aide_build_database'
-
-###############################################################################
-# BEGIN fix (12 / 270) for 'ensure_gpgcheck_globally_activated'
-###############################################################################
-(>&2 echo "Remediating rule 12/270: 'ensure_gpgcheck_globally_activated'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26709-6'
-# END fix for 'ensure_gpgcheck_globally_activated'
-
-###############################################################################
-# BEGIN fix (13 / 270) for 'security_patches_up_to_date'
-###############################################################################
-(>&2 echo "Remediating rule 13/270: 'security_patches_up_to_date'")
-yum -y update
-# END fix for 'security_patches_up_to_date'
-
-###############################################################################
-# BEGIN fix (14 / 270) for 'ensure_redhat_gpgkey_installed'
-###############################################################################
-(>&2 echo "Remediating rule 14/270: 'ensure_redhat_gpgkey_installed'")
-# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
-readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
-readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
-
-# Location of the key we would like to import (once it's integrity verified)
-readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
-
-RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
-
-# Verify /etc/pki/rpm-gpg directory permissions are safe
-if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
-then
-  # If they are safe, try to obtain fingerprints from the key file
-  # (to ensure there won't be e.g. CRC error).
-
-  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
-
-  GPG_RESULT=$?
-  # No CRC error, safe to proceed
-  if [ "${GPG_RESULT}" -eq "0" ]
-  then
-    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
-      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
-      rpm --import "${REDHAT_RELEASE_KEY}"
-    }
-  fi
-fi
-# END fix for 'ensure_redhat_gpgkey_installed'
-
-###############################################################################
-# BEGIN fix (15 / 270) for 'ensure_gpgcheck_never_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 15/270: 'ensure_gpgcheck_never_disabled'")
-sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
-# END fix for 'ensure_gpgcheck_never_disabled'
-
-###############################################################################
-# BEGIN fix (16 / 270) for 'gconf_gnome_screensaver_mode_blank'
-###############################################################################
-(>&2 echo "Remediating rule 16/270: 'gconf_gnome_screensaver_mode_blank'")
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Set the screensaver mode in the GNOME desktop to a blank screen
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type string \
-            --set /apps/gnome-screensaver/mode blank-only
-# END fix for 'gconf_gnome_screensaver_mode_blank'
-
-###############################################################################
-# BEGIN fix (17 / 270) for 'gconf_gnome_screensaver_lock_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 17/270: 'gconf_gnome_screensaver_lock_enabled'")
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Set the screensaver locking activation in the GNOME desktop when the
-# screensaver is activated
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type bool \
-            --set /apps/gnome-screensaver/lock_enabled true
-# END fix for 'gconf_gnome_screensaver_lock_enabled'
-
-###############################################################################
-# BEGIN fix (18 / 270) for 'gconf_gnome_screensaver_idle_activation_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 18/270: 'gconf_gnome_screensaver_idle_activation_enabled'")
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Set the screensaver activation in the GNOME desktop after a period of inactivity
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type bool \
-            --set /apps/gnome-screensaver/idle_activation_enabled true
-# END fix for 'gconf_gnome_screensaver_idle_activation_enabled'
-
-###############################################################################
-# BEGIN fix (19 / 270) for 'gconf_gnome_screensaver_idle_delay'
-###############################################################################
-(>&2 echo "Remediating rule 19/270: 'gconf_gnome_screensaver_idle_delay'")
-
-inactivity_timeout_value="900"
-
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Set the idle time-out value for inactivity in the GNOME desktop to meet the
-# requirement
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type int \
-            --set /desktop/gnome/session/idle_delay ${inactivity_timeout_value}
-# END fix for 'gconf_gnome_screensaver_idle_delay'
-
-###############################################################################
-# BEGIN fix (20 / 270) for 'gconf_gnome_disable_automount'
-###############################################################################
-(>&2 echo "Remediating rule 20/270: 'gconf_gnome_disable_automount'")
-(>&2 echo "FIX FOR THIS RULE 'gconf_gnome_disable_automount' IS MISSING!")
-# END fix for 'gconf_gnome_disable_automount'
-
-###############################################################################
-# BEGIN fix (21 / 270) for 'gconf_gnome_disable_thumbnailers'
-###############################################################################
-(>&2 echo "Remediating rule 21/270: 'gconf_gnome_disable_thumbnailers'")
-(>&2 echo "FIX FOR THIS RULE 'gconf_gnome_disable_thumbnailers' IS MISSING!")
-# END fix for 'gconf_gnome_disable_thumbnailers'
-
-###############################################################################
-# BEGIN fix (22 / 270) for 'package_rsyslog_installed'
-###############################################################################
-(>&2 echo "Remediating rule 22/270: 'package_rsyslog_installed'")
+(>&2 echo "Remediating rule 1/270: 'package_rsyslog_installed'")
 
 if ! rpm -q --quiet "rsyslog" ; then
     yum install -y "rsyslog"
@@ -383,18 +34,18 @@ fi
 # END fix for 'package_rsyslog_installed'
 
 ###############################################################################
-# BEGIN fix (23 / 270) for 'service_rsyslog_enabled'
+# BEGIN fix (2 / 270) for 'service_rsyslog_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 23/270: 'service_rsyslog_enabled'")
+(>&2 echo "Remediating rule 2/270: 'service_rsyslog_enabled'")
 
 /sbin/service 'rsyslog' start
 /sbin/chkconfig --level 0123456 'rsyslog' on
 # END fix for 'service_rsyslog_enabled'
 
 ###############################################################################
-# BEGIN fix (24 / 270) for 'rsyslog_remote_loghost'
+# BEGIN fix (3 / 270) for 'rsyslog_remote_loghost'
 ###############################################################################
-(>&2 echo "Remediating rule 24/270: 'rsyslog_remote_loghost'")
+(>&2 echo "Remediating rule 3/270: 'rsyslog_remote_loghost'")
 
 rsyslog_remote_loghost_address="logcollector"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -478,23 +129,44 @@ replace_or_append '/etc/rsyslog.conf' '^\*\.\*' "@@$rsyslog_remote_loghost_addre
 # END fix for 'rsyslog_remote_loghost'
 
 ###############################################################################
-# BEGIN fix (25 / 270) for 'rsyslog_files_ownership'
+# BEGIN fix (4 / 270) for 'ensure_logrotate_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 25/270: 'rsyslog_files_ownership'")
-(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_ownership' IS MISSING!")
-# END fix for 'rsyslog_files_ownership'
+(>&2 echo "Remediating rule 4/270: 'ensure_logrotate_activated'")
+
+LOGROTATE_CONF_FILE="/etc/logrotate.conf"
+CRON_DAILY_LOGROTATE_FILE="/etc/cron.daily/logrotate"
+
+# daily rotation is configured
+grep -q "^daily$" $LOGROTATE_CONF_FILE|| echo "daily" >> $LOGROTATE_CONF_FILE
+
+# remove any line configuring weekly, monthly or yearly rotation
+sed -i -r "/^(weekly|monthly|yearly)$/d" $LOGROTATE_CONF_FILE
+
+# configure cron.daily if not already
+if ! grep -q "^[[:space:]]*/usr/sbin/logrotate[[:alnum:][:blank:][:punct:]]*$LOGROTATE_CONF_FILE$" $CRON_DAILY_LOGROTATE_FILE; then
+	echo "#!/bin/sh" > $CRON_DAILY_LOGROTATE_FILE
+	echo "/usr/sbin/logrotate $LOGROTATE_CONF_FILE" >> $CRON_DAILY_LOGROTATE_FILE
+fi
+# END fix for 'ensure_logrotate_activated'
 
 ###############################################################################
-# BEGIN fix (26 / 270) for 'rsyslog_files_groupownership'
+# BEGIN fix (5 / 270) for 'rsyslog_files_groupownership'
 ###############################################################################
-(>&2 echo "Remediating rule 26/270: 'rsyslog_files_groupownership'")
+(>&2 echo "Remediating rule 5/270: 'rsyslog_files_groupownership'")
 (>&2 echo "FIX FOR THIS RULE 'rsyslog_files_groupownership' IS MISSING!")
 # END fix for 'rsyslog_files_groupownership'
 
 ###############################################################################
-# BEGIN fix (27 / 270) for 'rsyslog_files_permissions'
+# BEGIN fix (6 / 270) for 'rsyslog_files_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 27/270: 'rsyslog_files_permissions'")
+(>&2 echo "Remediating rule 6/270: 'rsyslog_files_ownership'")
+(>&2 echo "FIX FOR THIS RULE 'rsyslog_files_ownership' IS MISSING!")
+# END fix for 'rsyslog_files_ownership'
+
+###############################################################################
+# BEGIN fix (7 / 270) for 'rsyslog_files_permissions'
+###############################################################################
+(>&2 echo "Remediating rule 7/270: 'rsyslog_files_permissions'")
 
 # List of log file paths to be inspected for correct permissions
 # * Primarily inspect log file paths listed in /etc/rsyslog.conf
@@ -512,14 +184,21 @@ do
 	# From each of these files extract just particular log file path(s), thus:
 	# * Ignore lines starting with space (' '), comment ('#"), or variable syntax ('$') characters,
 	# * Ignore empty lines,
+	# * Strip quotes and closing brackets from paths.
+	# * Ignore paths that match /dev|/etc.*\.conf, as those are paths, but likely not log files
 	# * From the remaining valid rows select only fields constituting a log file path
 	# Text file column is understood to represent a log file path if and only if all of the following are met:
 	# * it contains at least one slash '/' character,
+	# * it is preceded by space
 	# * it doesn't contain space (' '), colon (':'), and semicolon (';') characters
 	# Search log file for path(s) only in case it exists!
 	if [[ -f "${LOG_FILE}" ]]
 	then
-		MATCHED_ITEMS=$(sed -e "/^[[:space:]|#|$]/d ; s/[^\/]*[[:space:]]*\([^:;[:space:]]*\)/\1/g ; /^$/d" "${LOG_FILE}")
+		NORMALIZED_CONFIG_FILE_LINES=$(sed -e "/^[[:space:]|#|$]/d" "${LOG_FILE}")
+		LINES_WITH_PATHS=$(grep '[^/]*\s\+\S*/\S\+' <<< "${NORMALIZED_CONFIG_FILE_LINES}")
+		FILTERED_PATHS=$(sed -e 's/[^\/]*[[:space:]]*\([^:;[:space:]]*\)/\1/g' <<< "${LINES_WITH_PATHS}")
+		CLEANED_PATHS=$(sed -e "s/[\"')]//g; /\\/etc.*\.conf/d; /\\/dev\\//d" <<< "${FILTERED_PATHS}")
+		MATCHED_ITEMS=$(sed -e "/^$/d" <<< "${CLEANED_PATHS}")
 		# Since above sed command might return more than one item (delimited by newline), split the particular
 		# matches entries into new array specific for this log file
 		readarray -t ARRAY_FOR_LOG_FILE <<< "$MATCHED_ITEMS"
@@ -559,7 +238,7 @@ do
 	
 
 	# Also for each log file check if its permissions differ from 600. If so, correct them
-	if [ "$(/usr/bin/stat -c %a "$LOG_FILE_PATH")" -ne 600 ]
+	if [ -f "$LOG_FILE_PATH" ] && [ "$(/usr/bin/stat -c %a "$LOG_FILE_PATH")" -ne 600 ]
 	then
 		/bin/chmod 600 "$LOG_FILE_PATH"
 	fi
@@ -567,44 +246,109 @@ done
 # END fix for 'rsyslog_files_permissions'
 
 ###############################################################################
-# BEGIN fix (28 / 270) for 'ensure_logrotate_activated'
+# BEGIN fix (8 / 270) for 'network_sniffer_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 28/270: 'ensure_logrotate_activated'")
-
-LOGROTATE_CONF_FILE="/etc/logrotate.conf"
-CRON_DAILY_LOGROTATE_FILE="/etc/cron.daily/logrotate"
-
-# daily rotation is configured
-grep -q "^daily$" $LOGROTATE_CONF_FILE|| echo "daily" >> $LOGROTATE_CONF_FILE
-
-# remove any line configuring weekly, monthly or yearly rotation
-sed -i -r "/^(weekly|monthly|yearly)$/d" $LOGROTATE_CONF_FILE
-
-# configure cron.daily if not already
-if ! grep -q "^[[:space:]]*/usr/sbin/logrotate[[:alnum:][:blank:][:punct:]]*$LOGROTATE_CONF_FILE$" $CRON_DAILY_LOGROTATE_FILE; then
-	echo "#!/bin/sh" > $CRON_DAILY_LOGROTATE_FILE
-	echo "/usr/sbin/logrotate $LOGROTATE_CONF_FILE" >> $CRON_DAILY_LOGROTATE_FILE
-fi
-# END fix for 'ensure_logrotate_activated'
-
-###############################################################################
-# BEGIN fix (29 / 270) for 'network_sniffer_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 29/270: 'network_sniffer_disabled'")
+(>&2 echo "Remediating rule 8/270: 'network_sniffer_disabled'")
 (>&2 echo "FIX FOR THIS RULE 'network_sniffer_disabled' IS MISSING!")
 # END fix for 'network_sniffer_disabled'
 
 ###############################################################################
-# BEGIN fix (30 / 270) for 'network_disable_zeroconf'
+# BEGIN fix (9 / 270) for 'network_disable_zeroconf'
 ###############################################################################
-(>&2 echo "Remediating rule 30/270: 'network_disable_zeroconf'")
+(>&2 echo "Remediating rule 9/270: 'network_disable_zeroconf'")
 echo "NOZEROCONF=yes" >> /etc/sysconfig/network
 # END fix for 'network_disable_zeroconf'
 
 ###############################################################################
-# BEGIN fix (31 / 270) for 'sysctl_net_ipv6_conf_default_accept_ra'
+# BEGIN fix (10 / 270) for 'service_ip6tables_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 31/270: 'sysctl_net_ipv6_conf_default_accept_ra'")
+(>&2 echo "Remediating rule 10/270: 'service_ip6tables_enabled'")
+
+/sbin/service 'ip6tables' start
+/sbin/chkconfig --level 0123456 'ip6tables' on
+# END fix for 'service_ip6tables_enabled'
+
+###############################################################################
+# BEGIN fix (11 / 270) for 'service_iptables_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 11/270: 'service_iptables_enabled'")
+
+/sbin/service 'iptables' start
+/sbin/chkconfig --level 0123456 'iptables' on
+# END fix for 'service_iptables_enabled'
+
+###############################################################################
+# BEGIN fix (12 / 270) for 'set_ip6tables_default_rule'
+###############################################################################
+(>&2 echo "Remediating rule 12/270: 'set_ip6tables_default_rule'")
+sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/ip6tables
+# END fix for 'set_ip6tables_default_rule'
+
+###############################################################################
+# BEGIN fix (13 / 270) for 'set_iptables_default_rule_forward'
+###############################################################################
+(>&2 echo "Remediating rule 13/270: 'set_iptables_default_rule_forward'")
+sed -i 's/^:FORWARD ACCEPT.*/:FORWARD DROP [0:0]/g' /etc/sysconfig/iptables
+# END fix for 'set_iptables_default_rule_forward'
+
+###############################################################################
+# BEGIN fix (14 / 270) for 'set_iptables_default_rule'
+###############################################################################
+(>&2 echo "Remediating rule 14/270: 'set_iptables_default_rule'")
+sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/iptables
+# END fix for 'set_iptables_default_rule'
+
+###############################################################################
+# BEGIN fix (15 / 270) for 'kernel_module_ipv6_option_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 15/270: 'kernel_module_ipv6_option_disabled'")
+
+# Prevent the IPv6 kernel module (ipv6) from loading the IPv6 networking stack
+echo "options ipv6 disable=1" > /etc/modprobe.d/ipv6.conf
+
+# Since according to: https://access.redhat.com/solutions/72733
+# "ipv6 disable=1" options doesn't always disable the IPv6 networking stack from
+# loading, instruct also sysctl configuration to disable IPv6 according to:
+# https://access.redhat.com/solutions/8709#rhel6disable
+
+declare -a IPV6_SETTINGS=("net.ipv6.conf.all.disable_ipv6" "net.ipv6.conf.default.disable_ipv6")
+
+for setting in "${IPV6_SETTINGS[@]}"
+do
+	# Set runtime =1 for setting
+	/sbin/sysctl -q -n -w "$setting=1"
+
+	# If setting is present in /etc/sysctl.conf, change value to "1"
+	# else, add "$setting = 1" to /etc/sysctl.conf
+	if grep -q ^"$setting" /etc/sysctl.conf ; then
+		sed -i "s/^$setting.*/$setting = 1/g" /etc/sysctl.conf
+	else
+		echo "" >> /etc/sysctl.conf
+		echo "# Set $setting = 1 per security requirements" >> /etc/sysctl.conf
+		echo "$setting = 1" >> /etc/sysctl.conf
+	fi
+done
+# END fix for 'kernel_module_ipv6_option_disabled'
+
+###############################################################################
+# BEGIN fix (16 / 270) for 'network_ipv6_disable_rpc'
+###############################################################################
+(>&2 echo "Remediating rule 16/270: 'network_ipv6_disable_rpc'")
+
+# Drop 'tcp6' and 'udp6' entries from /etc/netconfig to prevent RPC
+# services for NFSv4 from attempting to start IPv6 network listeners
+declare -a IPV6_RPC_ENTRIES=("tcp6" "udp6")
+
+for rpc_entry in "${IPV6_RPC_ENTRIES[@]}"
+do
+	sed -i "/^${rpc_entry}[[:space:]]\\+tpi\\_.*inet6.*/d" /etc/netconfig
+done
+# END fix for 'network_ipv6_disable_rpc'
+
+###############################################################################
+# BEGIN fix (17 / 270) for 'sysctl_net_ipv6_conf_default_accept_ra'
+###############################################################################
+(>&2 echo "Remediating rule 17/270: 'sysctl_net_ipv6_conf_default_accept_ra'")
 
 sysctl_net_ipv6_conf_default_accept_ra_value="0"
 
@@ -698,9 +442,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.default.accept_ra' "$sysctl
 # END fix for 'sysctl_net_ipv6_conf_default_accept_ra'
 
 ###############################################################################
-# BEGIN fix (32 / 270) for 'sysctl_net_ipv6_conf_default_accept_redirects'
+# BEGIN fix (18 / 270) for 'sysctl_net_ipv6_conf_default_accept_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 32/270: 'sysctl_net_ipv6_conf_default_accept_redirects'")
+(>&2 echo "Remediating rule 18/270: 'sysctl_net_ipv6_conf_default_accept_redirects'")
 
 sysctl_net_ipv6_conf_default_accept_redirects_value="0"
 
@@ -794,95 +538,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv6.conf.default.accept_redirects' "
 # END fix for 'sysctl_net_ipv6_conf_default_accept_redirects'
 
 ###############################################################################
-# BEGIN fix (33 / 270) for 'network_ipv6_disable_rpc'
+# BEGIN fix (19 / 270) for 'sysctl_net_ipv4_conf_default_accept_source_route'
 ###############################################################################
-(>&2 echo "Remediating rule 33/270: 'network_ipv6_disable_rpc'")
-
-# Drop 'tcp6' and 'udp6' entries from /etc/netconfig to prevent RPC
-# services for NFSv4 from attempting to start IPv6 network listeners
-declare -a IPV6_RPC_ENTRIES=("tcp6" "udp6")
-
-for rpc_entry in ${IPV6_RPC_ENTRIES[@]}
-do
-	sed -i "/^$rpc_entry[[:space:]]\+tpi\_.*inet6.*/d" /etc/netconfig
-done
-# END fix for 'network_ipv6_disable_rpc'
-
-###############################################################################
-# BEGIN fix (34 / 270) for 'kernel_module_ipv6_option_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 34/270: 'kernel_module_ipv6_option_disabled'")
-
-# Prevent the IPv6 kernel module (ipv6) from loading the IPv6 networking stack
-echo "options ipv6 disable=1" > /etc/modprobe.d/ipv6.conf
-
-# Since according to: https://access.redhat.com/solutions/72733
-# "ipv6 disable=1" options doesn't always disable the IPv6 networking stack from
-# loading, instruct also sysctl configuration to disable IPv6 according to:
-# https://access.redhat.com/solutions/8709#rhel6disable
-
-declare -a IPV6_SETTINGS=("net.ipv6.conf.all.disable_ipv6" "net.ipv6.conf.default.disable_ipv6")
-
-for setting in ${IPV6_SETTINGS[@]}
-do
-	# Set runtime =1 for setting
-	/sbin/sysctl -q -n -w "$setting=1"
-
-	# If setting is present in /etc/sysctl.conf, change value to "1"
-	# else, add "$setting = 1" to /etc/sysctl.conf
-	if grep -q ^"$setting" /etc/sysctl.conf ; then
-		sed -i "s/^$setting.*/$setting = 1/g" /etc/sysctl.conf
-	else
-		echo "" >> /etc/sysctl.conf
-		echo "# Set $setting = 1 per security requirements" >> /etc/sysctl.conf
-		echo "$setting = 1" >> /etc/sysctl.conf
-	fi
-done
-# END fix for 'kernel_module_ipv6_option_disabled'
-
-###############################################################################
-# BEGIN fix (35 / 270) for 'service_ip6tables_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 35/270: 'service_ip6tables_enabled'")
-
-/sbin/service 'ip6tables' start
-/sbin/chkconfig --level 0123456 'ip6tables' on
-# END fix for 'service_ip6tables_enabled'
-
-###############################################################################
-# BEGIN fix (36 / 270) for 'service_iptables_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 36/270: 'service_iptables_enabled'")
-
-/sbin/service 'iptables' start
-/sbin/chkconfig --level 0123456 'iptables' on
-# END fix for 'service_iptables_enabled'
-
-###############################################################################
-# BEGIN fix (37 / 270) for 'set_ip6tables_default_rule'
-###############################################################################
-(>&2 echo "Remediating rule 37/270: 'set_ip6tables_default_rule'")
-sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/ip6tables
-# END fix for 'set_ip6tables_default_rule'
-
-###############################################################################
-# BEGIN fix (38 / 270) for 'set_iptables_default_rule_forward'
-###############################################################################
-(>&2 echo "Remediating rule 38/270: 'set_iptables_default_rule_forward'")
-sed -i 's/^:FORWARD ACCEPT.*/:FORWARD DROP [0:0]/g' /etc/sysconfig/iptables
-# END fix for 'set_iptables_default_rule_forward'
-
-###############################################################################
-# BEGIN fix (39 / 270) for 'set_iptables_default_rule'
-###############################################################################
-(>&2 echo "Remediating rule 39/270: 'set_iptables_default_rule'")
-sed -i 's/^:INPUT ACCEPT.*/:INPUT DROP [0:0]/g' /etc/sysconfig/iptables
-# END fix for 'set_iptables_default_rule'
-
-###############################################################################
-# BEGIN fix (40 / 270) for 'sysctl_net_ipv4_conf_default_accept_source_route'
-###############################################################################
-(>&2 echo "Remediating rule 40/270: 'sysctl_net_ipv4_conf_default_accept_source_route'")
+(>&2 echo "Remediating rule 19/270: 'sysctl_net_ipv4_conf_default_accept_source_route'")
 
 sysctl_net_ipv4_conf_default_accept_source_route_value="0"
 
@@ -976,873 +634,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.accept_source_route
 # END fix for 'sysctl_net_ipv4_conf_default_accept_source_route'
 
 ###############################################################################
-# BEGIN fix (41 / 270) for 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'
+# BEGIN fix (20 / 270) for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
 ###############################################################################
-(>&2 echo "Remediating rule 41/270: 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'")
-
-sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value="1"
-
-#
-# Set runtime for net.ipv4.icmp_ignore_bogus_error_responses
-#
-/sbin/sysctl -q -n -w net.ipv4.icmp_ignore_bogus_error_responses="$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value"
-
-#
-# If net.ipv4.icmp_ignore_bogus_error_responses present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.icmp_ignore_bogus_error_responses = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.icmp_ignore_bogus_error_responses' "$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value" 'CCE-26993-6'
-# END fix for 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'
-
-###############################################################################
-# BEGIN fix (42 / 270) for 'sysctl_net_ipv4_conf_default_accept_redirects'
-###############################################################################
-(>&2 echo "Remediating rule 42/270: 'sysctl_net_ipv4_conf_default_accept_redirects'")
-
-sysctl_net_ipv4_conf_default_accept_redirects_value="0"
-
-#
-# Set runtime for net.ipv4.conf.default.accept_redirects
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.default.accept_redirects="$sysctl_net_ipv4_conf_default_accept_redirects_value"
-
-#
-# If net.ipv4.conf.default.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.default.accept_redirects = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.accept_redirects' "$sysctl_net_ipv4_conf_default_accept_redirects_value" 'CCE-27015-7'
-# END fix for 'sysctl_net_ipv4_conf_default_accept_redirects'
-
-###############################################################################
-# BEGIN fix (43 / 270) for 'sysctl_net_ipv4_conf_default_rp_filter'
-###############################################################################
-(>&2 echo "Remediating rule 43/270: 'sysctl_net_ipv4_conf_default_rp_filter'")
-
-sysctl_net_ipv4_conf_default_rp_filter_value="1"
-
-#
-# Set runtime for net.ipv4.conf.default.rp_filter
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.default.rp_filter="$sysctl_net_ipv4_conf_default_rp_filter_value"
-
-#
-# If net.ipv4.conf.default.rp_filter present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.default.rp_filter = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.rp_filter' "$sysctl_net_ipv4_conf_default_rp_filter_value" 'CCE-26915-9'
-# END fix for 'sysctl_net_ipv4_conf_default_rp_filter'
-
-###############################################################################
-# BEGIN fix (44 / 270) for 'sysctl_net_ipv4_conf_all_secure_redirects'
-###############################################################################
-(>&2 echo "Remediating rule 44/270: 'sysctl_net_ipv4_conf_all_secure_redirects'")
-
-sysctl_net_ipv4_conf_all_secure_redirects_value="1"
-
-#
-# Set runtime for net.ipv4.conf.all.secure_redirects
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.all.secure_redirects="$sysctl_net_ipv4_conf_all_secure_redirects_value"
-
-#
-# If net.ipv4.conf.all.secure_redirects present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.all.secure_redirects = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.secure_redirects' "$sysctl_net_ipv4_conf_all_secure_redirects_value" 'CCE-26854-0'
-# END fix for 'sysctl_net_ipv4_conf_all_secure_redirects'
-
-###############################################################################
-# BEGIN fix (45 / 270) for 'sysctl_net_ipv4_conf_all_accept_source_route'
-###############################################################################
-(>&2 echo "Remediating rule 45/270: 'sysctl_net_ipv4_conf_all_accept_source_route'")
-
-sysctl_net_ipv4_conf_all_accept_source_route_value="0"
-
-#
-# Set runtime for net.ipv4.conf.all.accept_source_route
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_source_route="$sysctl_net_ipv4_conf_all_accept_source_route_value"
-
-#
-# If net.ipv4.conf.all.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.all.accept_source_route = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_source_route' "$sysctl_net_ipv4_conf_all_accept_source_route_value" 'CCE-27037-1'
-# END fix for 'sysctl_net_ipv4_conf_all_accept_source_route'
-
-###############################################################################
-# BEGIN fix (46 / 270) for 'sysctl_net_ipv4_tcp_syncookies'
-###############################################################################
-(>&2 echo "Remediating rule 46/270: 'sysctl_net_ipv4_tcp_syncookies'")
-
-sysctl_net_ipv4_tcp_syncookies_value="1"
-
-#
-# Set runtime for net.ipv4.tcp_syncookies
-#
-/sbin/sysctl -q -n -w net.ipv4.tcp_syncookies="$sysctl_net_ipv4_tcp_syncookies_value"
-
-#
-# If net.ipv4.tcp_syncookies present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.tcp_syncookies = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.tcp_syncookies' "$sysctl_net_ipv4_tcp_syncookies_value" 'CCE-27053-8'
-# END fix for 'sysctl_net_ipv4_tcp_syncookies'
-
-###############################################################################
-# BEGIN fix (47 / 270) for 'sysctl_net_ipv4_conf_all_accept_redirects'
-###############################################################################
-(>&2 echo "Remediating rule 47/270: 'sysctl_net_ipv4_conf_all_accept_redirects'")
-
-sysctl_net_ipv4_conf_all_accept_redirects_value="0"
-
-#
-# Set runtime for net.ipv4.conf.all.accept_redirects
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_redirects="$sysctl_net_ipv4_conf_all_accept_redirects_value"
-
-#
-# If net.ipv4.conf.all.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.all.accept_redirects = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_redirects' "$sysctl_net_ipv4_conf_all_accept_redirects_value" 'CCE-27027-2'
-# END fix for 'sysctl_net_ipv4_conf_all_accept_redirects'
-
-###############################################################################
-# BEGIN fix (48 / 270) for 'sysctl_net_ipv4_conf_all_log_martians'
-###############################################################################
-(>&2 echo "Remediating rule 48/270: 'sysctl_net_ipv4_conf_all_log_martians'")
-
-sysctl_net_ipv4_conf_all_log_martians_value="1"
-
-#
-# Set runtime for net.ipv4.conf.all.log_martians
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.all.log_martians="$sysctl_net_ipv4_conf_all_log_martians_value"
-
-#
-# If net.ipv4.conf.all.log_martians present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.all.log_martians = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.log_martians' "$sysctl_net_ipv4_conf_all_log_martians_value" 'CCE-27066-0'
-# END fix for 'sysctl_net_ipv4_conf_all_log_martians'
-
-###############################################################################
-# BEGIN fix (49 / 270) for 'sysctl_net_ipv4_conf_all_rp_filter'
-###############################################################################
-(>&2 echo "Remediating rule 49/270: 'sysctl_net_ipv4_conf_all_rp_filter'")
-
-sysctl_net_ipv4_conf_all_rp_filter_value="1"
-
-#
-# Set runtime for net.ipv4.conf.all.rp_filter
-#
-/sbin/sysctl -q -n -w net.ipv4.conf.all.rp_filter="$sysctl_net_ipv4_conf_all_rp_filter_value"
-
-#
-# If net.ipv4.conf.all.rp_filter present in /etc/sysctl.conf, change value to appropriate value
-#	else, add "net.ipv4.conf.all.rp_filter = value" to /etc/sysctl.conf
-#
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.rp_filter' "$sysctl_net_ipv4_conf_all_rp_filter_value" 'CCE-26979-5'
-# END fix for 'sysctl_net_ipv4_conf_all_rp_filter'
-
-###############################################################################
-# BEGIN fix (50 / 270) for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
-###############################################################################
-(>&2 echo "Remediating rule 50/270: 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'")
+(>&2 echo "Remediating rule 20/270: 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'")
 
 sysctl_net_ipv4_icmp_echo_ignore_broadcasts_value="1"
 
@@ -1936,9 +730,681 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.icmp_echo_ignore_broadcasts' "$s
 # END fix for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
 
 ###############################################################################
-# BEGIN fix (51 / 270) for 'sysctl_net_ipv4_conf_default_secure_redirects'
+# BEGIN fix (21 / 270) for 'sysctl_net_ipv4_conf_default_accept_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 51/270: 'sysctl_net_ipv4_conf_default_secure_redirects'")
+(>&2 echo "Remediating rule 21/270: 'sysctl_net_ipv4_conf_default_accept_redirects'")
+
+sysctl_net_ipv4_conf_default_accept_redirects_value="0"
+
+#
+# Set runtime for net.ipv4.conf.default.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.accept_redirects="$sysctl_net_ipv4_conf_default_accept_redirects_value"
+
+#
+# If net.ipv4.conf.default.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.accept_redirects = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.accept_redirects' "$sysctl_net_ipv4_conf_default_accept_redirects_value" 'CCE-27015-7'
+# END fix for 'sysctl_net_ipv4_conf_default_accept_redirects'
+
+###############################################################################
+# BEGIN fix (22 / 270) for 'sysctl_net_ipv4_conf_default_rp_filter'
+###############################################################################
+(>&2 echo "Remediating rule 22/270: 'sysctl_net_ipv4_conf_default_rp_filter'")
+
+sysctl_net_ipv4_conf_default_rp_filter_value="1"
+
+#
+# Set runtime for net.ipv4.conf.default.rp_filter
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.default.rp_filter="$sysctl_net_ipv4_conf_default_rp_filter_value"
+
+#
+# If net.ipv4.conf.default.rp_filter present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.default.rp_filter = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.rp_filter' "$sysctl_net_ipv4_conf_default_rp_filter_value" 'CCE-26915-9'
+# END fix for 'sysctl_net_ipv4_conf_default_rp_filter'
+
+###############################################################################
+# BEGIN fix (23 / 270) for 'sysctl_net_ipv4_conf_all_secure_redirects'
+###############################################################################
+(>&2 echo "Remediating rule 23/270: 'sysctl_net_ipv4_conf_all_secure_redirects'")
+
+sysctl_net_ipv4_conf_all_secure_redirects_value="1"
+
+#
+# Set runtime for net.ipv4.conf.all.secure_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.secure_redirects="$sysctl_net_ipv4_conf_all_secure_redirects_value"
+
+#
+# If net.ipv4.conf.all.secure_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.secure_redirects = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.secure_redirects' "$sysctl_net_ipv4_conf_all_secure_redirects_value" 'CCE-26854-0'
+# END fix for 'sysctl_net_ipv4_conf_all_secure_redirects'
+
+###############################################################################
+# BEGIN fix (24 / 270) for 'sysctl_net_ipv4_conf_all_accept_source_route'
+###############################################################################
+(>&2 echo "Remediating rule 24/270: 'sysctl_net_ipv4_conf_all_accept_source_route'")
+
+sysctl_net_ipv4_conf_all_accept_source_route_value="0"
+
+#
+# Set runtime for net.ipv4.conf.all.accept_source_route
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_source_route="$sysctl_net_ipv4_conf_all_accept_source_route_value"
+
+#
+# If net.ipv4.conf.all.accept_source_route present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.accept_source_route = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_source_route' "$sysctl_net_ipv4_conf_all_accept_source_route_value" 'CCE-27037-1'
+# END fix for 'sysctl_net_ipv4_conf_all_accept_source_route'
+
+###############################################################################
+# BEGIN fix (25 / 270) for 'sysctl_net_ipv4_conf_all_accept_redirects'
+###############################################################################
+(>&2 echo "Remediating rule 25/270: 'sysctl_net_ipv4_conf_all_accept_redirects'")
+
+sysctl_net_ipv4_conf_all_accept_redirects_value="0"
+
+#
+# Set runtime for net.ipv4.conf.all.accept_redirects
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.accept_redirects="$sysctl_net_ipv4_conf_all_accept_redirects_value"
+
+#
+# If net.ipv4.conf.all.accept_redirects present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.accept_redirects = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.accept_redirects' "$sysctl_net_ipv4_conf_all_accept_redirects_value" 'CCE-27027-2'
+# END fix for 'sysctl_net_ipv4_conf_all_accept_redirects'
+
+###############################################################################
+# BEGIN fix (26 / 270) for 'sysctl_net_ipv4_conf_all_log_martians'
+###############################################################################
+(>&2 echo "Remediating rule 26/270: 'sysctl_net_ipv4_conf_all_log_martians'")
+
+sysctl_net_ipv4_conf_all_log_martians_value="1"
+
+#
+# Set runtime for net.ipv4.conf.all.log_martians
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.log_martians="$sysctl_net_ipv4_conf_all_log_martians_value"
+
+#
+# If net.ipv4.conf.all.log_martians present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.log_martians = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.log_martians' "$sysctl_net_ipv4_conf_all_log_martians_value" 'CCE-27066-0'
+# END fix for 'sysctl_net_ipv4_conf_all_log_martians'
+
+###############################################################################
+# BEGIN fix (27 / 270) for 'sysctl_net_ipv4_conf_all_rp_filter'
+###############################################################################
+(>&2 echo "Remediating rule 27/270: 'sysctl_net_ipv4_conf_all_rp_filter'")
+
+sysctl_net_ipv4_conf_all_rp_filter_value="1"
+
+#
+# Set runtime for net.ipv4.conf.all.rp_filter
+#
+/sbin/sysctl -q -n -w net.ipv4.conf.all.rp_filter="$sysctl_net_ipv4_conf_all_rp_filter_value"
+
+#
+# If net.ipv4.conf.all.rp_filter present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.conf.all.rp_filter = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.rp_filter' "$sysctl_net_ipv4_conf_all_rp_filter_value" 'CCE-26979-5'
+# END fix for 'sysctl_net_ipv4_conf_all_rp_filter'
+
+###############################################################################
+# BEGIN fix (28 / 270) for 'sysctl_net_ipv4_conf_default_secure_redirects'
+###############################################################################
+(>&2 echo "Remediating rule 28/270: 'sysctl_net_ipv4_conf_default_secure_redirects'")
 
 sysctl_net_ipv4_conf_default_secure_redirects_value="1"
 
@@ -2032,9 +1498,201 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.secure_redirects' "
 # END fix for 'sysctl_net_ipv4_conf_default_secure_redirects'
 
 ###############################################################################
-# BEGIN fix (52 / 270) for 'sysctl_net_ipv4_ip_forward'
+# BEGIN fix (29 / 270) for 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'
 ###############################################################################
-(>&2 echo "Remediating rule 52/270: 'sysctl_net_ipv4_ip_forward'")
+(>&2 echo "Remediating rule 29/270: 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'")
+
+sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value="1"
+
+#
+# Set runtime for net.ipv4.icmp_ignore_bogus_error_responses
+#
+/sbin/sysctl -q -n -w net.ipv4.icmp_ignore_bogus_error_responses="$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value"
+
+#
+# If net.ipv4.icmp_ignore_bogus_error_responses present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.icmp_ignore_bogus_error_responses = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.icmp_ignore_bogus_error_responses' "$sysctl_net_ipv4_icmp_ignore_bogus_error_responses_value" 'CCE-26993-6'
+# END fix for 'sysctl_net_ipv4_icmp_ignore_bogus_error_responses'
+
+###############################################################################
+# BEGIN fix (30 / 270) for 'sysctl_net_ipv4_tcp_syncookies'
+###############################################################################
+(>&2 echo "Remediating rule 30/270: 'sysctl_net_ipv4_tcp_syncookies'")
+
+sysctl_net_ipv4_tcp_syncookies_value="1"
+
+#
+# Set runtime for net.ipv4.tcp_syncookies
+#
+/sbin/sysctl -q -n -w net.ipv4.tcp_syncookies="$sysctl_net_ipv4_tcp_syncookies_value"
+
+#
+# If net.ipv4.tcp_syncookies present in /etc/sysctl.conf, change value to appropriate value
+#	else, add "net.ipv4.tcp_syncookies = value" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^net.ipv4.tcp_syncookies' "$sysctl_net_ipv4_tcp_syncookies_value" 'CCE-27053-8'
+# END fix for 'sysctl_net_ipv4_tcp_syncookies'
+
+###############################################################################
+# BEGIN fix (31 / 270) for 'sysctl_net_ipv4_ip_forward'
+###############################################################################
+(>&2 echo "Remediating rule 31/270: 'sysctl_net_ipv4_ip_forward'")
 
 
 #
@@ -2127,9 +1785,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.ip_forward' "0" 'CCE-26866-4'
 # END fix for 'sysctl_net_ipv4_ip_forward'
 
 ###############################################################################
-# BEGIN fix (53 / 270) for 'sysctl_net_ipv4_conf_all_send_redirects'
+# BEGIN fix (32 / 270) for 'sysctl_net_ipv4_conf_all_send_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 53/270: 'sysctl_net_ipv4_conf_all_send_redirects'")
+(>&2 echo "Remediating rule 32/270: 'sysctl_net_ipv4_conf_all_send_redirects'")
 
 
 #
@@ -2222,9 +1880,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.all.send_redirects' "0" 'CC
 # END fix for 'sysctl_net_ipv4_conf_all_send_redirects'
 
 ###############################################################################
-# BEGIN fix (54 / 270) for 'sysctl_net_ipv4_conf_default_send_redirects'
+# BEGIN fix (33 / 270) for 'sysctl_net_ipv4_conf_default_send_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 54/270: 'sysctl_net_ipv4_conf_default_send_redirects'")
+(>&2 echo "Remediating rule 33/270: 'sysctl_net_ipv4_conf_default_send_redirects'")
 
 
 #
@@ -2317,9 +1975,9 @@ replace_or_append '/etc/sysctl.conf' '^net.ipv4.conf.default.send_redirects' "0"
 # END fix for 'sysctl_net_ipv4_conf_default_send_redirects'
 
 ###############################################################################
-# BEGIN fix (55 / 270) for 'kernel_module_dccp_disabled'
+# BEGIN fix (34 / 270) for 'kernel_module_dccp_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 55/270: 'kernel_module_dccp_disabled'")
+(>&2 echo "Remediating rule 34/270: 'kernel_module_dccp_disabled'")
 if LC_ALL=C grep -q -m 1 "^install dccp" /etc/modprobe.d/dccp.conf ; then
 	sed -i 's/^install dccp.*/install dccp /bin/true/g' /etc/modprobe.d/dccp.conf
 else
@@ -2329,9 +1987,9 @@ fi
 # END fix for 'kernel_module_dccp_disabled'
 
 ###############################################################################
-# BEGIN fix (56 / 270) for 'kernel_module_tipc_disabled'
+# BEGIN fix (35 / 270) for 'kernel_module_tipc_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 56/270: 'kernel_module_tipc_disabled'")
+(>&2 echo "Remediating rule 35/270: 'kernel_module_tipc_disabled'")
 if LC_ALL=C grep -q -m 1 "^install tipc" /etc/modprobe.d/tipc.conf ; then
 	sed -i 's/^install tipc.*/install tipc /bin/true/g' /etc/modprobe.d/tipc.conf
 else
@@ -2341,9 +1999,9 @@ fi
 # END fix for 'kernel_module_tipc_disabled'
 
 ###############################################################################
-# BEGIN fix (57 / 270) for 'kernel_module_sctp_disabled'
+# BEGIN fix (36 / 270) for 'kernel_module_sctp_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 57/270: 'kernel_module_sctp_disabled'")
+(>&2 echo "Remediating rule 36/270: 'kernel_module_sctp_disabled'")
 if LC_ALL=C grep -q -m 1 "^install sctp" /etc/modprobe.d/sctp.conf ; then
 	sed -i 's/^install sctp.*/install sctp /bin/true/g' /etc/modprobe.d/sctp.conf
 else
@@ -2353,9 +2011,9 @@ fi
 # END fix for 'kernel_module_sctp_disabled'
 
 ###############################################################################
-# BEGIN fix (58 / 270) for 'kernel_module_rds_disabled'
+# BEGIN fix (37 / 270) for 'kernel_module_rds_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 58/270: 'kernel_module_rds_disabled'")
+(>&2 echo "Remediating rule 37/270: 'kernel_module_rds_disabled'")
 if LC_ALL=C grep -q -m 1 "^install rds" /etc/modprobe.d/rds.conf ; then
 	sed -i 's/^install rds.*/install rds /bin/true/g' /etc/modprobe.d/rds.conf
 else
@@ -2365,18 +2023,18 @@ fi
 # END fix for 'kernel_module_rds_disabled'
 
 ###############################################################################
-# BEGIN fix (59 / 270) for 'service_bluetooth_disabled'
+# BEGIN fix (38 / 270) for 'service_bluetooth_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 59/270: 'service_bluetooth_disabled'")
+(>&2 echo "Remediating rule 38/270: 'service_bluetooth_disabled'")
 
 /sbin/service 'bluetooth' stop
 /sbin/chkconfig --level 0123456 'bluetooth' off
 # END fix for 'service_bluetooth_disabled'
 
 ###############################################################################
-# BEGIN fix (60 / 270) for 'kernel_module_bluetooth_disabled'
+# BEGIN fix (39 / 270) for 'kernel_module_bluetooth_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 60/270: 'kernel_module_bluetooth_disabled'")
+(>&2 echo "Remediating rule 39/270: 'kernel_module_bluetooth_disabled'")
 if LC_ALL=C grep -q -m 1 "^install bluetooth" /etc/modprobe.d/bluetooth.conf ; then
 	sed -i 's/^install bluetooth.*/install bluetooth /bin/true/g' /etc/modprobe.d/bluetooth.conf
 else
@@ -2386,40 +2044,40 @@ fi
 # END fix for 'kernel_module_bluetooth_disabled'
 
 ###############################################################################
-# BEGIN fix (61 / 270) for 'wireless_disable_in_bios'
+# BEGIN fix (40 / 270) for 'wireless_disable_in_bios'
 ###############################################################################
-(>&2 echo "Remediating rule 61/270: 'wireless_disable_in_bios'")
+(>&2 echo "Remediating rule 40/270: 'wireless_disable_in_bios'")
 (>&2 echo "FIX FOR THIS RULE 'wireless_disable_in_bios' IS MISSING!")
 # END fix for 'wireless_disable_in_bios'
 
 ###############################################################################
-# BEGIN fix (62 / 270) for 'wireless_disable_interfaces'
+# BEGIN fix (41 / 270) for 'wireless_disable_interfaces'
 ###############################################################################
-(>&2 echo "Remediating rule 62/270: 'wireless_disable_interfaces'")
+(>&2 echo "Remediating rule 41/270: 'wireless_disable_interfaces'")
 (>&2 echo "FIX FOR THIS RULE 'wireless_disable_interfaces' IS MISSING!")
 # END fix for 'wireless_disable_interfaces'
 
 ###############################################################################
-# BEGIN fix (63 / 270) for 'service_restorecond_enabled'
+# BEGIN fix (42 / 270) for 'service_restorecond_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 63/270: 'service_restorecond_enabled'")
+(>&2 echo "Remediating rule 42/270: 'service_restorecond_enabled'")
 
 /sbin/service 'restorecond' start
 /sbin/chkconfig --level 0123456 'restorecond' on
 # END fix for 'service_restorecond_enabled'
 
 ###############################################################################
-# BEGIN fix (64 / 270) for 'grub_legacy_enable_selinux'
+# BEGIN fix (43 / 270) for 'grub_legacy_enable_selinux'
 ###############################################################################
-(>&2 echo "Remediating rule 64/270: 'grub_legacy_enable_selinux'")
+(>&2 echo "Remediating rule 43/270: 'grub_legacy_enable_selinux'")
 sed -i --follow-symlinks "s/selinux=0//gI" /etc/grub.conf
 sed -i --follow-symlinks "s/enforcing=0//gI" /etc/grub.conf
 # END fix for 'grub_legacy_enable_selinux'
 
 ###############################################################################
-# BEGIN fix (65 / 270) for 'selinux_policytype'
+# BEGIN fix (44 / 270) for 'selinux_policytype'
 ###############################################################################
-(>&2 echo "Remediating rule 65/270: 'selinux_policytype'")
+(>&2 echo "Remediating rule 44/270: 'selinux_policytype'")
 
 var_selinux_policy_name="targeted"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -2503,23 +2161,23 @@ replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_n
 # END fix for 'selinux_policytype'
 
 ###############################################################################
-# BEGIN fix (66 / 270) for 'selinux_confinement_of_daemons'
+# BEGIN fix (45 / 270) for 'selinux_confinement_of_daemons'
 ###############################################################################
-(>&2 echo "Remediating rule 66/270: 'selinux_confinement_of_daemons'")
+(>&2 echo "Remediating rule 45/270: 'selinux_confinement_of_daemons'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_confinement_of_daemons' IS MISSING!")
 # END fix for 'selinux_confinement_of_daemons'
 
 ###############################################################################
-# BEGIN fix (67 / 270) for 'selinux_all_devicefiles_labeled'
+# BEGIN fix (46 / 270) for 'selinux_all_devicefiles_labeled'
 ###############################################################################
-(>&2 echo "Remediating rule 67/270: 'selinux_all_devicefiles_labeled'")
+(>&2 echo "Remediating rule 46/270: 'selinux_all_devicefiles_labeled'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_all_devicefiles_labeled' IS MISSING!")
 # END fix for 'selinux_all_devicefiles_labeled'
 
 ###############################################################################
-# BEGIN fix (68 / 270) for 'selinux_state'
+# BEGIN fix (47 / 270) for 'selinux_state'
 ###############################################################################
-(>&2 echo "Remediating rule 68/270: 'selinux_state'")
+(>&2 echo "Remediating rule 47/270: 'selinux_state'")
 
 var_selinux_state="enforcing"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -2606,496 +2264,42 @@ fixfiles -f relabel
 # END fix for 'selinux_state'
 
 ###############################################################################
-# BEGIN fix (69 / 270) for 'file_owner_grub_conf'
+# BEGIN fix (48 / 270) for 'file_owner_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 69/270: 'file_owner_grub_conf'")
+(>&2 echo "Remediating rule 48/270: 'file_owner_grub_conf'")
 
 
 chown 0 /boot/grub/grub.conf
 # END fix for 'file_owner_grub_conf'
 
 ###############################################################################
-# BEGIN fix (70 / 270) for 'grub_legacy_password'
+# BEGIN fix (49 / 270) for 'grub_legacy_password'
 ###############################################################################
-(>&2 echo "Remediating rule 70/270: 'grub_legacy_password'")
+(>&2 echo "Remediating rule 49/270: 'grub_legacy_password'")
 (>&2 echo "FIX FOR THIS RULE 'grub_legacy_password' IS MISSING!")
 # END fix for 'grub_legacy_password'
 
 ###############################################################################
-# BEGIN fix (71 / 270) for 'file_groupowner_grub_conf'
+# BEGIN fix (50 / 270) for 'file_groupowner_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 71/270: 'file_groupowner_grub_conf'")
+(>&2 echo "Remediating rule 50/270: 'file_groupowner_grub_conf'")
 
 
 chgrp 0 /boot/grub/grub.conf
 # END fix for 'file_groupowner_grub_conf'
 
 ###############################################################################
-# BEGIN fix (72 / 270) for 'file_permissions_grub_conf'
+# BEGIN fix (51 / 270) for 'file_permissions_grub_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 72/270: 'file_permissions_grub_conf'")
+(>&2 echo "Remediating rule 51/270: 'file_permissions_grub_conf'")
 
 chmod 0600 /boot/grub/grub.conf
 # END fix for 'file_permissions_grub_conf'
 
 ###############################################################################
-# BEGIN fix (73 / 270) for 'set_password_hashing_algorithm_logindefs'
+# BEGIN fix (52 / 270) for 'accounts_password_minlen_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 73/270: 'set_password_hashing_algorithm_logindefs'")
-if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
-	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
-else
-	echo "" >> /etc/login.defs
-	echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
-fi
-# END fix for 'set_password_hashing_algorithm_logindefs'
-
-###############################################################################
-# BEGIN fix (74 / 270) for 'set_password_hashing_algorithm_libuserconf'
-###############################################################################
-(>&2 echo "Remediating rule 74/270: 'set_password_hashing_algorithm_libuserconf'")
-
-LIBUSER_CONF="/etc/libuser.conf"
-CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
-
-# Try find crypt_style in [defaults] section. If it is here, then change algorithm to sha512.
-# If it isn't here, then add it to [defaults] section.
-if grep -qzosP $CRYPT_STYLE_REGEX $LIBUSER_CONF ; then
-        sed -i "s/\(crypt_style[[:space:]]*=[[:space:]]*\).*/\1sha512/g" $LIBUSER_CONF
-elif grep -qs "\[defaults]" $LIBUSER_CONF ; then
-        sed -i "/[[:space:]]*\[defaults]/a crypt_style = sha512" $LIBUSER_CONF
-else
-        echo -e "[defaults]\ncrypt_style = sha512" >> $LIBUSER_CONF
-fi
-# END fix for 'set_password_hashing_algorithm_libuserconf'
-
-###############################################################################
-# BEGIN fix (75 / 270) for 'set_password_hashing_algorithm_systemauth'
-###############################################################################
-(>&2 echo "Remediating rule 75/270: 'set_password_hashing_algorithm_systemauth'")
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
-
-for pamFile in "${AUTH_FILES[@]}"
-do
-	if ! grep -q "^password.*sufficient.*pam_unix.so.*sha512" $pamFile; then
-		sed -i --follow-symlinks "/^password.*sufficient.*pam_unix.so/ s/$/ sha512/" $pamFile
-	fi
-done
-# END fix for 'set_password_hashing_algorithm_systemauth'
-
-###############################################################################
-# BEGIN fix (76 / 270) for 'accounts_passwords_pam_faillock_unlock_time'
-###############################################################################
-(>&2 echo "Remediating rule 76/270: 'accounts_passwords_pam_faillock_unlock_time'")
-
-var_accounts_passwords_pam_faillock_unlock_time="900"
-function include_set_faillock_option {
-	:
-}
-
-function insert_preauth {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth required pam_faillock.so preauth present?
-	if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth required pam_faillock.so preauth is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent $option=$value" "$pam_file"
-	fi
-}
-
-function insert_authfail {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth default pam_faillock.so authfail present?
-	if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth default pam_faillock.so authfail is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail $option=$value" "$pam_file"
-	fi
-}
-
-function insert_account {
-	local pam_file="$1"
-	if ! grep -qE "^\s*account\s+required\s+pam_faillock\.so.*$" "$pam_file" ; then
-		sed -E -i --follow-symlinks "/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so" "$pam_file"
-	fi
-}
-
-function set_faillock_option {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	insert_preauth "$pam_file" "$option" "$value"
-	insert_authfail "$pam_file" "$option" "$value"
-	insert_account "$pam_file"
-}
-include_set_faillock_option
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
-
-for pam_file in "${AUTH_FILES[@]}"
-do
-	set_faillock_option "$pam_file" "unlock_time" "$var_accounts_passwords_pam_faillock_unlock_time"
-done
-# END fix for 'accounts_passwords_pam_faillock_unlock_time'
-
-###############################################################################
-# BEGIN fix (77 / 270) for 'accounts_password_pam_unix_remember'
-###############################################################################
-(>&2 echo "Remediating rule 77/270: 'accounts_password_pam_unix_remember'")
-
-var_password_pam_unix_remember="5"
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
-
-for pamFile in "${AUTH_FILES[@]}"
-do
-	if grep -q "remember=" $pamFile; then
-		sed -i --follow-symlinks "s/\(^password.*sufficient.*pam_unix.so.*\)\(\(remember *= *\)[^ $]*\)/\1remember=$var_password_pam_unix_remember/" $pamFile
-	else
-		sed -i --follow-symlinks "/^password[[:space:]]\+sufficient[[:space:]]\+pam_unix.so/ s/$/ remember=$var_password_pam_unix_remember/" $pamFile
-	fi
-done
-# END fix for 'accounts_password_pam_unix_remember'
-
-###############################################################################
-# BEGIN fix (78 / 270) for 'accounts_passwords_pam_faillock_interval'
-###############################################################################
-(>&2 echo "Remediating rule 78/270: 'accounts_passwords_pam_faillock_interval'")
-function include_set_faillock_option {
-	:
-}
-
-function insert_preauth {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth required pam_faillock.so preauth present?
-	if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth required pam_faillock.so preauth is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent $option=$value" "$pam_file"
-	fi
-}
-
-function insert_authfail {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth default pam_faillock.so authfail present?
-	if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth default pam_faillock.so authfail is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail $option=$value" "$pam_file"
-	fi
-}
-
-function insert_account {
-	local pam_file="$1"
-	if ! grep -qE "^\s*account\s+required\s+pam_faillock\.so.*$" "$pam_file" ; then
-		sed -E -i --follow-symlinks "/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so" "$pam_file"
-	fi
-}
-
-function set_faillock_option {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	insert_preauth "$pam_file" "$option" "$value"
-	insert_authfail "$pam_file" "$option" "$value"
-	insert_account "$pam_file"
-}
-include_set_faillock_option
-
-var_accounts_passwords_pam_faillock_fail_interval="900"
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
-
-for pam_file in "${AUTH_FILES[@]}"
-do
-	set_faillock_option "$pam_file" "fail_interval" "$var_accounts_passwords_pam_faillock_fail_interval"
-done
-# END fix for 'accounts_passwords_pam_faillock_interval'
-
-###############################################################################
-# BEGIN fix (79 / 270) for 'accounts_passwords_pam_faillock_deny'
-###############################################################################
-(>&2 echo "Remediating rule 79/270: 'accounts_passwords_pam_faillock_deny'")
-
-var_accounts_passwords_pam_faillock_deny="3"
-function include_set_faillock_option {
-	:
-}
-
-function insert_preauth {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth required pam_faillock.so preauth present?
-	if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth required pam_faillock.so preauth is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent $option=$value" "$pam_file"
-	fi
-}
-
-function insert_authfail {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth default pam_faillock.so authfail present?
-	if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth default pam_faillock.so authfail is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail $option=$value" "$pam_file"
-	fi
-}
-
-function insert_account {
-	local pam_file="$1"
-	if ! grep -qE "^\s*account\s+required\s+pam_faillock\.so.*$" "$pam_file" ; then
-		sed -E -i --follow-symlinks "/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so" "$pam_file"
-	fi
-}
-
-function set_faillock_option {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	insert_preauth "$pam_file" "$option" "$value"
-	insert_authfail "$pam_file" "$option" "$value"
-	insert_account "$pam_file"
-}
-include_set_faillock_option
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
-
-for pam_file in "${AUTH_FILES[@]}"
-do
-	set_faillock_option "$pam_file" "deny" "$var_accounts_passwords_pam_faillock_deny"
-done
-# END fix for 'accounts_passwords_pam_faillock_deny'
-
-###############################################################################
-# BEGIN fix (80 / 270) for 'cracklib_accounts_password_pam_retry'
-###############################################################################
-(>&2 echo "Remediating rule 80/270: 'cracklib_accounts_password_pam_retry'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_retry' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_retry'
-
-###############################################################################
-# BEGIN fix (81 / 270) for 'cracklib_accounts_password_pam_ocredit'
-###############################################################################
-(>&2 echo "Remediating rule 81/270: 'cracklib_accounts_password_pam_ocredit'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ocredit' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_ocredit'
-
-###############################################################################
-# BEGIN fix (82 / 270) for 'cracklib_accounts_password_pam_dcredit'
-###############################################################################
-(>&2 echo "Remediating rule 82/270: 'cracklib_accounts_password_pam_dcredit'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_dcredit' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_dcredit'
-
-###############################################################################
-# BEGIN fix (83 / 270) for 'cracklib_accounts_password_pam_ucredit'
-###############################################################################
-(>&2 echo "Remediating rule 83/270: 'cracklib_accounts_password_pam_ucredit'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ucredit' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_ucredit'
-
-###############################################################################
-# BEGIN fix (84 / 270) for 'cracklib_accounts_password_pam_lcredit'
-###############################################################################
-(>&2 echo "Remediating rule 84/270: 'cracklib_accounts_password_pam_lcredit'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_lcredit' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_lcredit'
-
-###############################################################################
-# BEGIN fix (85 / 270) for 'cracklib_accounts_password_pam_difok'
-###############################################################################
-(>&2 echo "Remediating rule 85/270: 'cracklib_accounts_password_pam_difok'")
-(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_difok' IS MISSING!")
-# END fix for 'cracklib_accounts_password_pam_difok'
-
-###############################################################################
-# BEGIN fix (86 / 270) for 'require_singleuser_auth'
-###############################################################################
-(>&2 echo "Remediating rule 86/270: 'require_singleuser_auth'")
-
-grep -q ^SINGLE /etc/sysconfig/init && \
-  sed -i "s/SINGLE.*/SINGLE=\/sbin\/sulogin/g" /etc/sysconfig/init
-if ! [ $? -eq 0 ]; then
-    echo "SINGLE=/sbin/sulogin" >> /etc/sysconfig/init
-fi
-# END fix for 'require_singleuser_auth'
-
-###############################################################################
-# BEGIN fix (87 / 270) for 'grub_legacy_disable_interactive_boot'
-###############################################################################
-(>&2 echo "Remediating rule 87/270: 'grub_legacy_disable_interactive_boot'")
-
-# Ensure value of PROMPT key in /etc/sysconfig/init is set to 'no'
-grep -q ^PROMPT /etc/sysconfig/init && \
-  sed -i "s/PROMPT.*/PROMPT=no/g" /etc/sysconfig/init
-if ! [ $? -eq 0 ]; then
-    echo "PROMPT=no" >> /etc/sysconfig/init
-fi
-
-# Ensure 'confirm' kernel boot argument is not present in some of
-# kernel lines in /etc/grub.conf
-sed -i --follow-symlinks "s/confirm//gI" /etc/grub.conf
-# END fix for 'grub_legacy_disable_interactive_boot'
-
-###############################################################################
-# BEGIN fix (88 / 270) for 'package_screen_installed'
-###############################################################################
-(>&2 echo "Remediating rule 88/270: 'package_screen_installed'")
-
-if ! rpm -q --quiet "screen" ; then
-    yum install -y "screen"
-fi
-# END fix for 'package_screen_installed'
-
-###############################################################################
-# BEGIN fix (89 / 270) for 'accounts_tmout'
-###############################################################################
-(>&2 echo "Remediating rule 89/270: 'accounts_tmout'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_tmout' IS MISSING!")
-# END fix for 'accounts_tmout'
-
-###############################################################################
-# BEGIN fix (90 / 270) for 'accounts_root_path_dirs_no_write'
-###############################################################################
-(>&2 echo "Remediating rule 90/270: 'accounts_root_path_dirs_no_write'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_root_path_dirs_no_write' IS MISSING!")
-# END fix for 'accounts_root_path_dirs_no_write'
-
-###############################################################################
-# BEGIN fix (91 / 270) for 'banner_etc_issue'
-###############################################################################
-(>&2 echo "Remediating rule 91/270: 'banner_etc_issue'")
-
-login_banner_text="--[\s\n]+WARNING[\s\n]+--[\s\n]*This[\s\n]+system[\s\n]+is[\s\n]+for[\s\n]+the[\s\n]+use[\s\n]+of[\s\n]+authorized[\s\n]+users[\s\n]+only.[\s\n]+Individuals[\s\n]*using[\s\n]+this[\s\n]+computer[\s\n]+system[\s\n]+without[\s\n]+authority[\s\n]+or[\s\n]+in[\s\n]+excess[\s\n]+of[\s\n]+their[\s\n]*authority[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+having[\s\n]+all[\s\n]+their[\s\n]+activities[\s\n]+on[\s\n]+this[\s\n]+system[\s\n]*monitored[\s\n]+and[\s\n]+recorded[\s\n]+by[\s\n]+system[\s\n]+personnel.[\s\n]+Anyone[\s\n]+using[\s\n]+this[\s\n]*system[\s\n]+expressly[\s\n]+consents[\s\n]+to[\s\n]+such[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+advised[\s\n]+that[\s\n]*if[\s\n]+such[\s\n]+monitoring[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+criminal[\s\n]+activity[\s\n]*system[\s\n]+personal[\s\n]+may[\s\n]+provide[\s\n]+the[\s\n]+evidence[\s\n]+of[\s\n]+such[\s\n]+monitoring[\s\n]+to[\s\n]+law[\s\n]*enforcement[\s\n]+officials."
-
-# There was a regular-expression matching various banners, needs to be expanded
-expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
-formatted=$(echo "$expanded" | fold -sw 80)
-
-cat <<EOF >/etc/issue
-$formatted
-EOF
-
-printf "\n" >> /etc/issue
-# END fix for 'banner_etc_issue'
-
-###############################################################################
-# BEGIN fix (92 / 270) for 'gconf_gdm_enable_warning_gui_banner'
-###############################################################################
-(>&2 echo "Remediating rule 92/270: 'gconf_gdm_enable_warning_gui_banner'")
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Enable displaying of a login warning banner in the GNOME Display Manager's
-# login screen
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type bool \
-            --set /apps/gdm/simple-greeter/banner_message_enable true
-# END fix for 'gconf_gdm_enable_warning_gui_banner'
-
-###############################################################################
-# BEGIN fix (93 / 270) for 'gconf_gdm_set_login_banner_text'
-###############################################################################
-(>&2 echo "Remediating rule 93/270: 'gconf_gdm_set_login_banner_text'")
-
-login_banner_text="--[\s\n]+WARNING[\s\n]+--[\s\n]*This[\s\n]+system[\s\n]+is[\s\n]+for[\s\n]+the[\s\n]+use[\s\n]+of[\s\n]+authorized[\s\n]+users[\s\n]+only.[\s\n]+Individuals[\s\n]*using[\s\n]+this[\s\n]+computer[\s\n]+system[\s\n]+without[\s\n]+authority[\s\n]+or[\s\n]+in[\s\n]+excess[\s\n]+of[\s\n]+their[\s\n]*authority[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+having[\s\n]+all[\s\n]+their[\s\n]+activities[\s\n]+on[\s\n]+this[\s\n]+system[\s\n]*monitored[\s\n]+and[\s\n]+recorded[\s\n]+by[\s\n]+system[\s\n]+personnel.[\s\n]+Anyone[\s\n]+using[\s\n]+this[\s\n]*system[\s\n]+expressly[\s\n]+consents[\s\n]+to[\s\n]+such[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+advised[\s\n]+that[\s\n]*if[\s\n]+such[\s\n]+monitoring[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+criminal[\s\n]+activity[\s\n]*system[\s\n]+personal[\s\n]+may[\s\n]+provide[\s\n]+the[\s\n]+evidence[\s\n]+of[\s\n]+such[\s\n]+monitoring[\s\n]+to[\s\n]+law[\s\n]*enforcement[\s\n]+officials."
-
-# Install GConf2 package if not installed
-if ! rpm -q GConf2; then
-  yum -y install GConf2
-fi
-
-# Expand the login_banner_text value - there was a regular-expression
-# matching various banners, needs to be expanded
-banner_expanded=$(echo "$login_banner_text" | sed 's/\[\\s\\n\][*+]/ /g;s/\\//g;')
-
-# Set the text shown by the GNOME Display Manager in the login screen
-gconftool-2 --direct \
-            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
-            --type string \
-            --set /apps/gdm/simple-greeter/banner_message_text "${banner_expanded}"
-# END fix for 'gconf_gdm_set_login_banner_text'
-
-###############################################################################
-# BEGIN fix (94 / 270) for 'accounts_password_minlen_login_defs'
-###############################################################################
-(>&2 echo "Remediating rule 94/270: 'accounts_password_minlen_login_defs'")
+(>&2 echo "Remediating rule 52/270: 'accounts_password_minlen_login_defs'")
 
 declare var_accounts_password_minlen_login_defs
 var_accounts_password_minlen_login_defs="15"
@@ -3109,9 +2313,9 @@ fi
 # END fix for 'accounts_password_minlen_login_defs'
 
 ###############################################################################
-# BEGIN fix (95 / 270) for 'accounts_minimum_age_login_defs'
+# BEGIN fix (53 / 270) for 'accounts_minimum_age_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 95/270: 'accounts_minimum_age_login_defs'")
+(>&2 echo "Remediating rule 53/270: 'accounts_minimum_age_login_defs'")
 
 var_accounts_minimum_age_login_defs="7"
 
@@ -3123,9 +2327,9 @@ fi
 # END fix for 'accounts_minimum_age_login_defs'
 
 ###############################################################################
-# BEGIN fix (96 / 270) for 'accounts_maximum_age_login_defs'
+# BEGIN fix (54 / 270) for 'accounts_maximum_age_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 96/270: 'accounts_maximum_age_login_defs'")
+(>&2 echo "Remediating rule 54/270: 'accounts_maximum_age_login_defs'")
 
 var_accounts_maximum_age_login_defs="90"
 
@@ -3137,9 +2341,9 @@ fi
 # END fix for 'accounts_maximum_age_login_defs'
 
 ###############################################################################
-# BEGIN fix (97 / 270) for 'accounts_password_warn_age_login_defs'
+# BEGIN fix (55 / 270) for 'accounts_password_warn_age_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 97/270: 'accounts_password_warn_age_login_defs'")
+(>&2 echo "Remediating rule 55/270: 'accounts_password_warn_age_login_defs'")
 
 var_accounts_password_warn_age_login_defs="7"
 
@@ -3151,37 +2355,52 @@ fi
 # END fix for 'accounts_password_warn_age_login_defs'
 
 ###############################################################################
-# BEGIN fix (98 / 270) for 'accounts_no_uid_except_zero'
+# BEGIN fix (56 / 270) for 'accounts_password_all_shadowed'
 ###############################################################################
-(>&2 echo "Remediating rule 98/270: 'accounts_no_uid_except_zero'")
+(>&2 echo "Remediating rule 56/270: 'accounts_password_all_shadowed'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
+# END fix for 'accounts_password_all_shadowed'
+
+###############################################################################
+# BEGIN fix (57 / 270) for 'no_empty_passwords'
+###############################################################################
+(>&2 echo "Remediating rule 57/270: 'no_empty_passwords'")
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
+# END fix for 'no_empty_passwords'
+
+###############################################################################
+# BEGIN fix (58 / 270) for 'accounts_no_uid_except_zero'
+###############################################################################
+(>&2 echo "Remediating rule 58/270: 'accounts_no_uid_except_zero'")
 awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
 # END fix for 'accounts_no_uid_except_zero'
 
 ###############################################################################
-# BEGIN fix (99 / 270) for 'no_shelllogin_for_systemaccounts'
+# BEGIN fix (59 / 270) for 'no_shelllogin_for_systemaccounts'
 ###############################################################################
-(>&2 echo "Remediating rule 99/270: 'no_shelllogin_for_systemaccounts'")
+(>&2 echo "Remediating rule 59/270: 'no_shelllogin_for_systemaccounts'")
 (>&2 echo "FIX FOR THIS RULE 'no_shelllogin_for_systemaccounts' IS MISSING!")
 # END fix for 'no_shelllogin_for_systemaccounts'
 
 ###############################################################################
-# BEGIN fix (100 / 270) for 'securetty_root_login_console_only'
+# BEGIN fix (60 / 270) for 'securetty_root_login_console_only'
 ###############################################################################
-(>&2 echo "Remediating rule 100/270: 'securetty_root_login_console_only'")
+(>&2 echo "Remediating rule 60/270: 'securetty_root_login_console_only'")
 sed -i '/^vc\//d' /etc/securetty
 # END fix for 'securetty_root_login_console_only'
 
 ###############################################################################
-# BEGIN fix (101 / 270) for 'restrict_serial_port_logins'
+# BEGIN fix (61 / 270) for 'restrict_serial_port_logins'
 ###############################################################################
-(>&2 echo "Remediating rule 101/270: 'restrict_serial_port_logins'")
+(>&2 echo "Remediating rule 61/270: 'restrict_serial_port_logins'")
 sed -i '/ttyS/d' /etc/securetty
 # END fix for 'restrict_serial_port_logins'
 
 ###############################################################################
-# BEGIN fix (102 / 270) for 'account_disable_post_pw_expiration'
+# BEGIN fix (62 / 270) for 'account_disable_post_pw_expiration'
 ###############################################################################
-(>&2 echo "Remediating rule 102/270: 'account_disable_post_pw_expiration'")
+(>&2 echo "Remediating rule 62/270: 'account_disable_post_pw_expiration'")
 
 var_account_disable_post_pw_expiration="40"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -3265,40 +2484,1755 @@ replace_or_append '/etc/default/useradd' '^INACTIVE' "$var_account_disable_post_
 # END fix for 'account_disable_post_pw_expiration'
 
 ###############################################################################
-# BEGIN fix (103 / 270) for 'account_temp_expire_date'
+# BEGIN fix (63 / 270) for 'account_temp_expire_date'
 ###############################################################################
-(>&2 echo "Remediating rule 103/270: 'account_temp_expire_date'")
+(>&2 echo "Remediating rule 63/270: 'account_temp_expire_date'")
 (>&2 echo "FIX FOR THIS RULE 'account_temp_expire_date' IS MISSING!")
 # END fix for 'account_temp_expire_date'
 
 ###############################################################################
-# BEGIN fix (104 / 270) for 'no_empty_passwords'
+# BEGIN fix (64 / 270) for 'set_password_hashing_algorithm_logindefs'
 ###############################################################################
-(>&2 echo "Remediating rule 104/270: 'no_empty_passwords'")
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
-# END fix for 'no_empty_passwords'
+(>&2 echo "Remediating rule 64/270: 'set_password_hashing_algorithm_logindefs'")
+if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
+	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
+else
+	echo "" >> /etc/login.defs
+	echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+fi
+# END fix for 'set_password_hashing_algorithm_logindefs'
 
 ###############################################################################
-# BEGIN fix (105 / 270) for 'accounts_password_all_shadowed'
+# BEGIN fix (65 / 270) for 'set_password_hashing_algorithm_libuserconf'
 ###############################################################################
-(>&2 echo "Remediating rule 105/270: 'accounts_password_all_shadowed'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
-# END fix for 'accounts_password_all_shadowed'
+(>&2 echo "Remediating rule 65/270: 'set_password_hashing_algorithm_libuserconf'")
+
+LIBUSER_CONF="/etc/libuser.conf"
+CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
+
+# Try find crypt_style in [defaults] section. If it is here, then change algorithm to sha512.
+# If it isn't here, then add it to [defaults] section.
+if grep -qzosP $CRYPT_STYLE_REGEX $LIBUSER_CONF ; then
+        sed -i "s/\(crypt_style[[:space:]]*=[[:space:]]*\).*/\1sha512/g" $LIBUSER_CONF
+elif grep -qs "\[defaults]" $LIBUSER_CONF ; then
+        sed -i "/[[:space:]]*\[defaults]/a crypt_style = sha512" $LIBUSER_CONF
+else
+        echo -e "[defaults]\ncrypt_style = sha512" >> $LIBUSER_CONF
+fi
+# END fix for 'set_password_hashing_algorithm_libuserconf'
 
 ###############################################################################
-# BEGIN fix (106 / 270) for 'service_auditd_enabled'
+# BEGIN fix (66 / 270) for 'set_password_hashing_algorithm_systemauth'
 ###############################################################################
-(>&2 echo "Remediating rule 106/270: 'service_auditd_enabled'")
+(>&2 echo "Remediating rule 66/270: 'set_password_hashing_algorithm_systemauth'")
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if ! grep -q "^password.*sufficient.*pam_unix.so.*sha512" $pamFile; then
+		sed -i --follow-symlinks "/^password.*sufficient.*pam_unix.so/ s/$/ sha512/" $pamFile
+	fi
+done
+# END fix for 'set_password_hashing_algorithm_systemauth'
+
+###############################################################################
+# BEGIN fix (67 / 270) for 'accounts_passwords_pam_faillock_unlock_time'
+###############################################################################
+(>&2 echo "Remediating rule 67/270: 'accounts_passwords_pam_faillock_unlock_time'")
+
+var_accounts_passwords_pam_faillock_unlock_time="900"
+
+AUTH_FILES=("/etc/pam.d/system-auth" "/etc/pam.d/password-auth")
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+    # is auth required pam_faillock.so preauth present?
+    if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*'"unlock_time"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\('"unlock_time"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_unlock_time"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ '"unlock_time"'='"$var_accounts_passwords_pam_faillock_unlock_time"'/' "$pam_file"
+        fi
+    # auth required pam_faillock.so preauth is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent '"unlock_time"'='"$var_accounts_passwords_pam_faillock_unlock_time" "$pam_file"
+    fi
+    # is auth default pam_faillock.so authfail present?
+    if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*'"unlock_time"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\('"unlock_time"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_unlock_time"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ '"unlock_time"'='"$var_accounts_passwords_pam_faillock_unlock_time"'/' "$pam_file"
+        fi
+    # auth default pam_faillock.so authfail is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail '"unlock_time"'='"$var_accounts_passwords_pam_faillock_unlock_time" "$pam_file"
+    fi
+    if ! grep -qE '^\s*account\s+required\s+pam_faillock\.so.*$' "$pam_file" ; then
+        sed -E -i --follow-symlinks '/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so' "$pam_file"
+    fi
+done
+# END fix for 'accounts_passwords_pam_faillock_unlock_time'
+
+###############################################################################
+# BEGIN fix (68 / 270) for 'accounts_password_pam_unix_remember'
+###############################################################################
+(>&2 echo "Remediating rule 68/270: 'accounts_password_pam_unix_remember'")
+
+var_password_pam_unix_remember="5"
+
+AUTH_FILES[0]="/etc/pam.d/system-auth"
+AUTH_FILES[1]="/etc/pam.d/password-auth"
+
+for pamFile in "${AUTH_FILES[@]}"
+do
+	if grep -q "remember=" $pamFile; then
+		sed -i --follow-symlinks "s/\(^password.*sufficient.*pam_unix.so.*\)\(\(remember *= *\)[^ $]*\)/\1remember=$var_password_pam_unix_remember/" $pamFile
+	else
+		sed -i --follow-symlinks "/^password[[:space:]]\+sufficient[[:space:]]\+pam_unix.so/ s/$/ remember=$var_password_pam_unix_remember/" $pamFile
+	fi
+done
+# END fix for 'accounts_password_pam_unix_remember'
+
+###############################################################################
+# BEGIN fix (69 / 270) for 'accounts_passwords_pam_faillock_interval'
+###############################################################################
+(>&2 echo "Remediating rule 69/270: 'accounts_passwords_pam_faillock_interval'")
+
+var_accounts_passwords_pam_faillock_fail_interval="900"
+
+AUTH_FILES=("/etc/pam.d/system-auth" "/etc/pam.d/password-auth")
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+    # is auth required pam_faillock.so preauth present?
+    if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*'"fail_interval"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\('"fail_interval"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_fail_interval"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ '"fail_interval"'='"$var_accounts_passwords_pam_faillock_fail_interval"'/' "$pam_file"
+        fi
+    # auth required pam_faillock.so preauth is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent '"fail_interval"'='"$var_accounts_passwords_pam_faillock_fail_interval" "$pam_file"
+    fi
+    # is auth default pam_faillock.so authfail present?
+    if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*'"fail_interval"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\('"fail_interval"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_fail_interval"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ '"fail_interval"'='"$var_accounts_passwords_pam_faillock_fail_interval"'/' "$pam_file"
+        fi
+    # auth default pam_faillock.so authfail is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail '"fail_interval"'='"$var_accounts_passwords_pam_faillock_fail_interval" "$pam_file"
+    fi
+    if ! grep -qE '^\s*account\s+required\s+pam_faillock\.so.*$' "$pam_file" ; then
+        sed -E -i --follow-symlinks '/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so' "$pam_file"
+    fi
+done
+# END fix for 'accounts_passwords_pam_faillock_interval'
+
+###############################################################################
+# BEGIN fix (70 / 270) for 'accounts_passwords_pam_faillock_deny'
+###############################################################################
+(>&2 echo "Remediating rule 70/270: 'accounts_passwords_pam_faillock_deny'")
+
+var_accounts_passwords_pam_faillock_deny="3"
+
+AUTH_FILES=("/etc/pam.d/system-auth" "/etc/pam.d/password-auth")
+
+for pam_file in "${AUTH_FILES[@]}"
+do
+    # is auth required pam_faillock.so preauth present?
+    if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth required pam_faillock.so preauth is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    # is auth default pam_faillock.so authfail present?
+    if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth default pam_faillock.so authfail is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    if ! grep -qE '^\s*account\s+required\s+pam_faillock\.so.*$' "$pam_file" ; then
+        sed -E -i --follow-symlinks '/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so' "$pam_file"
+    fi
+done
+# END fix for 'accounts_passwords_pam_faillock_deny'
+
+###############################################################################
+# BEGIN fix (71 / 270) for 'cracklib_accounts_password_pam_retry'
+###############################################################################
+(>&2 echo "Remediating rule 71/270: 'cracklib_accounts_password_pam_retry'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_retry' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_retry'
+
+###############################################################################
+# BEGIN fix (72 / 270) for 'cracklib_accounts_password_pam_ocredit'
+###############################################################################
+(>&2 echo "Remediating rule 72/270: 'cracklib_accounts_password_pam_ocredit'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ocredit' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_ocredit'
+
+###############################################################################
+# BEGIN fix (73 / 270) for 'cracklib_accounts_password_pam_dcredit'
+###############################################################################
+(>&2 echo "Remediating rule 73/270: 'cracklib_accounts_password_pam_dcredit'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_dcredit' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_dcredit'
+
+###############################################################################
+# BEGIN fix (74 / 270) for 'cracklib_accounts_password_pam_ucredit'
+###############################################################################
+(>&2 echo "Remediating rule 74/270: 'cracklib_accounts_password_pam_ucredit'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_ucredit' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_ucredit'
+
+###############################################################################
+# BEGIN fix (75 / 270) for 'cracklib_accounts_password_pam_lcredit'
+###############################################################################
+(>&2 echo "Remediating rule 75/270: 'cracklib_accounts_password_pam_lcredit'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_lcredit' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_lcredit'
+
+###############################################################################
+# BEGIN fix (76 / 270) for 'cracklib_accounts_password_pam_difok'
+###############################################################################
+(>&2 echo "Remediating rule 76/270: 'cracklib_accounts_password_pam_difok'")
+(>&2 echo "FIX FOR THIS RULE 'cracklib_accounts_password_pam_difok' IS MISSING!")
+# END fix for 'cracklib_accounts_password_pam_difok'
+
+###############################################################################
+# BEGIN fix (77 / 270) for 'grub_legacy_disable_interactive_boot'
+###############################################################################
+(>&2 echo "Remediating rule 77/270: 'grub_legacy_disable_interactive_boot'")
+
+# Ensure value of PROMPT key in /etc/sysconfig/init is set to 'no'
+grep -q ^PROMPT /etc/sysconfig/init && \
+  sed -i "s/PROMPT.*/PROMPT=no/g" /etc/sysconfig/init
+if ! [ $? -eq 0 ]; then
+    echo "PROMPT=no" >> /etc/sysconfig/init
+fi
+
+# Ensure 'confirm' kernel boot argument is not present in some of
+# kernel lines in /etc/grub.conf
+sed -i --follow-symlinks "s/confirm//gI" /etc/grub.conf
+# END fix for 'grub_legacy_disable_interactive_boot'
+
+###############################################################################
+# BEGIN fix (78 / 270) for 'require_singleuser_auth'
+###############################################################################
+(>&2 echo "Remediating rule 78/270: 'require_singleuser_auth'")
+
+grep -q ^SINGLE /etc/sysconfig/init && \
+  sed -i "s/SINGLE.*/SINGLE=\/sbin\/sulogin/g" /etc/sysconfig/init
+if ! [ $? -eq 0 ]; then
+    echo "SINGLE=/sbin/sulogin" >> /etc/sysconfig/init
+fi
+# END fix for 'require_singleuser_auth'
+
+###############################################################################
+# BEGIN fix (79 / 270) for 'package_screen_installed'
+###############################################################################
+(>&2 echo "Remediating rule 79/270: 'package_screen_installed'")
+
+if ! rpm -q --quiet "screen" ; then
+    yum install -y "screen"
+fi
+# END fix for 'package_screen_installed'
+
+###############################################################################
+# BEGIN fix (80 / 270) for 'banner_etc_issue'
+###############################################################################
+(>&2 echo "Remediating rule 80/270: 'banner_etc_issue'")
+
+login_banner_text="^\-\-[\s\n]+WARNING[\s\n]+\-\-[\s\n]+This[\s\n]+system[\s\n]+is[\s\n]+for[\s\n]+the[\s\n]+use[\s\n]+of[\s\n]+authorized[\s\n]+users[\s\n]+only\.[\s\n]+Individuals[\s\n]+using[\s\n]+this[\s\n]+computer[\s\n]+system[\s\n]+without[\s\n]+authority[\s\n]+or[\s\n]+in[\s\n]+excess[\s\n]+of[\s\n]+their[\s\n]+authority[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+having[\s\n]+all[\s\n]+their[\s\n]+activities[\s\n]+on[\s\n]+this[\s\n]+system[\s\n]+monitored[\s\n]+and[\s\n]+recorded[\s\n]+by[\s\n]+system[\s\n]+personnel\.[\s\n]+Anyone[\s\n]+using[\s\n]+this[\s\n]+system[\s\n]+expressly[\s\n]+consents[\s\n]+to[\s\n]+such[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+advised[\s\n]+that[\s\n]+if[\s\n]+such[\s\n]+monitoring[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+criminal[\s\n]+activity[\s\n]+system[\s\n]+personal[\s\n]+may[\s\n]+provide[\s\n]+the[\s\n]+evidence[\s\n]+of[\s\n]+such[\s\n]+monitoring[\s\n]+to[\s\n]+law[\s\n]+enforcement[\s\n]+officials\.$"
+
+# Multiple regexes transform the banner regex into a usable banner
+# 0 - Remove anchors around the banner text
+login_banner_text=$(echo "$login_banner_text" | sed 's/^\^\(.*\)\$$/\1/g')
+# 1 - Keep only the first banners if there are multiple
+#    (dod_banners contains the long and short banner)
+login_banner_text=$(echo "$login_banner_text" | sed 's/^(\(.*\)|.*)$/\1/g')
+# 2 - Add spaces ' '. (Transforms regex for "space or newline" into a " ")
+login_banner_text=$(echo "$login_banner_text" | sed 's/\[\\s\\n\]+/ /g')
+# 3 - Adds newlines. (Transforms "(?:\[\\n\]+|(?:\\n)+)" into "\n")
+login_banner_text=$(echo "$login_banner_text" | sed 's/(?:\[\\n\]+|(?:\\n)+)/\n/g')
+# 4 - Remove any leftover backslash. (From any parethesis in the banner, for example).
+login_banner_text=$(echo "$login_banner_text" | sed 's/\\//g')
+formatted=$(echo "$login_banner_text" | fold -sw 80)
+
+cat <<EOF >/etc/issue
+$formatted
+EOF
+# END fix for 'banner_etc_issue'
+
+###############################################################################
+# BEGIN fix (81 / 270) for 'gconf_gdm_enable_warning_gui_banner'
+###############################################################################
+(>&2 echo "Remediating rule 81/270: 'gconf_gdm_enable_warning_gui_banner'")
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
+
+# Enable displaying of a login warning banner in the GNOME Display Manager's
+# login screen
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type bool \
+            --set /apps/gdm/simple-greeter/banner_message_enable true
+# END fix for 'gconf_gdm_enable_warning_gui_banner'
+
+###############################################################################
+# BEGIN fix (82 / 270) for 'gconf_gdm_set_login_banner_text'
+###############################################################################
+(>&2 echo "Remediating rule 82/270: 'gconf_gdm_set_login_banner_text'")
+
+login_banner_text="^\-\-[\s\n]+WARNING[\s\n]+\-\-[\s\n]+This[\s\n]+system[\s\n]+is[\s\n]+for[\s\n]+the[\s\n]+use[\s\n]+of[\s\n]+authorized[\s\n]+users[\s\n]+only\.[\s\n]+Individuals[\s\n]+using[\s\n]+this[\s\n]+computer[\s\n]+system[\s\n]+without[\s\n]+authority[\s\n]+or[\s\n]+in[\s\n]+excess[\s\n]+of[\s\n]+their[\s\n]+authority[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+having[\s\n]+all[\s\n]+their[\s\n]+activities[\s\n]+on[\s\n]+this[\s\n]+system[\s\n]+monitored[\s\n]+and[\s\n]+recorded[\s\n]+by[\s\n]+system[\s\n]+personnel\.[\s\n]+Anyone[\s\n]+using[\s\n]+this[\s\n]+system[\s\n]+expressly[\s\n]+consents[\s\n]+to[\s\n]+such[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+advised[\s\n]+that[\s\n]+if[\s\n]+such[\s\n]+monitoring[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+criminal[\s\n]+activity[\s\n]+system[\s\n]+personal[\s\n]+may[\s\n]+provide[\s\n]+the[\s\n]+evidence[\s\n]+of[\s\n]+such[\s\n]+monitoring[\s\n]+to[\s\n]+law[\s\n]+enforcement[\s\n]+officials\.$"
+
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
+
+# Expand the login_banner_text value - there was a regular-expression
+# matching various banners, needs to be expanded
+banner_expanded=$(echo "$login_banner_text" | sed 's/\[\\s\\n\][*+]/ /g;s/\\//g;')
+
+# Set the text shown by the GNOME Display Manager in the login screen
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type string \
+            --set /apps/gdm/simple-greeter/banner_message_text "${banner_expanded}"
+# END fix for 'gconf_gdm_set_login_banner_text'
+
+###############################################################################
+# BEGIN fix (83 / 270) for 'accounts_tmout'
+###############################################################################
+(>&2 echo "Remediating rule 83/270: 'accounts_tmout'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_tmout' IS MISSING!")
+# END fix for 'accounts_tmout'
+
+###############################################################################
+# BEGIN fix (84 / 270) for 'accounts_root_path_dirs_no_write'
+###############################################################################
+(>&2 echo "Remediating rule 84/270: 'accounts_root_path_dirs_no_write'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_root_path_dirs_no_write' IS MISSING!")
+# END fix for 'accounts_root_path_dirs_no_write'
+
+###############################################################################
+# BEGIN fix (85 / 270) for 'file_permissions_unauthorized_sgid'
+###############################################################################
+(>&2 echo "Remediating rule 85/270: 'file_permissions_unauthorized_sgid'")
+(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_sgid' IS MISSING!")
+# END fix for 'file_permissions_unauthorized_sgid'
+
+###############################################################################
+# BEGIN fix (86 / 270) for 'file_permissions_ungroupowned'
+###############################################################################
+(>&2 echo "Remediating rule 86/270: 'file_permissions_ungroupowned'")
+(>&2 echo "FIX FOR THIS RULE 'file_permissions_ungroupowned' IS MISSING!")
+# END fix for 'file_permissions_ungroupowned'
+
+###############################################################################
+# BEGIN fix (87 / 270) for 'dir_perms_world_writable_system_owned'
+###############################################################################
+(>&2 echo "Remediating rule 87/270: 'dir_perms_world_writable_system_owned'")
+(>&2 echo "FIX FOR THIS RULE 'dir_perms_world_writable_system_owned' IS MISSING!")
+# END fix for 'dir_perms_world_writable_system_owned'
+
+###############################################################################
+# BEGIN fix (88 / 270) for 'no_files_unowned_by_user'
+###############################################################################
+(>&2 echo "Remediating rule 88/270: 'no_files_unowned_by_user'")
+(>&2 echo "FIX FOR THIS RULE 'no_files_unowned_by_user' IS MISSING!")
+# END fix for 'no_files_unowned_by_user'
+
+###############################################################################
+# BEGIN fix (89 / 270) for 'file_permissions_unauthorized_world_writable'
+###############################################################################
+(>&2 echo "Remediating rule 89/270: 'file_permissions_unauthorized_world_writable'")
+(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_world_writable' IS MISSING!")
+# END fix for 'file_permissions_unauthorized_world_writable'
+
+###############################################################################
+# BEGIN fix (90 / 270) for 'file_permissions_unauthorized_suid'
+###############################################################################
+(>&2 echo "Remediating rule 90/270: 'file_permissions_unauthorized_suid'")
+(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_suid' IS MISSING!")
+# END fix for 'file_permissions_unauthorized_suid'
+
+###############################################################################
+# BEGIN fix (91 / 270) for 'dir_perms_world_writable_sticky_bits'
+###############################################################################
+(>&2 echo "Remediating rule 91/270: 'dir_perms_world_writable_sticky_bits'")
+df --local -P | awk '{if (NR!=1) print $6}' \
+| xargs -I '{}' find '{}' -xdev -type d \
+\( -perm -0002 -a ! -perm -1000 \) 2>/dev/null \
+| xargs chmod a+t
+# END fix for 'dir_perms_world_writable_sticky_bits'
+
+###############################################################################
+# BEGIN fix (92 / 270) for 'file_owner_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 92/270: 'file_owner_etc_group'")
+
+
+chown 0 /etc/group
+# END fix for 'file_owner_etc_group'
+
+###############################################################################
+# BEGIN fix (93 / 270) for 'file_permissions_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 93/270: 'file_permissions_etc_group'")
+
+chmod 0644 /etc/group
+# END fix for 'file_permissions_etc_group'
+
+###############################################################################
+# BEGIN fix (94 / 270) for 'file_groupowner_etc_shadow'
+###############################################################################
+(>&2 echo "Remediating rule 94/270: 'file_groupowner_etc_shadow'")
+
+
+chgrp 0 /etc/shadow
+# END fix for 'file_groupowner_etc_shadow'
+
+###############################################################################
+# BEGIN fix (95 / 270) for 'file_permissions_etc_shadow'
+###############################################################################
+(>&2 echo "Remediating rule 95/270: 'file_permissions_etc_shadow'")
+
+chmod 0000 /etc/shadow
+# END fix for 'file_permissions_etc_shadow'
+
+###############################################################################
+# BEGIN fix (96 / 270) for 'file_groupowner_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 96/270: 'file_groupowner_etc_gshadow'")
+
+
+chgrp 0 /etc/gshadow
+# END fix for 'file_groupowner_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (97 / 270) for 'file_owner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 97/270: 'file_owner_etc_passwd'")
+
+
+chown 0 /etc/passwd
+# END fix for 'file_owner_etc_passwd'
+
+###############################################################################
+# BEGIN fix (98 / 270) for 'file_owner_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 98/270: 'file_owner_etc_gshadow'")
+
+
+chown 0 /etc/gshadow
+# END fix for 'file_owner_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (99 / 270) for 'file_groupowner_etc_group'
+###############################################################################
+(>&2 echo "Remediating rule 99/270: 'file_groupowner_etc_group'")
+
+
+chgrp 0 /etc/group
+# END fix for 'file_groupowner_etc_group'
+
+###############################################################################
+# BEGIN fix (100 / 270) for 'file_permissions_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 100/270: 'file_permissions_etc_passwd'")
+
+chmod 0644 /etc/passwd
+# END fix for 'file_permissions_etc_passwd'
+
+###############################################################################
+# BEGIN fix (101 / 270) for 'file_owner_etc_shadow'
+###############################################################################
+(>&2 echo "Remediating rule 101/270: 'file_owner_etc_shadow'")
+
+
+chown 0 /etc/shadow
+# END fix for 'file_owner_etc_shadow'
+
+###############################################################################
+# BEGIN fix (102 / 270) for 'file_permissions_etc_gshadow'
+###############################################################################
+(>&2 echo "Remediating rule 102/270: 'file_permissions_etc_gshadow'")
+
+chmod 0000 /etc/gshadow
+# END fix for 'file_permissions_etc_gshadow'
+
+###############################################################################
+# BEGIN fix (103 / 270) for 'file_groupowner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 103/270: 'file_groupowner_etc_passwd'")
+
+
+chgrp 0 /etc/passwd
+# END fix for 'file_groupowner_etc_passwd'
+
+###############################################################################
+# BEGIN fix (104 / 270) for 'file_ownership_library_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 104/270: 'file_ownership_library_dirs'")
+for LIBDIR in /usr/lib /usr/lib64 /lib /lib64
+do
+  if [ -d $LIBDIR ]
+  then
+    find -L $LIBDIR \! -user root -exec chown root {} \; 
+  fi
+done
+# END fix for 'file_ownership_library_dirs'
+
+###############################################################################
+# BEGIN fix (105 / 270) for 'file_permissions_binary_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 105/270: 'file_permissions_binary_dirs'")
+DIRS="/bin /usr/bin /usr/local/bin /sbin /usr/sbin /usr/local/sbin /usr/libexec"
+for dirPath in $DIRS; do
+	find "$dirPath" -perm /022 -exec chmod go-w '{}' \;
+done
+# END fix for 'file_permissions_binary_dirs'
+
+###############################################################################
+# BEGIN fix (106 / 270) for 'file_ownership_binary_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 106/270: 'file_ownership_binary_dirs'")
+find /bin/ \
+/usr/bin/ \
+/usr/local/bin/ \
+/sbin/ \
+/usr/sbin/ \
+/usr/local/sbin/ \
+/usr/libexec \
+\! -user root -execdir chown root {} \;
+# END fix for 'file_ownership_binary_dirs'
+
+###############################################################################
+# BEGIN fix (107 / 270) for 'file_permissions_library_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 107/270: 'file_permissions_library_dirs'")
+DIRS="/lib /lib64 /usr/lib /usr/lib64"
+for dirPath in $DIRS; do
+	find "$dirPath" -perm /022 -type f -exec chmod go-w '{}' \;
+done
+# END fix for 'file_permissions_library_dirs'
+
+###############################################################################
+# BEGIN fix (108 / 270) for 'service_autofs_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 108/270: 'service_autofs_disabled'")
+
+/sbin/service 'autofs' stop
+/sbin/chkconfig --level 0123456 'autofs' off
+# END fix for 'service_autofs_disabled'
+
+###############################################################################
+# BEGIN fix (109 / 270) for 'kernel_module_usb-storage_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 109/270: 'kernel_module_usb-storage_disabled'")
+if LC_ALL=C grep -q -m 1 "^install usb-storage" /etc/modprobe.d/usb-storage.conf ; then
+	sed -i 's/^install usb-storage.*/install usb-storage /bin/true/g' /etc/modprobe.d/usb-storage.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/usb-storage.conf
+	echo "install usb-storage /bin/true" >> /etc/modprobe.d/usb-storage.conf
+fi
+# END fix for 'kernel_module_usb-storage_disabled'
+
+###############################################################################
+# BEGIN fix (110 / 270) for 'bios_disable_usb_boot'
+###############################################################################
+(>&2 echo "Remediating rule 110/270: 'bios_disable_usb_boot'")
+(>&2 echo "FIX FOR THIS RULE 'bios_disable_usb_boot' IS MISSING!")
+# END fix for 'bios_disable_usb_boot'
+
+###############################################################################
+# BEGIN fix (111 / 270) for 'kernel_module_freevxfs_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 111/270: 'kernel_module_freevxfs_disabled'")
+if LC_ALL=C grep -q -m 1 "^install freevxfs" /etc/modprobe.d/freevxfs.conf ; then
+	sed -i 's/^install freevxfs.*/install freevxfs /bin/true/g' /etc/modprobe.d/freevxfs.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/freevxfs.conf
+	echo "install freevxfs /bin/true" >> /etc/modprobe.d/freevxfs.conf
+fi
+# END fix for 'kernel_module_freevxfs_disabled'
+
+###############################################################################
+# BEGIN fix (112 / 270) for 'kernel_module_cramfs_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 112/270: 'kernel_module_cramfs_disabled'")
+if LC_ALL=C grep -q -m 1 "^install cramfs" /etc/modprobe.d/cramfs.conf ; then
+	sed -i 's/^install cramfs.*/install cramfs /bin/true/g' /etc/modprobe.d/cramfs.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/cramfs.conf
+	echo "install cramfs /bin/true" >> /etc/modprobe.d/cramfs.conf
+fi
+# END fix for 'kernel_module_cramfs_disabled'
+
+###############################################################################
+# BEGIN fix (113 / 270) for 'kernel_module_squashfs_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 113/270: 'kernel_module_squashfs_disabled'")
+if LC_ALL=C grep -q -m 1 "^install squashfs" /etc/modprobe.d/squashfs.conf ; then
+	sed -i 's/^install squashfs.*/install squashfs /bin/true/g' /etc/modprobe.d/squashfs.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/squashfs.conf
+	echo "install squashfs /bin/true" >> /etc/modprobe.d/squashfs.conf
+fi
+# END fix for 'kernel_module_squashfs_disabled'
+
+###############################################################################
+# BEGIN fix (114 / 270) for 'grub_legacy_nousb_argument'
+###############################################################################
+(>&2 echo "Remediating rule 114/270: 'grub_legacy_nousb_argument'")
+(>&2 echo "FIX FOR THIS RULE 'grub_legacy_nousb_argument' IS MISSING!")
+# END fix for 'grub_legacy_nousb_argument'
+
+###############################################################################
+# BEGIN fix (115 / 270) for 'kernel_module_jffs2_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 115/270: 'kernel_module_jffs2_disabled'")
+if LC_ALL=C grep -q -m 1 "^install jffs2" /etc/modprobe.d/jffs2.conf ; then
+	sed -i 's/^install jffs2.*/install jffs2 /bin/true/g' /etc/modprobe.d/jffs2.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/jffs2.conf
+	echo "install jffs2 /bin/true" >> /etc/modprobe.d/jffs2.conf
+fi
+# END fix for 'kernel_module_jffs2_disabled'
+
+###############################################################################
+# BEGIN fix (116 / 270) for 'kernel_module_hfsplus_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 116/270: 'kernel_module_hfsplus_disabled'")
+if LC_ALL=C grep -q -m 1 "^install hfsplus" /etc/modprobe.d/hfsplus.conf ; then
+	sed -i 's/^install hfsplus.*/install hfsplus /bin/true/g' /etc/modprobe.d/hfsplus.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/hfsplus.conf
+	echo "install hfsplus /bin/true" >> /etc/modprobe.d/hfsplus.conf
+fi
+# END fix for 'kernel_module_hfsplus_disabled'
+
+###############################################################################
+# BEGIN fix (117 / 270) for 'kernel_module_hfs_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 117/270: 'kernel_module_hfs_disabled'")
+if LC_ALL=C grep -q -m 1 "^install hfs" /etc/modprobe.d/hfs.conf ; then
+	sed -i 's/^install hfs.*/install hfs /bin/true/g' /etc/modprobe.d/hfs.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/hfs.conf
+	echo "install hfs /bin/true" >> /etc/modprobe.d/hfs.conf
+fi
+# END fix for 'kernel_module_hfs_disabled'
+
+###############################################################################
+# BEGIN fix (118 / 270) for 'kernel_module_udf_disabled'
+###############################################################################
+(>&2 echo "Remediating rule 118/270: 'kernel_module_udf_disabled'")
+if LC_ALL=C grep -q -m 1 "^install udf" /etc/modprobe.d/udf.conf ; then
+	sed -i 's/^install udf.*/install udf /bin/true/g' /etc/modprobe.d/udf.conf
+else
+	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/udf.conf
+	echo "install udf /bin/true" >> /etc/modprobe.d/udf.conf
+fi
+# END fix for 'kernel_module_udf_disabled'
+
+###############################################################################
+# BEGIN fix (119 / 270) for 'mount_option_dev_shm_noexec'
+###############################################################################
+(>&2 echo "Remediating rule 119/270: 'mount_option_dev_shm_noexec'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "noexec" "" ""
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+# END fix for 'mount_option_dev_shm_noexec'
+
+###############################################################################
+# BEGIN fix (120 / 270) for 'mount_option_tmp_nodev'
+###############################################################################
+(>&2 echo "Remediating rule 120/270: 'mount_option_tmp_nodev'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/tmp" "nodev" "" ""
+
+	ensure_partition_is_mounted "/tmp"
+}
+
+perform_remediation
+# END fix for 'mount_option_tmp_nodev'
+
+###############################################################################
+# BEGIN fix (121 / 270) for 'mount_option_tmp_nosuid'
+###############################################################################
+(>&2 echo "Remediating rule 121/270: 'mount_option_tmp_nosuid'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/tmp" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/tmp"
+}
+
+perform_remediation
+# END fix for 'mount_option_tmp_nosuid'
+
+###############################################################################
+# BEGIN fix (122 / 270) for 'mount_option_nodev_nonroot_local_partitions'
+###############################################################################
+(>&2 echo "Remediating rule 122/270: 'mount_option_nodev_nonroot_local_partitions'")
+
+# NOTE: Run-time reconfiguration of partitions' mount options is not possible.
+# After performing this remediation be sure to also subsequently reboot the
+# system as soon as possible for the remediation to take the effect!
+
+# Shortened ID for frequently used character class
+SP="[:space:]"
+
+# Load /etc/fstab's content with LABEL= and UUID= tags expanded to real
+# device names into FSTAB_REAL_DEVICES array splitting items by newline
+readarray -t FSTAB_REAL_DEVICES < <(findmnt --fstab --evaluate --noheadings)
+
+for line in "${FSTAB_REAL_DEVICES[@]}"
+do
+    # For each line:
+    # * squeeze multiple space characters into one,
+    # * split line content info four columns (target, source, fstype, and
+    #   mount options) by space delimiter
+    read TARGET SOURCE FSTYPE MOUNT_OPTIONS <<< "$(echo "$line" | tr -s ' ')"
+
+    # Filter the targets according to the following criteria:
+    # * don't include record for root partition,
+    # * include the target only if it has the form of '/word.*' (not to include
+    #   special entries like e.g swap),
+    # * include the target only if its source has the form of '/dev.*'
+    #   (to process only local partitions)
+    if [[ ! $TARGET =~ ^\/$ ]] 		&&	# Don't include root partition
+       [[ $TARGET =~ ^\/[A-Za-z0-9_] ]] &&	# Include if target =~ '/word.*'
+       [[ $SOURCE =~ ^\/dev ]]			# Include if source =~ '/dev.*'
+    then
+
+        # Check the mount options column if it doesn't contain 'nodev' keyword yet
+        if ! grep -q "nodev" <<< "$MOUNT_OPTIONS"
+        then
+            # Check if current mount options is empty string ('') meaning
+            # particular /etc/fstab row contain just 'defaults' keyword
+            if [[ ${#MOUNT_OPTIONS} == "0" ]]
+            then
+                # If so, add 'defaults' back and append 'nodev' keyword
+                MOUNT_OPTIONS="defaults,nodev"
+            else
+                # Otherwise append just 'nodev' keyword
+                MOUNT_OPTIONS="$MOUNT_OPTIONS,nodev"
+            fi
+
+            # This target doesn't contain 'nodev' in mount options yet (and meets
+            # the above filtering criteria). Therefore obtain particular /etc/fstab's
+            # row into FSTAB_TARGET_ROW variable separating the mount options field with
+            # hash '#' character
+            FSTAB_TARGET_ROW=$(sed -n "s|\\(.*${TARGET}[$SP]\\+${FSTYPE}[$SP]\\+\\)\\([^$SP]\\+\\)|\\1#\\2#|p" /etc/fstab)
+            # Split the retrieved value by the hash '#' delimiter to get the
+            # row's head & tail (i.e. columns other than mount options) which won't
+            # get modified
+            TARGET_HEAD=$(cut -f 1 -d '#' <<< "$FSTAB_TARGET_ROW")
+            # TARGET_OPTS=$(cut -f 2 -d '#' <<< "$FSTAB_TARGET_ROW")
+            TARGET_TAIL=$(cut -f 3 -d '#' <<< "$FSTAB_TARGET_ROW")
+            # Replace old mount options for particular /etc/fstab's row (for this target
+            # and fstype) with new mount options
+            sed -i "s|${TARGET_HEAD}\(.*\)${TARGET_TAIL}|${TARGET_HEAD}${MOUNT_OPTIONS}${TARGET_TAIL}|" /etc/fstab
+        fi
+    fi
+done
+# END fix for 'mount_option_nodev_nonroot_local_partitions'
+
+###############################################################################
+# BEGIN fix (123 / 270) for 'mount_option_nodev_removable_partitions'
+###############################################################################
+(>&2 echo "Remediating rule 123/270: 'mount_option_nodev_removable_partitions'")
+
+var_removable_partition="/dev/cdrom"
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nodev" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+# END fix for 'mount_option_nodev_removable_partitions'
+
+###############################################################################
+# BEGIN fix (124 / 270) for 'mount_option_dev_shm_nodev'
+###############################################################################
+(>&2 echo "Remediating rule 124/270: 'mount_option_dev_shm_nodev'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nodev" "" ""
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+# END fix for 'mount_option_dev_shm_nodev'
+
+###############################################################################
+# BEGIN fix (125 / 270) for 'mount_option_dev_shm_nosuid'
+###############################################################################
+(>&2 echo "Remediating rule 125/270: 'mount_option_dev_shm_nosuid'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/dev/shm" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/dev/shm"
+}
+
+perform_remediation
+# END fix for 'mount_option_dev_shm_nosuid'
+
+###############################################################################
+# BEGIN fix (126 / 270) for 'mount_option_var_tmp_bind'
+###############################################################################
+(>&2 echo "Remediating rule 126/270: 'mount_option_var_tmp_bind'")
+
+
+# Delete particular /etc/fstab's row if /var/tmp is already configured to
+# represent a mount point (for some device or filesystem other than /tmp)
+if grep -q -P '.*\/var\/tmp.*' /etc/fstab
+then
+  sed -i '/.*\/var\/tmp.*/d' /etc/fstab
+fi
+umount /var/tmp
+
+# Bind-mount /var/tmp to /tmp via /etc/fstab (preserving the /etc/fstab form)
+printf "%-24s%-24s%-8s%-32s%-3s\n" "/tmp" "/var/tmp" "none" "rw,nodev,noexec,nosuid,bind" "0 0" >> /etc/fstab
+
+mkdir -p /var/tmp
+mount -B /tmp /var/tmp
+# END fix for 'mount_option_var_tmp_bind'
+
+###############################################################################
+# BEGIN fix (127 / 270) for 'mount_option_tmp_noexec'
+###############################################################################
+(>&2 echo "Remediating rule 127/270: 'mount_option_tmp_noexec'")
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/tmp" "noexec" "" ""
+
+	ensure_partition_is_mounted "/tmp"
+}
+
+perform_remediation
+# END fix for 'mount_option_tmp_noexec'
+
+###############################################################################
+# BEGIN fix (128 / 270) for 'mount_option_nosuid_removable_partitions'
+###############################################################################
+(>&2 echo "Remediating rule 128/270: 'mount_option_nosuid_removable_partitions'")
+
+var_removable_partition="/dev/cdrom"
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+# END fix for 'mount_option_nosuid_removable_partitions'
+
+###############################################################################
+# BEGIN fix (129 / 270) for 'mount_option_noexec_removable_partitions'
+###############################################################################
+(>&2 echo "Remediating rule 129/270: 'mount_option_noexec_removable_partitions'")
+
+var_removable_partition="/dev/cdrom"
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "noexec" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+# END fix for 'mount_option_noexec_removable_partitions'
+
+###############################################################################
+# BEGIN fix (130 / 270) for 'umask_for_daemons'
+###############################################################################
+(>&2 echo "Remediating rule 130/270: 'umask_for_daemons'")
+
+var_umask_for_daemons="022"
+
+grep -q ^umask /etc/init.d/functions && \
+  sed -i "s/umask.*/umask $var_umask_for_daemons/g" /etc/init.d/functions
+if ! [ $? -eq 0 ]; then
+    echo "umask $var_umask_for_daemons" >> /etc/init.d/functions
+fi
+# END fix for 'umask_for_daemons'
+
+###############################################################################
+# BEGIN fix (131 / 270) for 'sysctl_kernel_exec_shield'
+###############################################################################
+(>&2 echo "Remediating rule 131/270: 'sysctl_kernel_exec_shield'")
+(>&2 echo "FIX FOR THIS RULE 'sysctl_kernel_exec_shield' IS MISSING!")
+# END fix for 'sysctl_kernel_exec_shield'
+
+###############################################################################
+# BEGIN fix (132 / 270) for 'sysctl_kernel_randomize_va_space'
+###############################################################################
+(>&2 echo "Remediating rule 132/270: 'sysctl_kernel_randomize_va_space'")
+
+
+#
+# Set runtime for kernel.randomize_va_space
+#
+/sbin/sysctl -q -n -w kernel.randomize_va_space="2"
+
+#
+# If kernel.randomize_va_space present in /etc/sysctl.conf, change value to "2"
+#	else, add "kernel.randomize_va_space = 2" to /etc/sysctl.conf
+#
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" 'CCE-26999-3'
+# END fix for 'sysctl_kernel_randomize_va_space'
+
+###############################################################################
+# BEGIN fix (133 / 270) for 'service_auditd_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 133/270: 'service_auditd_enabled'")
 
 /sbin/service 'auditd' start
 /sbin/chkconfig --level 0123456 'auditd' on
 # END fix for 'service_auditd_enabled'
 
 ###############################################################################
-# BEGIN fix (107 / 270) for 'grub_legacy_audit_argument'
+# BEGIN fix (134 / 270) for 'grub_legacy_audit_argument'
 ###############################################################################
-(>&2 echo "Remediating rule 107/270: 'grub_legacy_audit_argument'")
+(>&2 echo "Remediating rule 134/270: 'grub_legacy_audit_argument'")
 
 # Correct the form of kernel command line for each installed kernel
 # in the bootloader
@@ -3306,9 +4240,9 @@ sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
 # END fix for 'grub_legacy_audit_argument'
 
 ###############################################################################
-# BEGIN fix (108 / 270) for 'auditd_audispd_syslog_plugin_activated'
+# BEGIN fix (135 / 270) for 'auditd_audispd_syslog_plugin_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 108/270: 'auditd_audispd_syslog_plugin_activated'")
+(>&2 echo "Remediating rule 135/270: 'auditd_audispd_syslog_plugin_activated'")
 
 var_syslog_active="yes"
 
@@ -3395,9 +4329,9 @@ replace_or_append $AUDISP_SYSLOGCONFIG '^active' "$var_syslog_active" "CCE-26933
 # END fix for 'auditd_audispd_syslog_plugin_activated'
 
 ###############################################################################
-# BEGIN fix (109 / 270) for 'auditd_data_retention_max_log_file'
+# BEGIN fix (136 / 270) for 'auditd_data_retention_max_log_file'
 ###############################################################################
-(>&2 echo "Remediating rule 109/270: 'auditd_data_retention_max_log_file'")
+(>&2 echo "Remediating rule 136/270: 'auditd_data_retention_max_log_file'")
 
 var_auditd_max_log_file="6"
 
@@ -3483,9 +4417,9 @@ replace_or_append $AUDITCONFIG '^max_log_file' "$var_auditd_max_log_file" "CCE-2
 # END fix for 'auditd_data_retention_max_log_file'
 
 ###############################################################################
-# BEGIN fix (110 / 270) for 'auditd_data_retention_action_mail_acct'
+# BEGIN fix (137 / 270) for 'auditd_data_retention_action_mail_acct'
 ###############################################################################
-(>&2 echo "Remediating rule 110/270: 'auditd_data_retention_action_mail_acct'")
+(>&2 echo "Remediating rule 137/270: 'auditd_data_retention_action_mail_acct'")
 
 var_auditd_action_mail_acct="root"
 
@@ -3571,9 +4505,9 @@ replace_or_append $AUDITCONFIG '^action_mail_acct' "$var_auditd_action_mail_acct
 # END fix for 'auditd_data_retention_action_mail_acct'
 
 ###############################################################################
-# BEGIN fix (111 / 270) for 'auditd_data_retention_admin_space_left_action'
+# BEGIN fix (138 / 270) for 'auditd_data_retention_admin_space_left_action'
 ###############################################################################
-(>&2 echo "Remediating rule 111/270: 'auditd_data_retention_admin_space_left_action'")
+(>&2 echo "Remediating rule 138/270: 'auditd_data_retention_admin_space_left_action'")
 
 var_auditd_admin_space_left_action="single"
 
@@ -3659,9 +4593,9 @@ replace_or_append $AUDITCONFIG '^admin_space_left_action' "$var_auditd_admin_spa
 # END fix for 'auditd_data_retention_admin_space_left_action'
 
 ###############################################################################
-# BEGIN fix (112 / 270) for 'auditd_data_retention_space_left_action'
+# BEGIN fix (139 / 270) for 'auditd_data_retention_space_left_action'
 ###############################################################################
-(>&2 echo "Remediating rule 112/270: 'auditd_data_retention_space_left_action'")
+(>&2 echo "Remediating rule 139/270: 'auditd_data_retention_space_left_action'")
 
 var_auditd_space_left_action="email"
 
@@ -3753,9 +4687,9 @@ replace_or_append $AUDITCONFIG '^space_left_action' "$var_auditd_space_left_acti
 # END fix for 'auditd_data_retention_space_left_action'
 
 ###############################################################################
-# BEGIN fix (113 / 270) for 'auditd_data_retention_num_logs'
+# BEGIN fix (140 / 270) for 'auditd_data_retention_num_logs'
 ###############################################################################
-(>&2 echo "Remediating rule 113/270: 'auditd_data_retention_num_logs'")
+(>&2 echo "Remediating rule 140/270: 'auditd_data_retention_num_logs'")
 
 var_auditd_num_logs="5"
 
@@ -3841,9 +4775,9 @@ replace_or_append $AUDITCONFIG '^num_logs' "$var_auditd_num_logs" "CCE-27522-2"
 # END fix for 'auditd_data_retention_num_logs'
 
 ###############################################################################
-# BEGIN fix (114 / 270) for 'auditd_data_retention_max_log_file_action'
+# BEGIN fix (141 / 270) for 'auditd_data_retention_max_log_file_action'
 ###############################################################################
-(>&2 echo "Remediating rule 114/270: 'auditd_data_retention_max_log_file_action'")
+(>&2 echo "Remediating rule 141/270: 'auditd_data_retention_max_log_file_action'")
 
 var_auditd_max_log_file_action="rotate"
 
@@ -3929,9 +4863,9 @@ replace_or_append $AUDITCONFIG '^max_log_file_action' "$var_auditd_max_log_file_
 # END fix for 'auditd_data_retention_max_log_file_action'
 
 ###############################################################################
-# BEGIN fix (115 / 270) for 'audit_rules_session_events'
+# BEGIN fix (142 / 270) for 'audit_rules_session_events'
 ###############################################################################
-(>&2 echo "Remediating rule 115/270: 'audit_rules_session_events'")
+(>&2 echo "Remediating rule 142/270: 'audit_rules_session_events'")
 
 
 # Perform the remediation
@@ -4332,29 +5266,9 @@ fix_audit_watch_rule "augenrules" "/var/log/wtmp" "wa" "session"
 # END fix for 'audit_rules_session_events'
 
 ###############################################################################
-# BEGIN fix (116 / 270) for 'file_ownership_var_log_audit'
+# BEGIN fix (143 / 270) for 'audit_rules_sysadmin_actions'
 ###############################################################################
-(>&2 echo "Remediating rule 116/270: 'file_ownership_var_log_audit'")
-
-if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
-  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
-  if ! [ "${GROUP}" == 'root' ] ; then
-    chown root.${GROUP} /var/log/audit
-    chown root.${GROUP} /var/log/audit/audit.log*
-  else
-    chown root.root /var/log/audit
-    chown root.root /var/log/audit/audit.log*
-  fi
-else
-  chown root.root /var/log/audit
-  chown root.root /var/log/audit/audit.log*
-fi
-# END fix for 'file_ownership_var_log_audit'
-
-###############################################################################
-# BEGIN fix (117 / 270) for 'audit_rules_sysadmin_actions'
-###############################################################################
-(>&2 echo "Remediating rule 117/270: 'audit_rules_sysadmin_actions'")
+(>&2 echo "Remediating rule 143/270: 'audit_rules_sysadmin_actions'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -4618,14 +5532,14 @@ do
 	fi
 done
 }
-fix_audit_watch_rule "auditctl" "/etc/sudoers.d" "wa" "actions"
-fix_audit_watch_rule "augenrules" "/etc/sudoers.d" "wa" "actions"
+fix_audit_watch_rule "auditctl" "/etc/sudoers.d/" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers.d/" "wa" "actions"
 # END fix for 'audit_rules_sysadmin_actions'
 
 ###############################################################################
-# BEGIN fix (118 / 270) for 'audit_rules_networkconfig_modification'
+# BEGIN fix (144 / 270) for 'audit_rules_networkconfig_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 118/270: 'audit_rules_networkconfig_modification'")
+(>&2 echo "Remediating rule 144/270: 'audit_rules_networkconfig_modification'")
 
 
 # First perform the remediation of the syscall rule
@@ -4768,7 +5682,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -5392,9 +6306,9 @@ fix_audit_watch_rule "augenrules" "/etc/sysconfig/network" "wa" "audit_rules_net
 # END fix for 'audit_rules_networkconfig_modification'
 
 ###############################################################################
-# BEGIN fix (119 / 270) for 'audit_rules_usergroup_modification'
+# BEGIN fix (145 / 270) for 'audit_rules_usergroup_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 119/270: 'audit_rules_usergroup_modification'")
+(>&2 echo "Remediating rule 145/270: 'audit_rules_usergroup_modification'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -6056,9 +6970,9 @@ fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_user
 # END fix for 'audit_rules_usergroup_modification'
 
 ###############################################################################
-# BEGIN fix (120 / 270) for 'audit_rules_media_export'
+# BEGIN fix (146 / 270) for 'audit_rules_media_export'
 ###############################################################################
-(>&2 echo "Remediating rule 120/270: 'audit_rules_media_export'")
+(>&2 echo "Remediating rule 146/270: 'audit_rules_media_export'")
 
 
 # Perform the remediation of the syscall rule
@@ -6200,7 +7114,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -6297,9 +7211,9 @@ done
 # END fix for 'audit_rules_media_export'
 
 ###############################################################################
-# BEGIN fix (121 / 270) for 'file_permissions_var_log_audit'
+# BEGIN fix (147 / 270) for 'file_permissions_var_log_audit'
 ###############################################################################
-(>&2 echo "Remediating rule 121/270: 'file_permissions_var_log_audit'")
+(>&2 echo "Remediating rule 147/270: 'file_permissions_var_log_audit'")
 
 if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
   GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
@@ -6322,37 +7236,29 @@ fi
 # END fix for 'file_permissions_var_log_audit'
 
 ###############################################################################
-# BEGIN fix (122 / 270) for 'audit_rules_immutable'
+# BEGIN fix (148 / 270) for 'file_ownership_var_log_audit'
 ###############################################################################
-(>&2 echo "Remediating rule 122/270: 'audit_rules_immutable'")
+(>&2 echo "Remediating rule 148/270: 'file_ownership_var_log_audit'")
 
-# Traverse all of:
-#
-# /etc/audit/audit.rules,			(for auditctl case)
-# /etc/audit/rules.d/*.rules			(for augenrules case)
-#
-# files to check if '-e .*' setting is present in that '*.rules' file already.
-# If found, delete such occurrence since auditctl(8) manual page instructs the
-# '-e 2' rule should be placed as the last rule in the configuration
-find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
-
-# Append '-e 2' requirement at the end of both:
-# * /etc/audit/audit.rules file 		(for auditctl case)
-# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
-
-for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
-do
-	echo '' >> $AUDIT_FILE
-	echo '# Set the audit.rules configuration immutable per security requirements' >> $AUDIT_FILE
-	echo '# Reboot is required to change audit rules once this setting is applied' >> $AUDIT_FILE
-	echo '-e 2' >> $AUDIT_FILE
-done
-# END fix for 'audit_rules_immutable'
+if LC_ALL=C grep -m 1 -q ^log_group /etc/audit/auditd.conf; then
+  GROUP=$(awk -F "=" '/log_group/ {print $2}' /etc/audit/auditd.conf | tr -d ' ')
+  if ! [ "${GROUP}" == 'root' ] ; then
+    chown root.${GROUP} /var/log/audit
+    chown root.${GROUP} /var/log/audit/audit.log*
+  else
+    chown root.root /var/log/audit
+    chown root.root /var/log/audit/audit.log*
+  fi
+else
+  chown root.root /var/log/audit
+  chown root.root /var/log/audit/audit.log*
+fi
+# END fix for 'file_ownership_var_log_audit'
 
 ###############################################################################
-# BEGIN fix (123 / 270) for 'audit_rules_mac_modification'
+# BEGIN fix (149 / 270) for 'audit_rules_mac_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 123/270: 'audit_rules_mac_modification'")
+(>&2 echo "Remediating rule 149/270: 'audit_rules_mac_modification'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -6490,9 +7396,37 @@ fix_audit_watch_rule "augenrules" "/etc/selinux/" "wa" "MAC-policy"
 # END fix for 'audit_rules_mac_modification'
 
 ###############################################################################
-# BEGIN fix (124 / 270) for 'audit_rules_kernel_module_loading'
+# BEGIN fix (150 / 270) for 'audit_rules_immutable'
 ###############################################################################
-(>&2 echo "Remediating rule 124/270: 'audit_rules_kernel_module_loading'")
+(>&2 echo "Remediating rule 150/270: 'audit_rules_immutable'")
+
+# Traverse all of:
+#
+# /etc/audit/audit.rules,			(for auditctl case)
+# /etc/audit/rules.d/*.rules			(for augenrules case)
+#
+# files to check if '-e .*' setting is present in that '*.rules' file already.
+# If found, delete such occurrence since auditctl(8) manual page instructs the
+# '-e 2' rule should be placed as the last rule in the configuration
+find /etc/audit /etc/audit/rules.d -maxdepth 1 -type f -name '*.rules' -exec sed -i '/-e[[:space:]]\+.*/d' {} ';'
+
+# Append '-e 2' requirement at the end of both:
+# * /etc/audit/audit.rules file 		(for auditctl case)
+# * /etc/audit/rules.d/immutable.rules		(for augenrules case)
+
+for AUDIT_FILE in "/etc/audit/audit.rules" "/etc/audit/rules.d/immutable.rules"
+do
+	echo '' >> $AUDIT_FILE
+	echo '# Set the audit.rules configuration immutable per security requirements' >> $AUDIT_FILE
+	echo '# Reboot is required to change audit rules once this setting is applied' >> $AUDIT_FILE
+	echo '-e 2' >> $AUDIT_FILE
+done
+# END fix for 'audit_rules_immutable'
+
+###############################################################################
+# BEGIN fix (151 / 270) for 'audit_rules_kernel_module_loading'
+###############################################################################
+(>&2 echo "Remediating rule 151/270: 'audit_rules_kernel_module_loading'")
 
 
 # First perform the remediation of the syscall rule
@@ -6640,7 +7574,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -6737,9 +7671,9 @@ done
 # END fix for 'audit_rules_kernel_module_loading'
 
 ###############################################################################
-# BEGIN fix (125 / 270) for 'audit_rules_login_events'
+# BEGIN fix (152 / 270) for 'audit_rules_login_events'
 ###############################################################################
-(>&2 echo "Remediating rule 125/270: 'audit_rules_login_events'")
+(>&2 echo "Remediating rule 152/270: 'audit_rules_login_events'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -7139,9 +8073,9 @@ fix_audit_watch_rule "augenrules" "/var/log/lastlog" "wa" "logins"
 # END fix for 'audit_rules_login_events'
 
 ###############################################################################
-# BEGIN fix (126 / 270) for 'audit_rules_time_stime'
+# BEGIN fix (153 / 270) for 'audit_rules_time_stime'
 ###############################################################################
-(>&2 echo "Remediating rule 126/270: 'audit_rules_time_stime'")
+(>&2 echo "Remediating rule 153/270: 'audit_rules_time_stime'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -7271,7 +8205,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -7408,9 +8342,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_stime'
 
 ###############################################################################
-# BEGIN fix (127 / 270) for 'audit_rules_time_settimeofday'
+# BEGIN fix (154 / 270) for 'audit_rules_time_settimeofday'
 ###############################################################################
-(>&2 echo "Remediating rule 127/270: 'audit_rules_time_settimeofday'")
+(>&2 echo "Remediating rule 154/270: 'audit_rules_time_settimeofday'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -7540,7 +8474,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -7677,9 +8611,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_settimeofday'
 
 ###############################################################################
-# BEGIN fix (128 / 270) for 'audit_rules_time_watch_localtime'
+# BEGIN fix (155 / 270) for 'audit_rules_time_watch_localtime'
 ###############################################################################
-(>&2 echo "Remediating rule 128/270: 'audit_rules_time_watch_localtime'")
+(>&2 echo "Remediating rule 155/270: 'audit_rules_time_watch_localtime'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -7817,9 +8751,9 @@ fix_audit_watch_rule "augenrules" "/etc/localtime" "wa" "audit_time_rules"
 # END fix for 'audit_rules_time_watch_localtime'
 
 ###############################################################################
-# BEGIN fix (129 / 270) for 'audit_rules_time_clock_settime'
+# BEGIN fix (156 / 270) for 'audit_rules_time_clock_settime'
 ###############################################################################
-(>&2 echo "Remediating rule 129/270: 'audit_rules_time_clock_settime'")
+(>&2 echo "Remediating rule 156/270: 'audit_rules_time_clock_settime'")
 
 
 # First perform the remediation of the syscall rule
@@ -7961,7 +8895,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8058,9 +8992,9 @@ done
 # END fix for 'audit_rules_time_clock_settime'
 
 ###############################################################################
-# BEGIN fix (130 / 270) for 'audit_rules_time_adjtimex'
+# BEGIN fix (157 / 270) for 'audit_rules_time_adjtimex'
 ###############################################################################
-(>&2 echo "Remediating rule 130/270: 'audit_rules_time_adjtimex'")
+(>&2 echo "Remediating rule 157/270: 'audit_rules_time_adjtimex'")
 # Function to fix syscall audit rule for given system call. It is
 # based on example audit syscall rule definitions as outlined in
 # /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
@@ -8190,7 +9124,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8327,9 +9261,9 @@ perform_audit_adjtimex_settimeofday_stime_remediation
 # END fix for 'audit_rules_time_adjtimex'
 
 ###############################################################################
-# BEGIN fix (131 / 270) for 'audit_rules_dac_modification_fchown'
+# BEGIN fix (158 / 270) for 'audit_rules_dac_modification_fchown'
 ###############################################################################
-(>&2 echo "Remediating rule 131/270: 'audit_rules_dac_modification_fchown'")
+(>&2 echo "Remediating rule 158/270: 'audit_rules_dac_modification_fchown'")
 
 
 # First perform the remediation of the syscall rule
@@ -8472,7 +9406,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8569,9 +9503,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchown'
 
 ###############################################################################
-# BEGIN fix (132 / 270) for 'audit_rules_dac_modification_setxattr'
+# BEGIN fix (159 / 270) for 'audit_rules_dac_modification_setxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 132/270: 'audit_rules_dac_modification_setxattr'")
+(>&2 echo "Remediating rule 159/270: 'audit_rules_dac_modification_setxattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -8714,7 +9648,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -8811,9 +9745,9 @@ done
 # END fix for 'audit_rules_dac_modification_setxattr'
 
 ###############################################################################
-# BEGIN fix (133 / 270) for 'audit_rules_dac_modification_chown'
+# BEGIN fix (160 / 270) for 'audit_rules_dac_modification_chown'
 ###############################################################################
-(>&2 echo "Remediating rule 133/270: 'audit_rules_dac_modification_chown'")
+(>&2 echo "Remediating rule 160/270: 'audit_rules_dac_modification_chown'")
 
 
 # First perform the remediation of the syscall rule
@@ -8956,7 +9890,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9053,251 +9987,9 @@ done
 # END fix for 'audit_rules_dac_modification_chown'
 
 ###############################################################################
-# BEGIN fix (134 / 270) for 'audit_rules_dac_modification_removexattr'
+# BEGIN fix (161 / 270) for 'audit_rules_dac_modification_fchownat'
 ###############################################################################
-(>&2 echo "Remediating rule 134/270: 'audit_rules_dac_modification_removexattr'")
-
-
-# First perform the remediation of the syscall rule
-# Retrieve hardware architecture of the underlying system
-[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
-
-for ARCH in "${RULE_ARCHS[@]}"
-do
-	PATTERN="-a always,exit -F arch=$ARCH -S removexattr.*"
-	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S removexattr -F auid>=500 -F auid!=unset -F key=perm_mod"
-
-	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
-# Function to fix syscall audit rule for given system call. It is
-# based on example audit syscall rule definitions as outlined in
-# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
-# package. It will combine multiple system calls belonging to the same
-# syscall group into one audit rule (rather than to create audit rule per
-# different system call) to avoid audit infrastructure performance penalty
-# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
-#
-#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
-#
-# for further details.
-#
-# Expects five arguments (each of them is required) in the form of:
-# * audit tool				tool used to load audit rules,
-# 					either 'auditctl', or 'augenrules
-# * audit rules' pattern		audit rule skeleton for same syscall
-# * syscall group			greatest common string this rule shares
-# 					with other rules from the same group
-# * architecture			architecture this rule is intended for
-# * full form of new rule to add	expected full form of audit rule as to be
-# 					added into audit.rules file
-#
-# Note: The 2-th up to 4-th arguments are used to determine how many existing
-# audit rules will be inspected for resemblance with the new audit rule
-# (5-th argument) the function is going to add. The rule's similarity check
-# is performed to optimize audit.rules definition (merge syscalls of the same
-# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
-# penalty.
-#
-# Example call:
-#
-#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
-#
-function fix_audit_syscall_rule {
-
-# Load function arguments into local variables
-local tool="$1"
-local pattern="$2"
-local group="$3"
-local arch="$4"
-local full_rule="$5"
-
-# Check sanity of the input
-if [ $# -ne "5" ]
-then
-	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
-	echo "Aborting."
-	exit 1
-fi
-
-# Create a list of audit *.rules files that should be inspected for presence and correctness
-# of a particular audit rule. The scheme is as follows:
-# 
-# -----------------------------------------------------------------------------------------
-#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
-# -----------------------------------------------------------------------------------------
-#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
-# -----------------------------------------------------------------------------------------
-#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
-#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
-# -----------------------------------------------------------------------------------------
-#
-declare -a files_to_inspect
-
-retval=0
-
-# First check sanity of the specified audit tool
-if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
-then
-	echo "Unknown audit rules loading tool: $1. Aborting."
-	echo "Use either 'auditctl' or 'augenrules'!"
-	return 1
-# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
-# file to the list of files to be inspected
-elif [ "$tool" == 'auditctl' ]
-then
-	files_to_inspect+=('/etc/audit/audit.rules' )
-# If audit tool is 'augenrules', then check if the audit rule is defined
-# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
-# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
-elif [ "$tool" == 'augenrules' ]
-then
-	# Extract audit $key from audit rule so we can use it later
-	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
-	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-	for match in "${matches[@]}"
-	do
-		files_to_inspect+=("${match}")
-	done
-	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
-	if [ ${#files_to_inspect[@]} -eq "0" ]
-	then
-		file_to_inspect="/etc/audit/rules.d/$key.rules"
-		files_to_inspect=("$file_to_inspect")
-		if [ ! -e "$file_to_inspect" ]
-		then
-			touch "$file_to_inspect"
-			chmod 0640 "$file_to_inspect"
-		fi
-	fi
-fi
-
-#
-# Indicator that we want to append $full_rule into $audit_file by default
-local append_expected_rule=0
-
-for audit_file in "${files_to_inspect[@]}"
-do
-	# Filter existing $audit_file rules' definitions to select those that:
-	# * follow the rule pattern, and
-	# * meet the hardware architecture requirement, and
-	# * are current syscall group specific
-	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
-	if [ $? -ne 0 ]
-	then
-		retval=1
-	fi
-
-	# Process rules found case-by-case
-	for rule in "${existing_rules[@]}"
-	do
-		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
-		if [ "${rule}" != "${full_rule}" ]
-		then
-			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
-			# Check if list of '-S syscall' arguments of that rule is subset
-			# of '-S syscall' list of expected $full_rule
-			if grep -q -- "$rule_syscalls" <<< "$full_rule"
-			then
-				# Rule is covered (i.e. the list of -S syscalls for this rule is
-				# subset of -S syscalls of $full_rule => existing rule can be deleted
-				# Thus delete the rule from audit.rules & our array
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-				existing_rules=("${existing_rules[@]//$rule/}")
-			else
-				# Rule isn't covered by $full_rule - it besides -S syscall arguments
-				# for this group contains also -S syscall arguments for other syscall
-				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
-				# since 'lchown' & 'fchownat' share 'chown' substring
-				# Therefore:
-				# * 1) delete the original rule from audit.rules
-				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
-				# * 2) delete the -S syscall arguments for this syscall group, but
-				# keep those not belonging to this syscall group
-				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
-				# * 3) append the modified (filtered) rule again into audit.rules
-				# if the same rule not already present
-				#
-				# 1) Delete the original rule
-				sed -i -e "\;${rule};d" "$audit_file"
-				if [ $? -ne 0 ]
-				then
-					retval=1
-				fi
-
-				# 2) Delete syscalls for this group, but keep those from other groups
-				# Convert current rule syscall's string into array splitting by '-S' delimiter
-				IFS_BKP="$IFS"
-				IFS=$'-S'
-				read -a rule_syscalls_as_array <<< "$rule_syscalls"
-				# Reset IFS back to default
-				IFS="$IFS_BKP"
-				# Splitting by "-S" can't be replaced by the readarray functionality easily
-
-				# Declare new empty string to hold '-S syscall' arguments from other groups
-				new_syscalls_for_rule=''
-				# Walk through existing '-S syscall' arguments
-				for syscall_arg in "${rule_syscalls_as_array[@]}"
-				do
-					# Skip empty $syscall_arg values
-					if [ "$syscall_arg" == '' ]
-					then
-						continue
-					fi
-					# If the '-S syscall' doesn't belong to current group add it to the new list
-					# (together with adding '-S' delimiter back for each of such item found)
-					if grep -q -v -- "$group" <<< "$syscall_arg"
-					then
-						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
-					fi
-				done
-				# Replace original '-S syscall' list with the new one for this rule
-				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
-				# Squeeze repeated whitespace characters in rule definition (if any) into one
-				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
-				# 3) Append the modified / filtered rule again into audit.rules
-				#    (but only in case it's not present yet to prevent duplicate definitions)
-				if ! grep -q -- "$updated_rule" "$audit_file"
-				then
-					echo "$updated_rule" >> "$audit_file"
-				fi
-			fi
-		else
-			# $audit_file already contains the expected rule form for this
-			# architecture & key => don't insert it second time
-			append_expected_rule=1
-		fi
-	done
-
-	# We deleted all rules that were subset of the expected one for this arch & key.
-	# Also isolated rules containing system calls not from this system calls group.
-	# Now append the expected rule if it's not present in $audit_file yet
-	if [[ ${append_expected_rule} -eq "0" ]]
-	then
-		echo "$full_rule" >> "$audit_file"
-	fi
-done
-
-return $retval
-
-}
-	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
-done
-# END fix for 'audit_rules_dac_modification_removexattr'
-
-###############################################################################
-# BEGIN fix (135 / 270) for 'audit_rules_dac_modification_fchownat'
-###############################################################################
-(>&2 echo "Remediating rule 135/270: 'audit_rules_dac_modification_fchownat'")
+(>&2 echo "Remediating rule 161/270: 'audit_rules_dac_modification_fchownat'")
 
 
 # First perform the remediation of the syscall rule
@@ -9440,7 +10132,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9537,9 +10229,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchownat'
 
 ###############################################################################
-# BEGIN fix (136 / 270) for 'audit_rules_dac_modification_chmod'
+# BEGIN fix (162 / 270) for 'audit_rules_dac_modification_chmod'
 ###############################################################################
-(>&2 echo "Remediating rule 136/270: 'audit_rules_dac_modification_chmod'")
+(>&2 echo "Remediating rule 162/270: 'audit_rules_dac_modification_chmod'")
 
 
 # First perform the remediation of the syscall rule
@@ -9682,7 +10374,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -9779,9 +10471,9 @@ done
 # END fix for 'audit_rules_dac_modification_chmod'
 
 ###############################################################################
-# BEGIN fix (137 / 270) for 'audit_rules_dac_modification_fsetxattr'
+# BEGIN fix (163 / 270) for 'audit_rules_dac_modification_removexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 137/270: 'audit_rules_dac_modification_fsetxattr'")
+(>&2 echo "Remediating rule 163/270: 'audit_rules_dac_modification_removexattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -9790,9 +10482,9 @@ done
 
 for ARCH in "${RULE_ARCHS[@]}"
 do
-	PATTERN="-a always,exit -F arch=$ARCH -S fsetxattr.*"
+	PATTERN="-a always,exit -F arch=$ARCH -S removexattr.*"
 	GROUP="perm_mod"
-	FULL_RULE="-a always,exit -F arch=$ARCH -S fsetxattr -F auid>=500 -F auid!=unset -F key=perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S removexattr -F auid>=500 -F auid!=unset -F key=perm_mod"
 
 	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
 # Function to fix syscall audit rule for given system call. It is
@@ -9924,7 +10616,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10018,12 +10710,12 @@ return $retval
 	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
 done
-# END fix for 'audit_rules_dac_modification_fsetxattr'
+# END fix for 'audit_rules_dac_modification_removexattr'
 
 ###############################################################################
-# BEGIN fix (138 / 270) for 'audit_rules_dac_modification_fchmod'
+# BEGIN fix (164 / 270) for 'audit_rules_dac_modification_fchmod'
 ###############################################################################
-(>&2 echo "Remediating rule 138/270: 'audit_rules_dac_modification_fchmod'")
+(>&2 echo "Remediating rule 164/270: 'audit_rules_dac_modification_fchmod'")
 
 
 # First perform the remediation of the syscall rule
@@ -10166,7 +10858,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10263,9 +10955,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchmod'
 
 ###############################################################################
-# BEGIN fix (139 / 270) for 'audit_rules_dac_modification_lsetxattr'
+# BEGIN fix (165 / 270) for 'audit_rules_dac_modification_lsetxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 139/270: 'audit_rules_dac_modification_lsetxattr'")
+(>&2 echo "Remediating rule 165/270: 'audit_rules_dac_modification_lsetxattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -10408,7 +11100,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10505,9 +11197,9 @@ done
 # END fix for 'audit_rules_dac_modification_lsetxattr'
 
 ###############################################################################
-# BEGIN fix (140 / 270) for 'audit_rules_dac_modification_fremovexattr'
+# BEGIN fix (166 / 270) for 'audit_rules_dac_modification_fremovexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 140/270: 'audit_rules_dac_modification_fremovexattr'")
+(>&2 echo "Remediating rule 166/270: 'audit_rules_dac_modification_fremovexattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -10650,7 +11342,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10747,9 +11439,9 @@ done
 # END fix for 'audit_rules_dac_modification_fremovexattr'
 
 ###############################################################################
-# BEGIN fix (141 / 270) for 'audit_rules_dac_modification_lchown'
+# BEGIN fix (167 / 270) for 'audit_rules_dac_modification_lchown'
 ###############################################################################
-(>&2 echo "Remediating rule 141/270: 'audit_rules_dac_modification_lchown'")
+(>&2 echo "Remediating rule 167/270: 'audit_rules_dac_modification_lchown'")
 
 
 # First perform the remediation of the syscall rule
@@ -10892,7 +11584,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -10989,9 +11681,251 @@ done
 # END fix for 'audit_rules_dac_modification_lchown'
 
 ###############################################################################
-# BEGIN fix (142 / 270) for 'audit_rules_dac_modification_fchmodat'
+# BEGIN fix (168 / 270) for 'audit_rules_dac_modification_fsetxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 142/270: 'audit_rules_dac_modification_fchmodat'")
+(>&2 echo "Remediating rule 168/270: 'audit_rules_dac_modification_fsetxattr'")
+
+
+# First perform the remediation of the syscall rule
+# Retrieve hardware architecture of the underlying system
+[ "$(getconf LONG_BIT)" = "32" ] && RULE_ARCHS=("b32") || RULE_ARCHS=("b32" "b64")
+
+for ARCH in "${RULE_ARCHS[@]}"
+do
+	PATTERN="-a always,exit -F arch=$ARCH -S fsetxattr.*"
+	GROUP="perm_mod"
+	FULL_RULE="-a always,exit -F arch=$ARCH -S fsetxattr -F auid>=500 -F auid!=unset -F key=perm_mod"
+
+	# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
+# Function to fix syscall audit rule for given system call. It is
+# based on example audit syscall rule definitions as outlined in
+# /usr/share/doc/audit-2.3.7/stig.rules file provided with the audit
+# package. It will combine multiple system calls belonging to the same
+# syscall group into one audit rule (rather than to create audit rule per
+# different system call) to avoid audit infrastructure performance penalty
+# in the case of 'one-audit-rule-definition-per-one-system-call'. See:
+#
+#   https://www.redhat.com/archives/linux-audit/2014-November/msg00009.html
+#
+# for further details.
+#
+# Expects five arguments (each of them is required) in the form of:
+# * audit tool				tool used to load audit rules,
+# 					either 'auditctl', or 'augenrules
+# * audit rules' pattern		audit rule skeleton for same syscall
+# * syscall group			greatest common string this rule shares
+# 					with other rules from the same group
+# * architecture			architecture this rule is intended for
+# * full form of new rule to add	expected full form of audit rule as to be
+# 					added into audit.rules file
+#
+# Note: The 2-th up to 4-th arguments are used to determine how many existing
+# audit rules will be inspected for resemblance with the new audit rule
+# (5-th argument) the function is going to add. The rule's similarity check
+# is performed to optimize audit.rules definition (merge syscalls of the same
+# group into one rule) to avoid the "single-syscall-per-audit-rule" performance
+# penalty.
+#
+# Example call:
+#
+#	See e.g. 'audit_rules_file_deletion_events.sh' remediation script
+#
+function fix_audit_syscall_rule {
+
+# Load function arguments into local variables
+local tool="$1"
+local pattern="$2"
+local group="$3"
+local arch="$4"
+local full_rule="$5"
+
+# Check sanity of the input
+if [ $# -ne "5" ]
+then
+	echo "Usage: fix_audit_syscall_rule 'tool' 'pattern' 'group' 'arch' 'full rule'"
+	echo "Aborting."
+	exit 1
+fi
+
+# Create a list of audit *.rules files that should be inspected for presence and correctness
+# of a particular audit rule. The scheme is as follows:
+# 
+# -----------------------------------------------------------------------------------------
+#  Tool used to load audit rules | Rule already defined  |  Audit rules file to inspect    |
+# -----------------------------------------------------------------------------------------
+#        auditctl                |     Doesn't matter    |  /etc/audit/audit.rules         |
+# -----------------------------------------------------------------------------------------
+#        augenrules              |          Yes          |  /etc/audit/rules.d/*.rules     |
+#        augenrules              |          No           |  /etc/audit/rules.d/$key.rules  |
+# -----------------------------------------------------------------------------------------
+#
+declare -a files_to_inspect
+
+retval=0
+
+# First check sanity of the specified audit tool
+if [ "$tool" != 'auditctl' ] && [ "$tool" != 'augenrules' ]
+then
+	echo "Unknown audit rules loading tool: $1. Aborting."
+	echo "Use either 'auditctl' or 'augenrules'!"
+	return 1
+# If audit tool is 'auditctl', then add '/etc/audit/audit.rules'
+# file to the list of files to be inspected
+elif [ "$tool" == 'auditctl' ]
+then
+	files_to_inspect+=('/etc/audit/audit.rules' )
+# If audit tool is 'augenrules', then check if the audit rule is defined
+# If rule is defined, add '/etc/audit/rules.d/*.rules' to the list for inspection
+# If rule isn't defined yet, add '/etc/audit/rules.d/$key.rules' to the list for inspection
+elif [ "$tool" == 'augenrules' ]
+then
+	# Extract audit $key from audit rule so we can use it later
+	key=$(expr "$full_rule" : '.*-k[[:space:]]\([^[:space:]]\+\)' '|' "$full_rule" : '.*-F[[:space:]]key=\([^[:space:]]\+\)')
+	readarray -t matches < <(sed -s -n -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d;F" /etc/audit/rules.d/*.rules)
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+	for match in "${matches[@]}"
+	do
+		files_to_inspect+=("${match}")
+	done
+	# Case when particular rule isn't defined in /etc/audit/rules.d/*.rules yet
+	if [ ${#files_to_inspect[@]} -eq "0" ]
+	then
+		file_to_inspect="/etc/audit/rules.d/$key.rules"
+		files_to_inspect=("$file_to_inspect")
+		if [ ! -e "$file_to_inspect" ]
+		then
+			touch "$file_to_inspect"
+			chmod 0640 "$file_to_inspect"
+		fi
+	fi
+fi
+
+#
+# Indicator that we want to append $full_rule into $audit_file by default
+local append_expected_rule=0
+
+for audit_file in "${files_to_inspect[@]}"
+do
+	# Filter existing $audit_file rules' definitions to select those that:
+	# * follow the rule pattern, and
+	# * meet the hardware architecture requirement, and
+	# * are current syscall group specific
+	readarray -t existing_rules < <(sed -e "\;${pattern};!d" -e "/${arch}/!d" -e "/${group}/!d"  "$audit_file")
+	if [ $? -ne 0 ]
+	then
+		retval=1
+	fi
+
+	# Process rules found case-by-case
+	for rule in "${existing_rules[@]}"
+	do
+		# Found rule is for same arch & key, but differs (e.g. in count of -S arguments)
+		if [ "${rule}" != "${full_rule}" ]
+		then
+			# If so, isolate just '(-S \w)+' substring of that rule
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
+			# Check if list of '-S syscall' arguments of that rule is subset
+			# of '-S syscall' list of expected $full_rule
+			if grep -q -- "$rule_syscalls" <<< "$full_rule"
+			then
+				# Rule is covered (i.e. the list of -S syscalls for this rule is
+				# subset of -S syscalls of $full_rule => existing rule can be deleted
+				# Thus delete the rule from audit.rules & our array
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+				existing_rules=("${existing_rules[@]//$rule/}")
+			else
+				# Rule isn't covered by $full_rule - it besides -S syscall arguments
+				# for this group contains also -S syscall arguments for other syscall
+				# group. Example: '-S lchown -S fchmod -S fchownat' => group='chown'
+				# since 'lchown' & 'fchownat' share 'chown' substring
+				# Therefore:
+				# * 1) delete the original rule from audit.rules
+				# (original '-S lchown -S fchmod -S fchownat' rule would be deleted)
+				# * 2) delete the -S syscall arguments for this syscall group, but
+				# keep those not belonging to this syscall group
+				# (original '-S lchown -S fchmod -S fchownat' would become '-S fchmod'
+				# * 3) append the modified (filtered) rule again into audit.rules
+				# if the same rule not already present
+				#
+				# 1) Delete the original rule
+				sed -i -e "\;${rule};d" "$audit_file"
+				if [ $? -ne 0 ]
+				then
+					retval=1
+				fi
+
+				# 2) Delete syscalls for this group, but keep those from other groups
+				# Convert current rule syscall's string into array splitting by '-S' delimiter
+				IFS_BKP="$IFS"
+				IFS=$'-S'
+				read -a rule_syscalls_as_array <<< "$rule_syscalls"
+				# Reset IFS back to default
+				IFS="$IFS_BKP"
+				# Splitting by "-S" can't be replaced by the readarray functionality easily
+
+				# Declare new empty string to hold '-S syscall' arguments from other groups
+				new_syscalls_for_rule=''
+				# Walk through existing '-S syscall' arguments
+				for syscall_arg in "${rule_syscalls_as_array[@]}"
+				do
+					# Skip empty $syscall_arg values
+					if [ "$syscall_arg" == '' ]
+					then
+						continue
+					fi
+					# If the '-S syscall' doesn't belong to current group add it to the new list
+					# (together with adding '-S' delimiter back for each of such item found)
+					if grep -q -v -- "$group" <<< "$syscall_arg"
+					then
+						new_syscalls_for_rule="$new_syscalls_for_rule -S $syscall_arg"
+					fi
+				done
+				# Replace original '-S syscall' list with the new one for this rule
+				updated_rule=${rule//$rule_syscalls/$new_syscalls_for_rule}
+				# Squeeze repeated whitespace characters in rule definition (if any) into one
+				updated_rule=$(echo "$updated_rule" | tr -s '[:space:]')
+				# 3) Append the modified / filtered rule again into audit.rules
+				#    (but only in case it's not present yet to prevent duplicate definitions)
+				if ! grep -q -- "$updated_rule" "$audit_file"
+				then
+					echo "$updated_rule" >> "$audit_file"
+				fi
+			fi
+		else
+			# $audit_file already contains the expected rule form for this
+			# architecture & key => don't insert it second time
+			append_expected_rule=1
+		fi
+	done
+
+	# We deleted all rules that were subset of the expected one for this arch & key.
+	# Also isolated rules containing system calls not from this system calls group.
+	# Now append the expected rule if it's not present in $audit_file yet
+	if [[ ${append_expected_rule} -eq "0" ]]
+	then
+		echo "$full_rule" >> "$audit_file"
+	fi
+done
+
+return $retval
+
+}
+	fix_audit_syscall_rule "augenrules" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+	fix_audit_syscall_rule "auditctl" "$PATTERN" "$GROUP" "$ARCH" "$FULL_RULE"
+done
+# END fix for 'audit_rules_dac_modification_fsetxattr'
+
+###############################################################################
+# BEGIN fix (169 / 270) for 'audit_rules_dac_modification_fchmodat'
+###############################################################################
+(>&2 echo "Remediating rule 169/270: 'audit_rules_dac_modification_fchmodat'")
 
 
 # First perform the remediation of the syscall rule
@@ -11134,7 +12068,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11231,9 +12165,9 @@ done
 # END fix for 'audit_rules_dac_modification_fchmodat'
 
 ###############################################################################
-# BEGIN fix (143 / 270) for 'audit_rules_dac_modification_lremovexattr'
+# BEGIN fix (170 / 270) for 'audit_rules_dac_modification_lremovexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 143/270: 'audit_rules_dac_modification_lremovexattr'")
+(>&2 echo "Remediating rule 170/270: 'audit_rules_dac_modification_lremovexattr'")
 
 
 # First perform the remediation of the syscall rule
@@ -11376,7 +12310,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11473,9 +12407,9 @@ done
 # END fix for 'audit_rules_dac_modification_lremovexattr'
 
 ###############################################################################
-# BEGIN fix (144 / 270) for 'audit_rules_unsuccessful_file_modification'
+# BEGIN fix (171 / 270) for 'audit_rules_unsuccessful_file_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 144/270: 'audit_rules_unsuccessful_file_modification'")
+(>&2 echo "Remediating rule 171/270: 'audit_rules_unsuccessful_file_modification'")
 
 
 # Perform the remediation of the syscall rule
@@ -11620,7 +12554,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11848,7 +12782,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -11946,9 +12880,9 @@ done
 # END fix for 'audit_rules_unsuccessful_file_modification'
 
 ###############################################################################
-# BEGIN fix (145 / 270) for 'audit_rules_file_deletion_events'
+# BEGIN fix (172 / 270) for 'audit_rules_file_deletion_events'
 ###############################################################################
-(>&2 echo "Remediating rule 145/270: 'audit_rules_file_deletion_events'")
+(>&2 echo "Remediating rule 172/270: 'audit_rules_file_deletion_events'")
 
 
 # Perform the remediation for the syscall rule
@@ -12091,7 +13025,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -12188,12 +13122,12 @@ done
 # END fix for 'audit_rules_file_deletion_events'
 
 ###############################################################################
-# BEGIN fix (146 / 270) for 'audit_rules_privileged_commands'
+# BEGIN fix (173 / 270) for 'audit_rules_privileged_commands'
 ###############################################################################
-(>&2 echo "Remediating rule 146/270: 'audit_rules_privileged_commands'")
+(>&2 echo "Remediating rule 173/270: 'audit_rules_privileged_commands'")
 
 
-# Perform the remediation
+# Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
 # Function to perform remediation for 'audit_rules_privileged_commands' rule
 #
 # Expects two arguments:
@@ -12202,7 +13136,6 @@ done
 # 			One of 'auditctl' or 'augenrules'
 #
 # min_auid		Minimum original ID the user logged in with
-# 			'500' for RHEL-6 and before, '1000' for RHEL-7 and after.
 #
 # Example Call(s):
 #
@@ -12382,363 +13315,145 @@ perform_audit_rules_privileged_commands_remediation "augenrules" "500"
 # END fix for 'audit_rules_privileged_commands'
 
 ###############################################################################
-# BEGIN fix (147 / 270) for 'file_permissions_unauthorized_sgid'
+# BEGIN fix (174 / 270) for 'partition_for_home'
 ###############################################################################
-(>&2 echo "Remediating rule 147/270: 'file_permissions_unauthorized_sgid'")
-(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_sgid' IS MISSING!")
-# END fix for 'file_permissions_unauthorized_sgid'
+(>&2 echo "Remediating rule 174/270: 'partition_for_home'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
+# END fix for 'partition_for_home'
 
 ###############################################################################
-# BEGIN fix (148 / 270) for 'file_permissions_ungroupowned'
+# BEGIN fix (175 / 270) for 'partition_for_var'
 ###############################################################################
-(>&2 echo "Remediating rule 148/270: 'file_permissions_ungroupowned'")
-(>&2 echo "FIX FOR THIS RULE 'file_permissions_ungroupowned' IS MISSING!")
-# END fix for 'file_permissions_ungroupowned'
-
-###############################################################################
-# BEGIN fix (149 / 270) for 'dir_perms_world_writable_system_owned'
-###############################################################################
-(>&2 echo "Remediating rule 149/270: 'dir_perms_world_writable_system_owned'")
-(>&2 echo "FIX FOR THIS RULE 'dir_perms_world_writable_system_owned' IS MISSING!")
-# END fix for 'dir_perms_world_writable_system_owned'
+(>&2 echo "Remediating rule 175/270: 'partition_for_var'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
+# END fix for 'partition_for_var'
 
 ###############################################################################
-# BEGIN fix (150 / 270) for 'no_files_unowned_by_user'
+# BEGIN fix (176 / 270) for 'partition_for_tmp'
 ###############################################################################
-(>&2 echo "Remediating rule 150/270: 'no_files_unowned_by_user'")
-(>&2 echo "FIX FOR THIS RULE 'no_files_unowned_by_user' IS MISSING!")
-# END fix for 'no_files_unowned_by_user'
-
-###############################################################################
-# BEGIN fix (151 / 270) for 'file_permissions_unauthorized_world_writable'
-###############################################################################
-(>&2 echo "Remediating rule 151/270: 'file_permissions_unauthorized_world_writable'")
-(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_world_writable' IS MISSING!")
-# END fix for 'file_permissions_unauthorized_world_writable'
+(>&2 echo "Remediating rule 176/270: 'partition_for_tmp'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
+# END fix for 'partition_for_tmp'
 
 ###############################################################################
-# BEGIN fix (152 / 270) for 'dir_perms_world_writable_sticky_bits'
+# BEGIN fix (177 / 270) for 'partition_for_var_log_audit'
 ###############################################################################
-(>&2 echo "Remediating rule 152/270: 'dir_perms_world_writable_sticky_bits'")
-df --local -P | awk '{if (NR!=1) print $6}' \
-| xargs -I '{}' find '{}' -xdev -type d \
-\( -perm -0002 -a ! -perm -1000 \) 2>/dev/null \
-| xargs chmod a+t
-# END fix for 'dir_perms_world_writable_sticky_bits'
+(>&2 echo "Remediating rule 177/270: 'partition_for_var_log_audit'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
+# END fix for 'partition_for_var_log_audit'
 
 ###############################################################################
-# BEGIN fix (153 / 270) for 'file_permissions_unauthorized_suid'
+# BEGIN fix (178 / 270) for 'partition_for_var_log'
 ###############################################################################
-(>&2 echo "Remediating rule 153/270: 'file_permissions_unauthorized_suid'")
-(>&2 echo "FIX FOR THIS RULE 'file_permissions_unauthorized_suid' IS MISSING!")
-# END fix for 'file_permissions_unauthorized_suid'
-
-###############################################################################
-# BEGIN fix (154 / 270) for 'file_permissions_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 154/270: 'file_permissions_etc_shadow'")
-
-chmod 0000 /etc/shadow
-# END fix for 'file_permissions_etc_shadow'
+(>&2 echo "Remediating rule 178/270: 'partition_for_var_log'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log' IS MISSING!")
+# END fix for 'partition_for_var_log'
 
 ###############################################################################
-# BEGIN fix (155 / 270) for 'file_owner_etc_shadow'
+# BEGIN fix (179 / 270) for 'disable_prelink'
 ###############################################################################
-(>&2 echo "Remediating rule 155/270: 'file_owner_etc_shadow'")
+(>&2 echo "Remediating rule 179/270: 'disable_prelink'")
+# prelink not installed
+if test -e /etc/sysconfig/prelink -o -e /usr/sbin/prelink; then
+    if grep -q ^PRELINKING /etc/sysconfig/prelink
+    then
+        sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+    else
+        printf '\n' >> /etc/sysconfig/prelink
+        printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' >> /etc/sysconfig/prelink
+    fi
 
-
-chown 0 /etc/shadow
-# END fix for 'file_owner_etc_shadow'
-
-###############################################################################
-# BEGIN fix (156 / 270) for 'file_owner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 156/270: 'file_owner_etc_group'")
-
-
-chown 0 /etc/group
-# END fix for 'file_owner_etc_group'
-
-###############################################################################
-# BEGIN fix (157 / 270) for 'file_permissions_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 157/270: 'file_permissions_etc_group'")
-
-chmod 0644 /etc/group
-# END fix for 'file_permissions_etc_group'
+    # Undo previous prelink changes to binaries if prelink is available.
+    if test -x /usr/sbin/prelink; then
+        /usr/sbin/prelink -ua
+    fi
+fi
+# END fix for 'disable_prelink'
 
 ###############################################################################
-# BEGIN fix (158 / 270) for 'file_groupowner_etc_gshadow'
+# BEGIN fix (180 / 270) for 'rpm_verify_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 158/270: 'file_groupowner_etc_gshadow'")
+(>&2 echo "Remediating rule 180/270: 'rpm_verify_permissions'")
 
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
 
-chgrp 0 /etc/gshadow
-# END fix for 'file_groupowner_etc_gshadow'
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
 
-###############################################################################
-# BEGIN fix (159 / 270) for 'file_groupowner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 159/270: 'file_groupowner_etc_passwd'")
-
-
-chgrp 0 /etc/passwd
-# END fix for 'file_groupowner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (160 / 270) for 'file_groupowner_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 160/270: 'file_groupowner_etc_shadow'")
-
-
-chgrp 0 /etc/shadow
-# END fix for 'file_groupowner_etc_shadow'
-
-###############################################################################
-# BEGIN fix (161 / 270) for 'file_owner_etc_gshadow'
-###############################################################################
-(>&2 echo "Remediating rule 161/270: 'file_owner_etc_gshadow'")
-
-
-chown 0 /etc/gshadow
-# END fix for 'file_owner_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (162 / 270) for 'file_groupowner_etc_group'
-###############################################################################
-(>&2 echo "Remediating rule 162/270: 'file_groupowner_etc_group'")
-
-
-chgrp 0 /etc/group
-# END fix for 'file_groupowner_etc_group'
-
-###############################################################################
-# BEGIN fix (163 / 270) for 'file_permissions_etc_gshadow'
-###############################################################################
-(>&2 echo "Remediating rule 163/270: 'file_permissions_etc_gshadow'")
-
-chmod 0000 /etc/gshadow
-# END fix for 'file_permissions_etc_gshadow'
-
-###############################################################################
-# BEGIN fix (164 / 270) for 'file_owner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 164/270: 'file_owner_etc_passwd'")
-
-
-chown 0 /etc/passwd
-# END fix for 'file_owner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (165 / 270) for 'file_permissions_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 165/270: 'file_permissions_etc_passwd'")
-
-chmod 0644 /etc/passwd
-# END fix for 'file_permissions_etc_passwd'
-
-###############################################################################
-# BEGIN fix (166 / 270) for 'file_ownership_library_dirs'
-###############################################################################
-(>&2 echo "Remediating rule 166/270: 'file_ownership_library_dirs'")
-for LIBDIR in /usr/lib /usr/lib64 /lib /lib64
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
 do
-  if [ -d $LIBDIR ]
-  then
-    find -L $LIBDIR \! -user root -exec chown root {} \; 
-  fi
+	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
 done
-# END fix for 'file_ownership_library_dirs'
 
-###############################################################################
-# BEGIN fix (167 / 270) for 'file_permissions_binary_dirs'
-###############################################################################
-(>&2 echo "Remediating rule 167/270: 'file_permissions_binary_dirs'")
-DIRS="/bin /usr/bin /usr/local/bin /sbin /usr/sbin /usr/local/sbin /usr/libexec"
-for dirPath in $DIRS; do
-	find "$dirPath" -perm /022 -exec chmod go-w '{}' \;
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+	rpm --setperms "${RPM_PACKAGE}"
 done
-# END fix for 'file_permissions_binary_dirs'
+# END fix for 'rpm_verify_permissions'
 
 ###############################################################################
-# BEGIN fix (168 / 270) for 'file_ownership_binary_dirs'
+# BEGIN fix (181 / 270) for 'rpm_verify_hashes'
 ###############################################################################
-(>&2 echo "Remediating rule 168/270: 'file_ownership_binary_dirs'")
-find /bin/ \
-/usr/bin/ \
-/usr/local/bin/ \
-/sbin/ \
-/usr/sbin/ \
-/usr/local/sbin/ \
-/usr/libexec \
-\! -user root -execdir chown root {} \;
-# END fix for 'file_ownership_binary_dirs'
+(>&2 echo "Remediating rule 181/270: 'rpm_verify_hashes'")
+
+# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
+files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
+# From files names get package names and change newline to space, because rpm writes each package to new line
+packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
+
+yum reinstall -y $packages_to_reinstall
+# END fix for 'rpm_verify_hashes'
 
 ###############################################################################
-# BEGIN fix (169 / 270) for 'file_permissions_library_dirs'
+# BEGIN fix (182 / 270) for 'package_aide_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 169/270: 'file_permissions_library_dirs'")
-DIRS="/lib /lib64 /usr/lib /usr/lib64"
-for dirPath in $DIRS; do
-	find "$dirPath" -perm /022 -type f -exec chmod go-w '{}' \;
-done
-# END fix for 'file_permissions_library_dirs'
+(>&2 echo "Remediating rule 182/270: 'package_aide_installed'")
+
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+# END fix for 'package_aide_installed'
 
 ###############################################################################
-# BEGIN fix (170 / 270) for 'service_autofs_disabled'
+# BEGIN fix (183 / 270) for 'aide_periodic_cron_checking'
 ###############################################################################
-(>&2 echo "Remediating rule 170/270: 'service_autofs_disabled'")
+(>&2 echo "Remediating rule 183/270: 'aide_periodic_cron_checking'")
 
-/sbin/service 'autofs' stop
-/sbin/chkconfig --level 0123456 'autofs' off
-# END fix for 'service_autofs_disabled'
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
 
-###############################################################################
-# BEGIN fix (171 / 270) for 'kernel_module_usb-storage_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 171/270: 'kernel_module_usb-storage_disabled'")
-if LC_ALL=C grep -q -m 1 "^install usb-storage" /etc/modprobe.d/usb-storage.conf ; then
-	sed -i 's/^install usb-storage.*/install usb-storage /bin/true/g' /etc/modprobe.d/usb-storage.conf
+if ! grep -q "/usr/sbin/aide --check" /etc/crontab ; then
+    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
 else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/usb-storage.conf
-	echo "install usb-storage /bin/true" >> /etc/modprobe.d/usb-storage.conf
+    sed -i '/^.*\/usr\/sbin\/aide --check.*$/d' /etc/crontab
+    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
 fi
-# END fix for 'kernel_module_usb-storage_disabled'
+# END fix for 'aide_periodic_cron_checking'
 
 ###############################################################################
-# BEGIN fix (172 / 270) for 'bios_disable_usb_boot'
+# BEGIN fix (184 / 270) for 'aide_build_database'
 ###############################################################################
-(>&2 echo "Remediating rule 172/270: 'bios_disable_usb_boot'")
-(>&2 echo "FIX FOR THIS RULE 'bios_disable_usb_boot' IS MISSING!")
-# END fix for 'bios_disable_usb_boot'
+(>&2 echo "Remediating rule 184/270: 'aide_build_database'")
 
-###############################################################################
-# BEGIN fix (173 / 270) for 'kernel_module_freevxfs_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 173/270: 'kernel_module_freevxfs_disabled'")
-if LC_ALL=C grep -q -m 1 "^install freevxfs" /etc/modprobe.d/freevxfs.conf ; then
-	sed -i 's/^install freevxfs.*/install freevxfs /bin/true/g' /etc/modprobe.d/freevxfs.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/freevxfs.conf
-	echo "install freevxfs /bin/true" >> /etc/modprobe.d/freevxfs.conf
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
 fi
-# END fix for 'kernel_module_freevxfs_disabled'
+
+/usr/sbin/aide --init
+/bin/cp -p /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
+# END fix for 'aide_build_database'
 
 ###############################################################################
-# BEGIN fix (174 / 270) for 'kernel_module_udf_disabled'
+# BEGIN fix (185 / 270) for 'ensure_gpgcheck_globally_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 174/270: 'kernel_module_udf_disabled'")
-if LC_ALL=C grep -q -m 1 "^install udf" /etc/modprobe.d/udf.conf ; then
-	sed -i 's/^install udf.*/install udf /bin/true/g' /etc/modprobe.d/udf.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/udf.conf
-	echo "install udf /bin/true" >> /etc/modprobe.d/udf.conf
-fi
-# END fix for 'kernel_module_udf_disabled'
-
-###############################################################################
-# BEGIN fix (175 / 270) for 'kernel_module_squashfs_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 175/270: 'kernel_module_squashfs_disabled'")
-if LC_ALL=C grep -q -m 1 "^install squashfs" /etc/modprobe.d/squashfs.conf ; then
-	sed -i 's/^install squashfs.*/install squashfs /bin/true/g' /etc/modprobe.d/squashfs.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/squashfs.conf
-	echo "install squashfs /bin/true" >> /etc/modprobe.d/squashfs.conf
-fi
-# END fix for 'kernel_module_squashfs_disabled'
-
-###############################################################################
-# BEGIN fix (176 / 270) for 'kernel_module_hfsplus_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 176/270: 'kernel_module_hfsplus_disabled'")
-if LC_ALL=C grep -q -m 1 "^install hfsplus" /etc/modprobe.d/hfsplus.conf ; then
-	sed -i 's/^install hfsplus.*/install hfsplus /bin/true/g' /etc/modprobe.d/hfsplus.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/hfsplus.conf
-	echo "install hfsplus /bin/true" >> /etc/modprobe.d/hfsplus.conf
-fi
-# END fix for 'kernel_module_hfsplus_disabled'
-
-###############################################################################
-# BEGIN fix (177 / 270) for 'grub_legacy_nousb_argument'
-###############################################################################
-(>&2 echo "Remediating rule 177/270: 'grub_legacy_nousb_argument'")
-(>&2 echo "FIX FOR THIS RULE 'grub_legacy_nousb_argument' IS MISSING!")
-# END fix for 'grub_legacy_nousb_argument'
-
-###############################################################################
-# BEGIN fix (178 / 270) for 'kernel_module_jffs2_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 178/270: 'kernel_module_jffs2_disabled'")
-if LC_ALL=C grep -q -m 1 "^install jffs2" /etc/modprobe.d/jffs2.conf ; then
-	sed -i 's/^install jffs2.*/install jffs2 /bin/true/g' /etc/modprobe.d/jffs2.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/jffs2.conf
-	echo "install jffs2 /bin/true" >> /etc/modprobe.d/jffs2.conf
-fi
-# END fix for 'kernel_module_jffs2_disabled'
-
-###############################################################################
-# BEGIN fix (179 / 270) for 'kernel_module_hfs_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 179/270: 'kernel_module_hfs_disabled'")
-if LC_ALL=C grep -q -m 1 "^install hfs" /etc/modprobe.d/hfs.conf ; then
-	sed -i 's/^install hfs.*/install hfs /bin/true/g' /etc/modprobe.d/hfs.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/hfs.conf
-	echo "install hfs /bin/true" >> /etc/modprobe.d/hfs.conf
-fi
-# END fix for 'kernel_module_hfs_disabled'
-
-###############################################################################
-# BEGIN fix (180 / 270) for 'kernel_module_cramfs_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 180/270: 'kernel_module_cramfs_disabled'")
-if LC_ALL=C grep -q -m 1 "^install cramfs" /etc/modprobe.d/cramfs.conf ; then
-	sed -i 's/^install cramfs.*/install cramfs /bin/true/g' /etc/modprobe.d/cramfs.conf
-else
-	echo -e "\n# Disable per security requirements" >> /etc/modprobe.d/cramfs.conf
-	echo "install cramfs /bin/true" >> /etc/modprobe.d/cramfs.conf
-fi
-# END fix for 'kernel_module_cramfs_disabled'
-
-###############################################################################
-# BEGIN fix (181 / 270) for 'umask_for_daemons'
-###############################################################################
-(>&2 echo "Remediating rule 181/270: 'umask_for_daemons'")
-
-var_umask_for_daemons="022"
-
-grep -q ^umask /etc/init.d/functions && \
-  sed -i "s/umask.*/umask $var_umask_for_daemons/g" /etc/init.d/functions
-if ! [ $? -eq 0 ]; then
-    echo "umask $var_umask_for_daemons" >> /etc/init.d/functions
-fi
-# END fix for 'umask_for_daemons'
-
-###############################################################################
-# BEGIN fix (182 / 270) for 'sysctl_kernel_exec_shield'
-###############################################################################
-(>&2 echo "Remediating rule 182/270: 'sysctl_kernel_exec_shield'")
-(>&2 echo "FIX FOR THIS RULE 'sysctl_kernel_exec_shield' IS MISSING!")
-# END fix for 'sysctl_kernel_exec_shield'
-
-###############################################################################
-# BEGIN fix (183 / 270) for 'sysctl_kernel_randomize_va_space'
-###############################################################################
-(>&2 echo "Remediating rule 183/270: 'sysctl_kernel_randomize_va_space'")
-
-
-#
-# Set runtime for kernel.randomize_va_space
-#
-/sbin/sysctl -q -n -w kernel.randomize_va_space="2"
-
-#
-# If kernel.randomize_va_space present in /etc/sysctl.conf, change value to "2"
-#	else, add "kernel.randomize_va_space = 2" to /etc/sysctl.conf
-#
+(>&2 echo "Remediating rule 185/270: 'ensure_gpgcheck_globally_activated'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -12816,931 +13531,140 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' "2" 'CCE-26999-3'
-# END fix for 'sysctl_kernel_randomize_va_space'
+replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26709-6'
+# END fix for 'ensure_gpgcheck_globally_activated'
 
 ###############################################################################
-# BEGIN fix (184 / 270) for 'mount_option_dev_shm_nosuid'
+# BEGIN fix (186 / 270) for 'security_patches_up_to_date'
 ###############################################################################
-(>&2 echo "Remediating rule 184/270: 'mount_option_dev_shm_nosuid'")
-function include_mount_options_functions {
-	:
-}
+(>&2 echo "Remediating rule 186/270: 'security_patches_up_to_date'")
 
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
 
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/dev/shm" "nosuid" "" ""
-
-	ensure_partition_is_mounted "/dev/shm"
-}
-
-perform_remediation
-# END fix for 'mount_option_dev_shm_nosuid'
+yum -y update
+# END fix for 'security_patches_up_to_date'
 
 ###############################################################################
-# BEGIN fix (185 / 270) for 'mount_option_tmp_nodev'
+# BEGIN fix (187 / 270) for 'ensure_redhat_gpgkey_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 185/270: 'mount_option_tmp_nodev'")
-function include_mount_options_functions {
-	:
-}
+(>&2 echo "Remediating rule 187/270: 'ensure_redhat_gpgkey_installed'")
+# The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
+readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
+readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
 
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+# Location of the key we would like to import (once it's integrity verified)
+readonly REDHAT_RELEASE_KEY="/etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release"
 
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
+RPM_GPG_DIR_PERMS=$(stat -c %a "$(dirname "$REDHAT_RELEASE_KEY")")
 
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/tmp" "nodev" "" ""
-
-	ensure_partition_is_mounted "/tmp"
-}
-
-perform_remediation
-# END fix for 'mount_option_tmp_nodev'
-
-###############################################################################
-# BEGIN fix (186 / 270) for 'mount_option_tmp_nosuid'
-###############################################################################
-(>&2 echo "Remediating rule 186/270: 'mount_option_tmp_nosuid'")
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/tmp" "nosuid" "" ""
-
-	ensure_partition_is_mounted "/tmp"
-}
-
-perform_remediation
-# END fix for 'mount_option_tmp_nosuid'
-
-###############################################################################
-# BEGIN fix (187 / 270) for 'mount_option_nodev_nonroot_local_partitions'
-###############################################################################
-(>&2 echo "Remediating rule 187/270: 'mount_option_nodev_nonroot_local_partitions'")
-
-# NOTE: Run-time reconfiguration of partitions' mount options is not possible.
-# After performing this remediation be sure to also subsequently reboot the
-# system as soon as possible for the remediation to take the effect!
-
-# Shortened ID for frequently used character class
-SP="[:space:]"
-
-# Load /etc/fstab's content with LABEL= and UUID= tags expanded to real
-# device names into FSTAB_REAL_DEVICES array splitting items by newline
-readarray -t FSTAB_REAL_DEVICES < <(findmnt --fstab --evaluate --noheadings)
-
-for line in "${FSTAB_REAL_DEVICES[@]}"
-do
-    # For each line:
-    # * squeeze multiple space characters into one,
-    # * split line content info four columns (target, source, fstype, and
-    #   mount options) by space delimiter
-    read TARGET SOURCE FSTYPE MOUNT_OPTIONS <<< "$(echo "$line" | tr -s ' ')"
-
-    # Filter the targets according to the following criteria:
-    # * don't include record for root partition,
-    # * include the target only if it has the form of '/word.*' (not to include
-    #   special entries like e.g swap),
-    # * include the target only if its source has the form of '/dev.*'
-    #   (to process only local partitions)
-    if [[ ! $TARGET =~ ^\/$ ]] 		&&	# Don't include root partition
-       [[ $TARGET =~ ^\/[A-Za-z0-9_] ]] &&	# Include if target =~ '/word.*'
-       [[ $SOURCE =~ ^\/dev ]]			# Include if source =~ '/dev.*'
-    then
-
-        # Check the mount options column if it doesn't contain 'nodev' keyword yet
-        if ! grep -q "nodev" <<< "$MOUNT_OPTIONS"
-        then
-            # Check if current mount options is empty string ('') meaning
-            # particular /etc/fstab row contain just 'defaults' keyword
-            if [[ ${#MOUNT_OPTIONS} == "0" ]]
-            then
-                # If so, add 'defaults' back and append 'nodev' keyword
-                MOUNT_OPTIONS="defaults,nodev"
-            else
-                # Otherwise append just 'nodev' keyword
-                MOUNT_OPTIONS="$MOUNT_OPTIONS,nodev"
-            fi
-
-            # This target doesn't contain 'nodev' in mount options yet (and meets
-            # the above filtering criteria). Therefore obtain particular /etc/fstab's
-            # row into FSTAB_TARGET_ROW variable separating the mount options field with
-            # hash '#' character
-            FSTAB_TARGET_ROW=$(sed -n "s|\\(.*${TARGET}[$SP]\\+${FSTYPE}[$SP]\\+\\)\\([^$SP]\\+\\)|\\1#\\2#|p" /etc/fstab)
-            # Split the retrieved value by the hash '#' delimiter to get the
-            # row's head & tail (i.e. columns other than mount options) which won't
-            # get modified
-            TARGET_HEAD=$(cut -f 1 -d '#' <<< "$FSTAB_TARGET_ROW")
-            # TARGET_OPTS=$(cut -f 2 -d '#' <<< "$FSTAB_TARGET_ROW")
-            TARGET_TAIL=$(cut -f 3 -d '#' <<< "$FSTAB_TARGET_ROW")
-            # Replace old mount options for particular /etc/fstab's row (for this target
-            # and fstype) with new mount options
-            sed -i "s|${TARGET_HEAD}\(.*\)${TARGET_TAIL}|${TARGET_HEAD}${MOUNT_OPTIONS}${TARGET_TAIL}|" /etc/fstab
-        fi
-    fi
-done
-# END fix for 'mount_option_nodev_nonroot_local_partitions'
-
-###############################################################################
-# BEGIN fix (188 / 270) for 'mount_option_nodev_removable_partitions'
-###############################################################################
-(>&2 echo "Remediating rule 188/270: 'mount_option_nodev_removable_partitions'")
-
-var_removable_partition="/dev/cdrom"
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "$var_removable_partition" "nodev" "" ""
-
-	ensure_partition_is_mounted "$var_removable_partition"
-}
-
-perform_remediation
-# END fix for 'mount_option_nodev_removable_partitions'
-
-###############################################################################
-# BEGIN fix (189 / 270) for 'mount_option_dev_shm_nodev'
-###############################################################################
-(>&2 echo "Remediating rule 189/270: 'mount_option_dev_shm_nodev'")
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/dev/shm" "nodev" "" ""
-
-	ensure_partition_is_mounted "/dev/shm"
-}
-
-perform_remediation
-# END fix for 'mount_option_dev_shm_nodev'
-
-###############################################################################
-# BEGIN fix (190 / 270) for 'mount_option_dev_shm_noexec'
-###############################################################################
-(>&2 echo "Remediating rule 190/270: 'mount_option_dev_shm_noexec'")
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /dev/shm || { echo "Not remediating, because there is no record of /dev/shm in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/dev/shm" "noexec" "" ""
-
-	ensure_partition_is_mounted "/dev/shm"
-}
-
-perform_remediation
-# END fix for 'mount_option_dev_shm_noexec'
-
-###############################################################################
-# BEGIN fix (191 / 270) for 'mount_option_var_tmp_bind'
-###############################################################################
-(>&2 echo "Remediating rule 191/270: 'mount_option_var_tmp_bind'")
-
-
-# Delete particular /etc/fstab's row if /var/tmp is already configured to
-# represent a mount point (for some device or filesystem other than /tmp)
-if grep -q -P '.*\/var\/tmp.*' /etc/fstab
+# Verify /etc/pki/rpm-gpg directory permissions are safe
+if [ "${RPM_GPG_DIR_PERMS}" -le "755" ]
 then
-  sed -i '/.*\/var\/tmp.*/d' /etc/fstab
+  # If they are safe, try to obtain fingerprints from the key file
+  # (to ensure there won't be e.g. CRC error).
+
+  readarray -t GPG_OUT < <(gpg --with-fingerprint --with-colons "$REDHAT_RELEASE_KEY" | grep "^fpr" | cut -d ":" -f 10)
+
+  GPG_RESULT=$?
+  # No CRC error, safe to proceed
+  if [ "${GPG_RESULT}" -eq "0" ]
+  then
+    echo "${GPG_OUT[*]}" | grep -vE "${REDHAT_RELEASE_FINGERPRINT}|${REDHAT_AUXILIARY_FINGERPRINT}" || {
+      # If $REDHAT_RELEASE_KEY file doesn't contain any keys with unknown fingerprint, import it
+      rpm --import "${REDHAT_RELEASE_KEY}"
+    }
+  fi
 fi
-umount /var/tmp
-
-# Bind-mount /var/tmp to /tmp via /etc/fstab (preserving the /etc/fstab form)
-printf "%-24s%-24s%-8s%-32s%-3s\n" "/tmp" "/var/tmp" "none" "rw,nodev,noexec,nosuid,bind" "0 0" >> /etc/fstab
-
-mkdir -p /var/tmp
-mount -B /tmp /var/tmp
-# END fix for 'mount_option_var_tmp_bind'
+# END fix for 'ensure_redhat_gpgkey_installed'
 
 ###############################################################################
-# BEGIN fix (192 / 270) for 'mount_option_tmp_noexec'
+# BEGIN fix (188 / 270) for 'ensure_gpgcheck_never_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 192/270: 'mount_option_tmp_noexec'")
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /tmp || { echo "Not remediating, because there is no record of /tmp in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/tmp" "noexec" "" ""
-
-	ensure_partition_is_mounted "/tmp"
-}
-
-perform_remediation
-# END fix for 'mount_option_tmp_noexec'
+(>&2 echo "Remediating rule 188/270: 'ensure_gpgcheck_never_disabled'")
+sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
+# END fix for 'ensure_gpgcheck_never_disabled'
 
 ###############################################################################
-# BEGIN fix (193 / 270) for 'mount_option_nosuid_removable_partitions'
+# BEGIN fix (189 / 270) for 'gconf_gnome_screensaver_mode_blank'
 ###############################################################################
-(>&2 echo "Remediating rule 193/270: 'mount_option_nosuid_removable_partitions'")
+(>&2 echo "Remediating rule 189/270: 'gconf_gnome_screensaver_mode_blank'")
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
 
-var_removable_partition="/dev/cdrom"
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
-
-	ensure_partition_is_mounted "$var_removable_partition"
-}
-
-perform_remediation
-# END fix for 'mount_option_nosuid_removable_partitions'
+# Set the screensaver mode in the GNOME desktop to a blank screen
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type string \
+            --set /apps/gnome-screensaver/mode blank-only
+# END fix for 'gconf_gnome_screensaver_mode_blank'
 
 ###############################################################################
-# BEGIN fix (194 / 270) for 'mount_option_noexec_removable_partitions'
+# BEGIN fix (190 / 270) for 'gconf_gnome_screensaver_lock_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 194/270: 'mount_option_noexec_removable_partitions'")
+(>&2 echo "Remediating rule 190/270: 'gconf_gnome_screensaver_lock_enabled'")
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
 
-var_removable_partition="/dev/cdrom"
-function include_mount_options_functions {
-	:
-}
+# Set the screensaver locking activation in the GNOME desktop when the
+# screensaver is activated
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type bool \
+            --set /apps/gnome-screensaver/lock_enabled true
+# END fix for 'gconf_gnome_screensaver_lock_enabled'
 
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+###############################################################################
+# BEGIN fix (191 / 270) for 'gconf_gnome_screensaver_idle_activation_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 191/270: 'gconf_gnome_screensaver_idle_activation_enabled'")
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
 
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
+# Set the screensaver activation in the GNOME desktop after a period of inactivity
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type bool \
+            --set /apps/gnome-screensaver/idle_activation_enabled true
+# END fix for 'gconf_gnome_screensaver_idle_activation_enabled'
 
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+###############################################################################
+# BEGIN fix (192 / 270) for 'gconf_gnome_screensaver_idle_delay'
+###############################################################################
+(>&2 echo "Remediating rule 192/270: 'gconf_gnome_screensaver_idle_delay'")
 
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
+inactivity_timeout_value="900"
 
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
+# Install GConf2 package if not installed
+if ! rpm -q GConf2; then
+  yum -y install GConf2
+fi
 
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
+# Set the idle time-out value for inactivity in the GNOME desktop to meet the
+# requirement
+gconftool-2 --direct \
+            --config-source "xml:readwrite:/etc/gconf/gconf.xml.mandatory" \
+            --type int \
+            --set /desktop/gnome/session/idle_delay ${inactivity_timeout_value}
+# END fix for 'gconf_gnome_screensaver_idle_delay'
 
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
+###############################################################################
+# BEGIN fix (193 / 270) for 'gconf_gnome_disable_automount'
+###############################################################################
+(>&2 echo "Remediating rule 193/270: 'gconf_gnome_disable_automount'")
+(>&2 echo "FIX FOR THIS RULE 'gconf_gnome_disable_automount' IS MISSING!")
+# END fix for 'gconf_gnome_disable_automount'
 
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "$var_removable_partition" "noexec" "" ""
-
-	ensure_partition_is_mounted "$var_removable_partition"
-}
-
-perform_remediation
-# END fix for 'mount_option_noexec_removable_partitions'
+###############################################################################
+# BEGIN fix (194 / 270) for 'gconf_gnome_disable_thumbnailers'
+###############################################################################
+(>&2 echo "Remediating rule 194/270: 'gconf_gnome_disable_thumbnailers'")
+(>&2 echo "FIX FOR THIS RULE 'gconf_gnome_disable_thumbnailers' IS MISSING!")
+# END fix for 'gconf_gnome_disable_thumbnailers'
 
 ###############################################################################
 # BEGIN fix (195 / 270) for 'package_rsh_removed'
@@ -14208,9 +14132,16 @@ fi
 # END fix for 'postfix_network_listening_disabled'
 
 ###############################################################################
-# BEGIN fix (221 / 270) for 'require_smb_client_signing'
+# BEGIN fix (221 / 270) for 'mount_option_smb_client_signing'
 ###############################################################################
-(>&2 echo "Remediating rule 221/270: 'require_smb_client_signing'")
+(>&2 echo "Remediating rule 221/270: 'mount_option_smb_client_signing'")
+(>&2 echo "FIX FOR THIS RULE 'mount_option_smb_client_signing' IS MISSING!")
+# END fix for 'mount_option_smb_client_signing'
+
+###############################################################################
+# BEGIN fix (222 / 270) for 'require_smb_client_signing'
+###############################################################################
+(>&2 echo "Remediating rule 222/270: 'require_smb_client_signing'")
 ######################################################################
 #By Luke "Brisk-OH" Brisk
 #luke.brisk@boeing.com or luke.brisk@gmail.com
@@ -14225,13 +14156,6 @@ else
 	sed -i 's/[[:blank:]]*client[[:blank:]]signing[[:blank:]]*=[[:blank:]]*no/        client signing = mandatory/g' /etc/samba/smb.conf
 fi
 # END fix for 'require_smb_client_signing'
-
-###############################################################################
-# BEGIN fix (222 / 270) for 'mount_option_smb_client_signing'
-###############################################################################
-(>&2 echo "Remediating rule 222/270: 'mount_option_smb_client_signing'")
-(>&2 echo "FIX FOR THIS RULE 'mount_option_smb_client_signing' IS MISSING!")
-# END fix for 'mount_option_smb_client_signing'
 
 ###############################################################################
 # BEGIN fix (223 / 270) for 'package_httpd_removed'
@@ -14845,9 +14769,59 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_k
 # END fix for 'sshd_set_keepalive'
 
 ###############################################################################
-# BEGIN fix (264 / 270) for 'sshd_set_idle_timeout'
+# BEGIN fix (264 / 270) for 'sshd_enable_warning_banner'
 ###############################################################################
-(>&2 echo "Remediating rule 264/270: 'sshd_set_idle_timeout'")
+(>&2 echo "Remediating rule 264/270: 'sshd_enable_warning_banner'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_enable_warning_banner'
+
+###############################################################################
+# BEGIN fix (265 / 270) for 'sshd_allow_only_protocol2'
+###############################################################################
+(>&2 echo "Remediating rule 265/270: 'sshd_allow_only_protocol2'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_allow_only_protocol2'
+
+###############################################################################
+# BEGIN fix (266 / 270) for 'sshd_set_idle_timeout'
+###############################################################################
+(>&2 echo "Remediating rule 266/270: 'sshd_set_idle_timeout'")
 
 sshd_idle_timeout_value="300"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -14931,34 +14905,9 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeo
 # END fix for 'sshd_set_idle_timeout'
 
 ###############################################################################
-# BEGIN fix (265 / 270) for 'sshd_enable_warning_banner'
+# BEGIN fix (267 / 270) for 'sshd_do_not_permit_user_env'
 ###############################################################################
-(>&2 echo "Remediating rule 265/270: 'sshd_enable_warning_banner'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*Banner\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "Banner /etc/issue" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_enable_warning_banner'
-
-###############################################################################
-# BEGIN fix (266 / 270) for 'sshd_do_not_permit_user_env'
-###############################################################################
-(>&2 echo "Remediating rule 266/270: 'sshd_do_not_permit_user_env'")
+(>&2 echo "Remediating rule 267/270: 'sshd_do_not_permit_user_env'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -14970,40 +14919,15 @@ line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C s
 if [ -z "$line_number" ]; then
     # There was no match of '^Match', insert at
     # the end of the file.
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
 else
     head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
     tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
 fi
 # Clean up after ourselves.
 rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_do_not_permit_user_env'
-
-###############################################################################
-# BEGIN fix (267 / 270) for 'sshd_allow_only_protocol2'
-###############################################################################
-(>&2 echo "Remediating rule 267/270: 'sshd_allow_only_protocol2'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "Protocol 2" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_allow_only_protocol2'
 
 ###############################################################################
 # BEGIN fix (268 / 270) for 'sshd_use_approved_ciphers'

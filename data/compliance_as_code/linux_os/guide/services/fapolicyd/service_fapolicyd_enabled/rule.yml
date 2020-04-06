@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8
+prodtype: ocp4,ol8,rhel8
 
 title: 'Enable the File Access Policy Service'
 
@@ -16,9 +16,12 @@ severity: medium
 
 identifiers:
     cce@rhel8: 82249-4
+    cce@ocp4: 82534-9
 
 references:
+    nist: CM-6(a),SI-4(22)
     ospp: FMT_SMF_EXT.1
+    srg: SRG-OS-000370-GPOS-00155
 
 ocil_clause: 'the service is not enabled'
 
@@ -28,5 +31,3 @@ template:
     name: service_enabled
     vars:
         servicename: fapolicyd
-    backends:
-        ansible: 'off'

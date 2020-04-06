@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,rhv4
+prodtype: fedora,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install Intrusion Detection Software'
 
@@ -20,6 +20,9 @@ medium
 high
 {{%- endif %}}
 
+conflicts:
+    - selinux_state
+
 identifiers:
     cce@rhel6: 27409-2
     cce@rhel7: 26818-5
@@ -27,7 +30,7 @@ identifiers:
 
 references:
     disa: "1263"
-    nist: SC-7
+    nist: CM-6(a)
     nist-csf: DE.CM-1,PR.AC-5,PR.DS-5,PR.PT-4
     pcidss: Req-11.4
     srg@rhel6: SRG-OS-000196

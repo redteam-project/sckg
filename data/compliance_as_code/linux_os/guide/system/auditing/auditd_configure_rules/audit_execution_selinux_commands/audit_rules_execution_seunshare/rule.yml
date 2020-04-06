@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel7,rhel8,fedora,ol7,ol8
+prodtype: fedora,ocp4,ol7,ol8,rhel7,rhel8
 
 title: 'Record Any Attempts to Run seunshare'
 
@@ -33,10 +33,11 @@ severity: medium
 identifiers:
     cce@rhel7: 82362-5
     cce@rhel8: 80933-5
+    cce@ocp4: 82574-5
 
 references:
     disa: '172'
-    nist: AU-12(c),AC-6(9)
+    nist: AU-2(d),AU-12(c),AC-6(9),CM-6(a)
     ospp: FAU_GEN.1.1.c
     vmmsrg: SRG-OS-000463-VMM-001850
 

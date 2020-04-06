@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel6,rhel7,rhel8,fedora,rhv4
+prodtype: fedora,rhel6,rhel7,rhel8,rhv4,wrlinux1019
 
 title: 'Ensure All Files Are Owned by a User'
 
@@ -24,12 +24,14 @@ severity: medium
 identifiers:
     cce@rhel6: 27032-2
     cce@rhel7: 80134-0
+    cce@rhel8: 83499-4
 
 references:
     disa@rhel6: '224'
-    cis: 6.1.11
+    cis@rhel7: 6.1.11
+    cis@rhel8: 6.1.11
     disa: "002165"
-    nist: AC-3(4),AC-6,CM-6(b)
+    nist: CM-6(a),AC-6(1)
     nist-csf: PR.AC-4,PR.AC-6,PR.DS-5,PR.IP-1,PR.PT-3
     srg: SRG-OS-000480-GPOS-00227
     stigid@rhel7: "020320"

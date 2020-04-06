@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8,rhv4
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install rng-tools Package'
 
@@ -17,6 +17,9 @@ identifiers:
     cce@rhel6: 82970-5
     cce@rhel7: 82969-7
     cce@rhel8: 82968-9
+
+references:
+    srg: SRG-OS-000480-GPOS-00227
 
 ocil_clause: 'the package is not installed'
 

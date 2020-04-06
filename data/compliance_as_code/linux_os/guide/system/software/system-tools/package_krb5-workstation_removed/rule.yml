@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8
 
 title: 'Uninstall krb5-workstation Package'
 
@@ -20,6 +20,9 @@ identifiers:
     cce@rhel6: 82929-1
     cce@rhel7: 82930-9
     cce@rhel8: 82931-7
+
+references:
+    srg: SRG-OS-000095-GPOS-00049,SRG-OS-000120-GPOS-00061
 
 {{{ complete_ocil_entry_package(package="krb5-workstation") }}}
 

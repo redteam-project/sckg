@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,rhv4
+prodtype: fedora,rhel6,rhel7,rhel8,rhv4
 
 title: 'Install PAE Kernel on Supported 32-bit x86 Systems'
 
@@ -32,7 +32,7 @@ identifiers:
 
 references:
     cui: 3.1.7
-    nist: CM-6(b)
+    nist: CM-6(a)
     nist-csf: PR.IP-1
     isa-62443-2013: 'SR 7.6'
     isa-62443-2009: 4.3.4.3.2,4.3.4.3.3

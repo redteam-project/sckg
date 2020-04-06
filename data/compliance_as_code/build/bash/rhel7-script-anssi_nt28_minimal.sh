@@ -6,7 +6,7 @@
 # Draft profile for ANSSI compliance at the minimal level. ANSSI stands for Agence nationale de la sécurité des systèmes d'information. Based on https://www.ssi.gouv.fr/.
 #
 # Benchmark ID:  RHEL-7
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,37 +22,71 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 13) for 'sudo_remove_no_authenticate'
+# BEGIN fix (1 / 13) for 'package_rsyslog_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 1/13: 'sudo_remove_no_authenticate'")
+(>&2 echo "Remediating rule 1/13: 'package_rsyslog_installed'")
+
+if ! rpm -q --quiet "rsyslog" ; then
+    yum install -y "rsyslog"
+fi
+# END fix for 'package_rsyslog_installed'
+
+###############################################################################
+# BEGIN fix (2 / 13) for 'service_rsyslog_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 2/13: 'service_rsyslog_enabled'")
+
+SYSTEMCTL_EXEC='/usr/bin/systemctl'
+"$SYSTEMCTL_EXEC" start 'rsyslog.service'
+"$SYSTEMCTL_EXEC" enable 'rsyslog.service'
+# END fix for 'service_rsyslog_enabled'
+
+###############################################################################
+# BEGIN fix (3 / 13) for 'set_password_hashing_algorithm_logindefs'
+###############################################################################
+(>&2 echo "Remediating rule 3/13: 'set_password_hashing_algorithm_logindefs'")
+if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
+	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
+else
+	echo "" >> /etc/login.defs
+	echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
+fi
+# END fix for 'set_password_hashing_algorithm_logindefs'
+
+###############################################################################
+# BEGIN fix (4 / 13) for 'sudo_remove_no_authenticate'
+###############################################################################
+(>&2 echo "Remediating rule 4/13: 'sudo_remove_no_authenticate'")
 (>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
 # END fix for 'sudo_remove_no_authenticate'
 
 ###############################################################################
-# BEGIN fix (2 / 13) for 'sudo_remove_nopasswd'
+# BEGIN fix (5 / 13) for 'sudo_remove_nopasswd'
 ###############################################################################
-(>&2 echo "Remediating rule 2/13: 'sudo_remove_nopasswd'")
+(>&2 echo "Remediating rule 5/13: 'sudo_remove_nopasswd'")
 (>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
 # END fix for 'sudo_remove_nopasswd'
 
 ###############################################################################
-# BEGIN fix (3 / 13) for 'ensure_gpgcheck_never_disabled'
+# BEGIN fix (6 / 13) for 'ensure_gpgcheck_never_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 3/13: 'ensure_gpgcheck_never_disabled'")
+(>&2 echo "Remediating rule 6/13: 'ensure_gpgcheck_never_disabled'")
 sed -i 's/gpgcheck\s*=.*/gpgcheck=1/g' /etc/yum.repos.d/*
 # END fix for 'ensure_gpgcheck_never_disabled'
 
 ###############################################################################
-# BEGIN fix (4 / 13) for 'security_patches_up_to_date'
+# BEGIN fix (7 / 13) for 'security_patches_up_to_date'
 ###############################################################################
-(>&2 echo "Remediating rule 4/13: 'security_patches_up_to_date'")
+(>&2 echo "Remediating rule 7/13: 'security_patches_up_to_date'")
+
+
 yum -y update
 # END fix for 'security_patches_up_to_date'
 
 ###############################################################################
-# BEGIN fix (5 / 13) for 'ensure_redhat_gpgkey_installed'
+# BEGIN fix (8 / 13) for 'ensure_redhat_gpgkey_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 5/13: 'ensure_redhat_gpgkey_installed'")
+(>&2 echo "Remediating rule 8/13: 'ensure_redhat_gpgkey_installed'")
 # The two fingerprints below are retrieved from https://access.redhat.com/security/team/key
 readonly REDHAT_RELEASE_FINGERPRINT="567E347AD0044ADE55BA8A5F199E2F91FD431D51"
 readonly REDHAT_AUXILIARY_FINGERPRINT="43A6E49C4A38F4BE9ABF2A5345689C882FA658E0"
@@ -83,9 +117,9 @@ fi
 # END fix for 'ensure_redhat_gpgkey_installed'
 
 ###############################################################################
-# BEGIN fix (6 / 13) for 'ensure_gpgcheck_globally_activated'
+# BEGIN fix (9 / 13) for 'ensure_gpgcheck_globally_activated'
 ###############################################################################
-(>&2 echo "Remediating rule 6/13: 'ensure_gpgcheck_globally_activated'")
+(>&2 echo "Remediating rule 9/13: 'ensure_gpgcheck_globally_activated'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -167,9 +201,9 @@ replace_or_append "/etc/yum.conf" '^gpgcheck' '1' 'CCE-26989-4'
 # END fix for 'ensure_gpgcheck_globally_activated'
 
 ###############################################################################
-# BEGIN fix (7 / 13) for 'ensure_gpgcheck_local_packages'
+# BEGIN fix (10 / 13) for 'ensure_gpgcheck_local_packages'
 ###############################################################################
-(>&2 echo "Remediating rule 7/13: 'ensure_gpgcheck_local_packages'")
+(>&2 echo "Remediating rule 10/13: 'ensure_gpgcheck_local_packages'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -249,38 +283,6 @@ function replace_or_append {
 }
 replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' 'CCE-80347-8'
 # END fix for 'ensure_gpgcheck_local_packages'
-
-###############################################################################
-# BEGIN fix (8 / 13) for 'package_rsyslog_installed'
-###############################################################################
-(>&2 echo "Remediating rule 8/13: 'package_rsyslog_installed'")
-
-if ! rpm -q --quiet "rsyslog" ; then
-    yum install -y "rsyslog"
-fi
-# END fix for 'package_rsyslog_installed'
-
-###############################################################################
-# BEGIN fix (9 / 13) for 'service_rsyslog_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 9/13: 'service_rsyslog_enabled'")
-
-SYSTEMCTL_EXEC='/usr/bin/systemctl'
-"$SYSTEMCTL_EXEC" start 'rsyslog.service'
-"$SYSTEMCTL_EXEC" enable 'rsyslog.service'
-# END fix for 'service_rsyslog_enabled'
-
-###############################################################################
-# BEGIN fix (10 / 13) for 'set_password_hashing_algorithm_logindefs'
-###############################################################################
-(>&2 echo "Remediating rule 10/13: 'set_password_hashing_algorithm_logindefs'")
-if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
-	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
-else
-	echo "" >> /etc/login.defs
-	echo "ENCRYPT_METHOD SHA512" >> /etc/login.defs
-fi
-# END fix for 'set_password_hashing_algorithm_logindefs'
 
 ###############################################################################
 # BEGIN fix (11 / 13) for 'package_sendmail_removed'

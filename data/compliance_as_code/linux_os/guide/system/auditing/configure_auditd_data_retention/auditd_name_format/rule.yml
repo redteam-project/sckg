@@ -18,9 +18,11 @@ severity: medium
 identifiers:
     cce@rhel7: 82359-1
     cce@rhel8: 82897-0
+    cce@ocp4: 82513-3
 
 references:
     ospp: FAU_GEN.1
+    srg: SRG-OS-000039-GPOS-00017
 
 ocil_clause: name_format isn't set to hostname
 

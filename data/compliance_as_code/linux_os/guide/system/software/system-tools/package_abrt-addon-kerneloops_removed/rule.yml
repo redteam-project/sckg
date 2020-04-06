@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8
 
 title: 'Uninstall abrt-addon-kerneloops Package'
 
@@ -13,10 +13,15 @@ rationale: |-
 
 severity: low
 
+platform: machine
+
 identifiers:
     cce@rhel6: 82928-3
     cce@rhel7: 82927-5
     cce@rhel8: 82926-7
+
+references:
+    srg: SRG-OS-000095-GPOS-00049
 
 {{{ complete_ocil_entry_package(package="abrt-addon-kerneloops") }}}
 

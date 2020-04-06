@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel6,rhel7,rhel8,fedora,ol7,ol8
+prodtype: fedora,ol7,ol8,rhel6,rhel7,rhel8
 
 title: 'Disable GDM Automatic Login'
 
@@ -26,7 +26,7 @@ identifiers:
 references:
     cui: 3.1.1
     disa: "366"
-    nist: CM-6(b)
+    nist: CM-6(a),AC-6(1),CM-7(b)
     nist-csf: PR.IP-1
     ospp: FIA_AFL.1
     srg: SRG-OS-000480-GPOS-00229

@@ -19,7 +19,7 @@
 # at https://public.cyber.mil/stigs/faqs/
 #
 # Benchmark ID:  WRLINUX
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -35,276 +35,9 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 196) for 'partition_for_home'
+# BEGIN fix (1 / 196) for 'rsyslog_remote_loghost'
 ###############################################################################
-(>&2 echo "Remediating rule 1/196: 'partition_for_home'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
-# END fix for 'partition_for_home'
-
-###############################################################################
-# BEGIN fix (2 / 196) for 'partition_for_tmp'
-###############################################################################
-(>&2 echo "Remediating rule 2/196: 'partition_for_tmp'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
-# END fix for 'partition_for_tmp'
-
-###############################################################################
-# BEGIN fix (3 / 196) for 'partition_for_var'
-###############################################################################
-(>&2 echo "Remediating rule 3/196: 'partition_for_var'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
-# END fix for 'partition_for_var'
-
-###############################################################################
-# BEGIN fix (4 / 196) for 'partition_for_var_log_audit'
-###############################################################################
-(>&2 echo "Remediating rule 4/196: 'partition_for_var_log_audit'")
-(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
-# END fix for 'partition_for_var_log_audit'
-
-###############################################################################
-# BEGIN fix (5 / 196) for 'sudo_remove_no_authenticate'
-###############################################################################
-(>&2 echo "Remediating rule 5/196: 'sudo_remove_no_authenticate'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
-# END fix for 'sudo_remove_no_authenticate'
-
-###############################################################################
-# BEGIN fix (6 / 196) for 'sudo_remove_nopasswd'
-###############################################################################
-(>&2 echo "Remediating rule 6/196: 'sudo_remove_nopasswd'")
-(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
-# END fix for 'sudo_remove_nopasswd'
-
-###############################################################################
-# BEGIN fix (7 / 196) for 'installed_OS_is_vendor_supported'
-###############################################################################
-(>&2 echo "Remediating rule 7/196: 'installed_OS_is_vendor_supported'")
-(>&2 echo "FIX FOR THIS RULE 'installed_OS_is_vendor_supported' IS MISSING!")
-# END fix for 'installed_OS_is_vendor_supported'
-
-###############################################################################
-# BEGIN fix (8 / 196) for 'grub2_enable_fips_mode'
-###############################################################################
-(>&2 echo "Remediating rule 8/196: 'grub2_enable_fips_mode'")
-
-
-# prelink not installed
-if test ! -e /etc/sysconfig/prelink -a ! -e /usr/sbin/prelink; then
-    return 0
-fi
-
-if grep -q ^PRELINKING /etc/sysconfig/prelink
-then
-    sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
-else
-    printf '\n' >> /etc/sysconfig/prelink
-    printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' >> /etc/sysconfig/prelink
-fi
-
-# Undo previous prelink changes to binaries if prelink is available.
-if test -x /usr/sbin/prelink; then
-    /usr/sbin/prelink -ua
-fi
-
-if grep -q -m1 -o aes /proc/cpuinfo; then
-	if ! rpm -q --quiet "dracut-fips-aesni" ; then
-    yum install -y "dracut-fips-aesni"
-fi
-fi
-if ! rpm -q --quiet "dracut-fips" ; then
-    yum install -y "dracut-fips"
-fi
-
-dracut -f
-
-# Correct the form of default kernel command line in  grub
-if grep -q '^GRUB_CMDLINE_LINUX=.*fips=.*"'  /etc/default/grub; then
-	# modify the GRUB command-line if a fips= arg already exists
-	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)fips=[^[:space:]]*\(.*"\)/\1 fips=1 \2/'  /etc/default/grub
-else
-	# no existing fips=arg is present, append it
-	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 fips=1"/'  /etc/default/grub
-fi
-
-# Get the UUID of the device mounted at /boot.
-BOOT_UUID=$(findmnt --noheadings --output uuid --target /boot)
-
-if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"'  /etc/default/grub; then
-	# modify the GRUB command-line if a boot= arg already exists
-	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/ grub
-else
-	# no existing boot=arg is present, append it
-	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 boot=UUID='${BOOT_UUID}'"/'  /etc/default/grub
-fi
-
-# Correct the form of kernel command line for each installed kernel in the bootloader
-/sbin/grubby --update-kernel=ALL --args="fips=1 boot=UUID=${BOOT_UUID}"
-# END fix for 'grub2_enable_fips_mode'
-
-###############################################################################
-# BEGIN fix (9 / 196) for 'rpm_verify_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 9/196: 'rpm_verify_permissions'")
-
-# Declare array to hold set of RPM packages we need to correct permissions for
-declare -A SETPERMS_RPM_DICT
-
-# Create a list of files on the system having permissions different from what
-# is expected by the RPM database
-readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
-
-for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
-do
-	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
-	# Use an associative array to store packages as it's keys, not having to care about duplicates.
-	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
-done
-
-# For each of the RPM packages left in the list -- reset its permissions to the
-# correct values
-for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
-do
-	rpm --setperms "${RPM_PACKAGE}"
-done
-# END fix for 'rpm_verify_permissions'
-
-###############################################################################
-# BEGIN fix (10 / 196) for 'rpm_verify_hashes'
-###############################################################################
-(>&2 echo "Remediating rule 10/196: 'rpm_verify_hashes'")
-
-# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
-files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
-# From files names get package names and change newline to space, because rpm writes each package to new line
-packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
-
-yum reinstall -y $packages_to_reinstall
-# END fix for 'rpm_verify_hashes'
-
-###############################################################################
-# BEGIN fix (11 / 196) for 'aide_scan_notification'
-###############################################################################
-(>&2 echo "Remediating rule 11/196: 'aide_scan_notification'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-
-CRONTAB=/etc/crontab
-CRONDIRS='/etc/cron.d /etc/cron.daily /etc/cron.weekly /etc/cron.monthly'
-
-if [ -f /var/spool/cron/root ]; then
-	VARSPOOL=/var/spool/cron/root
-fi
-
-if ! grep -qR '^.*\/usr\/sbin\/aide\s*\-\-check.*|.*\/bin\/mail\s*-s\s*".*"\s*root@.*$' $CRONTAB $VARSPOOL $CRONDIRS; then
-	echo '0 5 * * * root /usr/sbin/aide  --check | /bin/mail -s "$(hostname) - AIDE Integrity Check" root@localhost' >> $CRONTAB
-fi
-# END fix for 'aide_scan_notification'
-
-###############################################################################
-# BEGIN fix (12 / 196) for 'aide_periodic_cron_checking'
-###############################################################################
-(>&2 echo "Remediating rule 12/196: 'aide_periodic_cron_checking'")
-
-if ! rpm -q --quiet "aide" ; then
-    yum install -y "aide"
-fi
-
-if ! grep -q "/usr/sbin/aide --check" /etc/crontab ; then
-    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
-fi
-# END fix for 'aide_periodic_cron_checking'
-
-###############################################################################
-# BEGIN fix (13 / 196) for 'ensure_gpgcheck_local_packages'
-###############################################################################
-(>&2 echo "Remediating rule 13/196: 'ensure_gpgcheck_local_packages'")
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
-}
-replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' ''
-# END fix for 'ensure_gpgcheck_local_packages'
-
-###############################################################################
-# BEGIN fix (14 / 196) for 'rsyslog_remote_loghost'
-###############################################################################
-(>&2 echo "Remediating rule 14/196: 'rsyslog_remote_loghost'")
+(>&2 echo "Remediating rule 1/196: 'rsyslog_remote_loghost'")
 
 rsyslog_remote_loghost_address="logcollector"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -388,9 +121,9 @@ replace_or_append '/etc/rsyslog.conf' '^\*\.\*' "@@$rsyslog_remote_loghost_addre
 # END fix for 'rsyslog_remote_loghost'
 
 ###############################################################################
-# BEGIN fix (15 / 196) for 'rsyslog_cron_logging'
+# BEGIN fix (2 / 196) for 'rsyslog_cron_logging'
 ###############################################################################
-(>&2 echo "Remediating rule 15/196: 'rsyslog_cron_logging'")
+(>&2 echo "Remediating rule 2/196: 'rsyslog_cron_logging'")
 
 if ! grep -s "^\s*cron\.\*\s*/var/log/cron$" /etc/rsyslog.conf /etc/rsyslog.d/*.conf; then
 	mkdir -p /etc/rsyslog.d
@@ -399,37 +132,37 @@ fi
 # END fix for 'rsyslog_cron_logging'
 
 ###############################################################################
-# BEGIN fix (16 / 196) for 'rsyslog_nolisten'
+# BEGIN fix (3 / 196) for 'rsyslog_nolisten'
 ###############################################################################
-(>&2 echo "Remediating rule 16/196: 'rsyslog_nolisten'")
+(>&2 echo "Remediating rule 3/196: 'rsyslog_nolisten'")
 (>&2 echo "FIX FOR THIS RULE 'rsyslog_nolisten' IS MISSING!")
 # END fix for 'rsyslog_nolisten'
 
 ###############################################################################
-# BEGIN fix (17 / 196) for 'network_configure_name_resolution'
+# BEGIN fix (4 / 196) for 'network_configure_name_resolution'
 ###############################################################################
-(>&2 echo "Remediating rule 17/196: 'network_configure_name_resolution'")
+(>&2 echo "Remediating rule 4/196: 'network_configure_name_resolution'")
 (>&2 echo "FIX FOR THIS RULE 'network_configure_name_resolution' IS MISSING!")
 # END fix for 'network_configure_name_resolution'
 
 ###############################################################################
-# BEGIN fix (18 / 196) for 'network_sniffer_disabled'
+# BEGIN fix (5 / 196) for 'network_sniffer_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 18/196: 'network_sniffer_disabled'")
+(>&2 echo "Remediating rule 5/196: 'network_sniffer_disabled'")
 (>&2 echo "FIX FOR THIS RULE 'network_sniffer_disabled' IS MISSING!")
 # END fix for 'network_sniffer_disabled'
 
 ###############################################################################
-# BEGIN fix (19 / 196) for 'sysctl_net_ipv6_conf_all_accept_source_route'
+# BEGIN fix (6 / 196) for 'service_firewalld_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 19/196: 'sysctl_net_ipv6_conf_all_accept_source_route'")
-(>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv6_conf_all_accept_source_route' IS MISSING!")
-# END fix for 'sysctl_net_ipv6_conf_all_accept_source_route'
+(>&2 echo "Remediating rule 6/196: 'service_firewalld_enabled'")
+(>&2 echo "FIX FOR THIS RULE 'service_firewalld_enabled' IS MISSING!")
+# END fix for 'service_firewalld_enabled'
 
 ###############################################################################
-# BEGIN fix (20 / 196) for 'configure_firewalld_ports'
+# BEGIN fix (7 / 196) for 'configure_firewalld_ports'
 ###############################################################################
-(>&2 echo "Remediating rule 20/196: 'configure_firewalld_ports'")
+(>&2 echo "Remediating rule 7/196: 'configure_firewalld_ports'")
 
 
 if ! rpm -q --quiet "firewalld" ; then
@@ -542,107 +275,109 @@ function replace_or_append {
         # If firewalld service is running, we need to do this step with firewall-cmd
         # Otherwise firewalld will comunicate with NetworkManage and will revert assigned zone
         # of NetworkManager managed interfaces upon reload
-        firewall-cmd --zone=$firewalld_sshd_zone --add-interface=${eth_interface_list[0]}
+        firewall-cmd --permanent --zone=$firewalld_sshd_zone --add-interface=${eth_interface_list[0]}
         firewall-cmd --reload
     fi
 fi
 # END fix for 'configure_firewalld_ports'
 
 ###############################################################################
-# BEGIN fix (21 / 196) for 'configure_firewalld_rate_limiting'
+# BEGIN fix (8 / 196) for 'configure_firewalld_rate_limiting'
 ###############################################################################
-(>&2 echo "Remediating rule 21/196: 'configure_firewalld_rate_limiting'")
-(>&2 echo "FIX FOR THIS RULE 'configure_firewalld_rate_limiting' IS MISSING!")
+(>&2 echo "Remediating rule 8/196: 'configure_firewalld_rate_limiting'")
+
+firewall-cmd --permanent --direct --add-rule ipv4 filter INPUT_direct 0 -p tcp -m limit --limit 25/minute --limit-burst 100  -j INPUT_ZONES
+firewall-cmd --reload
 # END fix for 'configure_firewalld_rate_limiting'
 
 ###############################################################################
-# BEGIN fix (22 / 196) for 'service_firewalld_enabled'
+# BEGIN fix (9 / 196) for 'sysctl_net_ipv6_conf_all_accept_source_route'
 ###############################################################################
-(>&2 echo "Remediating rule 22/196: 'service_firewalld_enabled'")
-(>&2 echo "FIX FOR THIS RULE 'service_firewalld_enabled' IS MISSING!")
-# END fix for 'service_firewalld_enabled'
+(>&2 echo "Remediating rule 9/196: 'sysctl_net_ipv6_conf_all_accept_source_route'")
+(>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv6_conf_all_accept_source_route' IS MISSING!")
+# END fix for 'sysctl_net_ipv6_conf_all_accept_source_route'
 
 ###############################################################################
-# BEGIN fix (23 / 196) for 'sysctl_net_ipv4_conf_default_accept_source_route'
+# BEGIN fix (10 / 196) for 'sysctl_net_ipv4_conf_default_accept_source_route'
 ###############################################################################
-(>&2 echo "Remediating rule 23/196: 'sysctl_net_ipv4_conf_default_accept_source_route'")
+(>&2 echo "Remediating rule 10/196: 'sysctl_net_ipv4_conf_default_accept_source_route'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_conf_default_accept_source_route' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_conf_default_accept_source_route'
 
 ###############################################################################
-# BEGIN fix (24 / 196) for 'sysctl_net_ipv4_conf_all_accept_source_route'
+# BEGIN fix (11 / 196) for 'sysctl_net_ipv4_conf_all_accept_source_route'
 ###############################################################################
-(>&2 echo "Remediating rule 24/196: 'sysctl_net_ipv4_conf_all_accept_source_route'")
+(>&2 echo "Remediating rule 11/196: 'sysctl_net_ipv4_conf_all_accept_source_route'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_conf_all_accept_source_route' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_conf_all_accept_source_route'
 
 ###############################################################################
-# BEGIN fix (25 / 196) for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
+# BEGIN fix (12 / 196) for 'sysctl_net_ipv4_conf_all_accept_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 25/196: 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'")
-(>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts' IS MISSING!")
-# END fix for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
-
-###############################################################################
-# BEGIN fix (26 / 196) for 'sysctl_net_ipv4_conf_all_accept_redirects'
-###############################################################################
-(>&2 echo "Remediating rule 26/196: 'sysctl_net_ipv4_conf_all_accept_redirects'")
+(>&2 echo "Remediating rule 12/196: 'sysctl_net_ipv4_conf_all_accept_redirects'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_conf_all_accept_redirects' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_conf_all_accept_redirects'
 
 ###############################################################################
-# BEGIN fix (27 / 196) for 'sysctl_net_ipv4_ip_forward'
+# BEGIN fix (13 / 196) for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
 ###############################################################################
-(>&2 echo "Remediating rule 27/196: 'sysctl_net_ipv4_ip_forward'")
+(>&2 echo "Remediating rule 13/196: 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'")
+(>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts' IS MISSING!")
+# END fix for 'sysctl_net_ipv4_icmp_echo_ignore_broadcasts'
+
+###############################################################################
+# BEGIN fix (14 / 196) for 'sysctl_net_ipv4_ip_forward'
+###############################################################################
+(>&2 echo "Remediating rule 14/196: 'sysctl_net_ipv4_ip_forward'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_ip_forward' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_ip_forward'
 
 ###############################################################################
-# BEGIN fix (28 / 196) for 'sysctl_net_ipv4_conf_all_send_redirects'
+# BEGIN fix (15 / 196) for 'sysctl_net_ipv4_conf_all_send_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 28/196: 'sysctl_net_ipv4_conf_all_send_redirects'")
+(>&2 echo "Remediating rule 15/196: 'sysctl_net_ipv4_conf_all_send_redirects'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_conf_all_send_redirects' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_conf_all_send_redirects'
 
 ###############################################################################
-# BEGIN fix (29 / 196) for 'sysctl_net_ipv4_conf_default_send_redirects'
+# BEGIN fix (16 / 196) for 'sysctl_net_ipv4_conf_default_send_redirects'
 ###############################################################################
-(>&2 echo "Remediating rule 29/196: 'sysctl_net_ipv4_conf_default_send_redirects'")
+(>&2 echo "Remediating rule 16/196: 'sysctl_net_ipv4_conf_default_send_redirects'")
 (>&2 echo "FIX FOR THIS RULE 'sysctl_net_ipv4_conf_default_send_redirects' IS MISSING!")
 # END fix for 'sysctl_net_ipv4_conf_default_send_redirects'
 
 ###############################################################################
-# BEGIN fix (30 / 196) for 'kernel_module_dccp_disabled'
+# BEGIN fix (17 / 196) for 'kernel_module_dccp_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 30/196: 'kernel_module_dccp_disabled'")
+(>&2 echo "Remediating rule 17/196: 'kernel_module_dccp_disabled'")
 (>&2 echo "FIX FOR THIS RULE 'kernel_module_dccp_disabled' IS MISSING!")
 # END fix for 'kernel_module_dccp_disabled'
 
 ###############################################################################
-# BEGIN fix (31 / 196) for 'grub2_no_removeable_media'
+# BEGIN fix (18 / 196) for 'grub2_password'
 ###############################################################################
-(>&2 echo "Remediating rule 31/196: 'grub2_no_removeable_media'")
-(>&2 echo "FIX FOR THIS RULE 'grub2_no_removeable_media' IS MISSING!")
-# END fix for 'grub2_no_removeable_media'
-
-###############################################################################
-# BEGIN fix (32 / 196) for 'grub2_password'
-###############################################################################
-(>&2 echo "Remediating rule 32/196: 'grub2_password'")
+(>&2 echo "Remediating rule 18/196: 'grub2_password'")
 (>&2 echo "FIX FOR THIS RULE 'grub2_password' IS MISSING!")
 # END fix for 'grub2_password'
 
 ###############################################################################
-# BEGIN fix (33 / 196) for 'grub2_uefi_password'
+# BEGIN fix (19 / 196) for 'grub2_no_removeable_media'
 ###############################################################################
-(>&2 echo "Remediating rule 33/196: 'grub2_uefi_password'")
+(>&2 echo "Remediating rule 19/196: 'grub2_no_removeable_media'")
+(>&2 echo "FIX FOR THIS RULE 'grub2_no_removeable_media' IS MISSING!")
+# END fix for 'grub2_no_removeable_media'
+
+###############################################################################
+# BEGIN fix (20 / 196) for 'grub2_uefi_password'
+###############################################################################
+(>&2 echo "Remediating rule 20/196: 'grub2_uefi_password'")
 (>&2 echo "FIX FOR THIS RULE 'grub2_uefi_password' IS MISSING!")
 # END fix for 'grub2_uefi_password'
 
 ###############################################################################
-# BEGIN fix (34 / 196) for 'selinux_policytype'
+# BEGIN fix (21 / 196) for 'selinux_policytype'
 ###############################################################################
-(>&2 echo "Remediating rule 34/196: 'selinux_policytype'")
+(>&2 echo "Remediating rule 21/196: 'selinux_policytype'")
 
 var_selinux_policy_name="targeted"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -726,23 +461,23 @@ replace_or_append '/etc/sysconfig/selinux' '^SELINUXTYPE=' $var_selinux_policy_n
 # END fix for 'selinux_policytype'
 
 ###############################################################################
-# BEGIN fix (35 / 196) for 'selinux_all_devicefiles_labeled'
+# BEGIN fix (22 / 196) for 'selinux_all_devicefiles_labeled'
 ###############################################################################
-(>&2 echo "Remediating rule 35/196: 'selinux_all_devicefiles_labeled'")
+(>&2 echo "Remediating rule 22/196: 'selinux_all_devicefiles_labeled'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_all_devicefiles_labeled' IS MISSING!")
 # END fix for 'selinux_all_devicefiles_labeled'
 
 ###############################################################################
-# BEGIN fix (36 / 196) for 'selinux_user_login_roles'
+# BEGIN fix (23 / 196) for 'selinux_user_login_roles'
 ###############################################################################
-(>&2 echo "Remediating rule 36/196: 'selinux_user_login_roles'")
+(>&2 echo "Remediating rule 23/196: 'selinux_user_login_roles'")
 (>&2 echo "FIX FOR THIS RULE 'selinux_user_login_roles' IS MISSING!")
 # END fix for 'selinux_user_login_roles'
 
 ###############################################################################
-# BEGIN fix (37 / 196) for 'selinux_state'
+# BEGIN fix (24 / 196) for 'selinux_state'
 ###############################################################################
-(>&2 echo "Remediating rule 37/196: 'selinux_state'")
+(>&2 echo "Remediating rule 24/196: 'selinux_state'")
 
 var_selinux_state="enforcing"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -829,9 +564,159 @@ fixfiles -f relabel
 # END fix for 'selinux_state'
 
 ###############################################################################
-# BEGIN fix (38 / 196) for 'display_login_attempts'
+# BEGIN fix (25 / 196) for 'accounts_minimum_age_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 38/196: 'display_login_attempts'")
+(>&2 echo "Remediating rule 25/196: 'accounts_minimum_age_login_defs'")
+
+var_accounts_minimum_age_login_defs="1"
+
+grep -q ^PASS_MIN_DAYS /etc/login.defs && \
+  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_minimum_age_login_defs'
+
+###############################################################################
+# BEGIN fix (26 / 196) for 'accounts_maximum_age_login_defs'
+###############################################################################
+(>&2 echo "Remediating rule 26/196: 'accounts_maximum_age_login_defs'")
+
+var_accounts_maximum_age_login_defs="60"
+
+grep -q ^PASS_MAX_DAYS /etc/login.defs && \
+  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
+if ! [ $? -eq 0 ]; then
+    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" >> /etc/login.defs
+fi
+# END fix for 'accounts_maximum_age_login_defs'
+
+###############################################################################
+# BEGIN fix (27 / 196) for 'accounts_password_set_min_life_existing'
+###############################################################################
+(>&2 echo "Remediating rule 27/196: 'accounts_password_set_min_life_existing'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_password_set_min_life_existing' IS MISSING!")
+# END fix for 'accounts_password_set_min_life_existing'
+
+###############################################################################
+# BEGIN fix (28 / 196) for 'accounts_password_set_max_life_existing'
+###############################################################################
+(>&2 echo "Remediating rule 28/196: 'accounts_password_set_max_life_existing'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_password_set_max_life_existing' IS MISSING!")
+# END fix for 'accounts_password_set_max_life_existing'
+
+###############################################################################
+# BEGIN fix (29 / 196) for 'no_empty_passwords'
+###############################################################################
+(>&2 echo "Remediating rule 29/196: 'no_empty_passwords'")
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
+# END fix for 'no_empty_passwords'
+
+###############################################################################
+# BEGIN fix (30 / 196) for 'gid_passwd_group_same'
+###############################################################################
+(>&2 echo "Remediating rule 30/196: 'gid_passwd_group_same'")
+(>&2 echo "FIX FOR THIS RULE 'gid_passwd_group_same' IS MISSING!")
+# END fix for 'gid_passwd_group_same'
+
+###############################################################################
+# BEGIN fix (31 / 196) for 'accounts_no_uid_except_zero'
+###############################################################################
+(>&2 echo "Remediating rule 31/196: 'accounts_no_uid_except_zero'")
+awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
+# END fix for 'accounts_no_uid_except_zero'
+
+###############################################################################
+# BEGIN fix (32 / 196) for 'account_disable_post_pw_expiration'
+###############################################################################
+(>&2 echo "Remediating rule 32/196: 'account_disable_post_pw_expiration'")
+
+var_account_disable_post_pw_expiration="0"
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
+}
+replace_or_append '/etc/default/useradd' '^INACTIVE' "$var_account_disable_post_pw_expiration" '' '%s=%s'
+# END fix for 'account_disable_post_pw_expiration'
+
+###############################################################################
+# BEGIN fix (33 / 196) for 'display_login_attempts'
+###############################################################################
+(>&2 echo "Remediating rule 33/196: 'display_login_attempts'")
 if grep -q "^session.*pam_lastlog.so" /etc/pam.d/postlogin; then
 	sed -i --follow-symlinks "/pam_lastlog.so/d" /etc/pam.d/postlogin
 fi
@@ -841,9 +726,9 @@ echo "session     optional      pam_lastlog.so silent noupdate showfailed" >> /e
 # END fix for 'display_login_attempts'
 
 ###############################################################################
-# BEGIN fix (39 / 196) for 'set_password_hashing_algorithm_logindefs'
+# BEGIN fix (34 / 196) for 'set_password_hashing_algorithm_logindefs'
 ###############################################################################
-(>&2 echo "Remediating rule 39/196: 'set_password_hashing_algorithm_logindefs'")
+(>&2 echo "Remediating rule 34/196: 'set_password_hashing_algorithm_logindefs'")
 if grep --silent ^ENCRYPT_METHOD /etc/login.defs ; then
 	sed -i 's/^ENCRYPT_METHOD.*/ENCRYPT_METHOD SHA512/g' /etc/login.defs
 else
@@ -853,9 +738,9 @@ fi
 # END fix for 'set_password_hashing_algorithm_logindefs'
 
 ###############################################################################
-# BEGIN fix (40 / 196) for 'set_password_hashing_algorithm_libuserconf'
+# BEGIN fix (35 / 196) for 'set_password_hashing_algorithm_libuserconf'
 ###############################################################################
-(>&2 echo "Remediating rule 40/196: 'set_password_hashing_algorithm_libuserconf'")
+(>&2 echo "Remediating rule 35/196: 'set_password_hashing_algorithm_libuserconf'")
 
 LIBUSER_CONF="/etc/libuser.conf"
 CRYPT_STYLE_REGEX='[[:space:]]*\[defaults](.*(\n)+)+?[[:space:]]*crypt_style[[:space:]]*'
@@ -872,9 +757,9 @@ fi
 # END fix for 'set_password_hashing_algorithm_libuserconf'
 
 ###############################################################################
-# BEGIN fix (41 / 196) for 'set_password_hashing_algorithm_systemauth'
+# BEGIN fix (36 / 196) for 'set_password_hashing_algorithm_systemauth'
 ###############################################################################
-(>&2 echo "Remediating rule 41/196: 'set_password_hashing_algorithm_systemauth'")
+(>&2 echo "Remediating rule 36/196: 'set_password_hashing_algorithm_systemauth'")
 
 AUTH_FILES[0]="/etc/pam.d/system-auth"
 AUTH_FILES[1]="/etc/pam.d/password-auth"
@@ -888,9 +773,9 @@ done
 # END fix for 'set_password_hashing_algorithm_systemauth'
 
 ###############################################################################
-# BEGIN fix (42 / 196) for 'accounts_passwords_pam_faillock_deny_root'
+# BEGIN fix (37 / 196) for 'accounts_passwords_pam_faillock_deny_root'
 ###############################################################################
-(>&2 echo "Remediating rule 42/196: 'accounts_passwords_pam_faillock_deny_root'")
+(>&2 echo "Remediating rule 37/196: 'accounts_passwords_pam_faillock_deny_root'")
 
 AUTH_FILES[0]="/etc/pam.d/system-auth"
 AUTH_FILES[1]="/etc/pam.d/password-auth"
@@ -938,9 +823,9 @@ done
 # END fix for 'accounts_passwords_pam_faillock_deny_root'
 
 ###############################################################################
-# BEGIN fix (43 / 196) for 'accounts_password_pam_unix_remember'
+# BEGIN fix (38 / 196) for 'accounts_password_pam_unix_remember'
 ###############################################################################
-(>&2 echo "Remediating rule 43/196: 'accounts_password_pam_unix_remember'")
+(>&2 echo "Remediating rule 38/196: 'accounts_password_pam_unix_remember'")
 
 var_password_pam_unix_remember="5"
 
@@ -958,150 +843,119 @@ done
 # END fix for 'accounts_password_pam_unix_remember'
 
 ###############################################################################
-# BEGIN fix (44 / 196) for 'accounts_passwords_pam_faillock_deny'
+# BEGIN fix (39 / 196) for 'accounts_passwords_pam_faillock_deny'
 ###############################################################################
-(>&2 echo "Remediating rule 44/196: 'accounts_passwords_pam_faillock_deny'")
+(>&2 echo "Remediating rule 39/196: 'accounts_passwords_pam_faillock_deny'")
 
 var_accounts_passwords_pam_faillock_deny="3"
-function include_set_faillock_option {
-	:
-}
 
-function insert_preauth {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth required pam_faillock.so preauth present?
-	if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth required pam_faillock.so preauth is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent $option=$value" "$pam_file"
-	fi
-}
-
-function insert_authfail {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	# is auth default pam_faillock.so authfail present?
-	if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$" "$pam_file" ; then
-		# is the option set?
-		if grep -qE "^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$option=([0-9]*).*$" "$pam_file" ; then
-			# just change the value of option to a correct value
-			sed -i --follow-symlinks "s/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\($option *= *\).*/\1\2$value/" "$pam_file"
-		# the option is not set.
-		else
-			# append the option
-			sed -i --follow-symlinks "/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ $option=$value/" "$pam_file"
-		fi
-	# auth default pam_faillock.so authfail is not present, insert the whole line
-	else
-		sed -i --follow-symlinks "/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail $option=$value" "$pam_file"
-	fi
-}
-
-function insert_account {
-	local pam_file="$1"
-	if ! grep -qE "^\s*account\s+required\s+pam_faillock\.so.*$" "$pam_file" ; then
-		sed -E -i --follow-symlinks "/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so" "$pam_file"
-	fi
-}
-
-function set_faillock_option {
-	local pam_file="$1"
-	local option="$2"
-	local value="$3"
-	insert_preauth "$pam_file" "$option" "$value"
-	insert_authfail "$pam_file" "$option" "$value"
-	insert_account "$pam_file"
-}
-include_set_faillock_option
-
-AUTH_FILES[0]="/etc/pam.d/system-auth"
-AUTH_FILES[1]="/etc/pam.d/password-auth"
+AUTH_FILES=("/etc/pam.d/system-auth" "/etc/pam.d/password-auth")
 
 for pam_file in "${AUTH_FILES[@]}"
 do
-	set_faillock_option "$pam_file" "deny" "$var_accounts_passwords_pam_faillock_deny"
+    # is auth required pam_faillock.so preauth present?
+    if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+required\s+pam_faillock\.so\s+preauth.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*required.*pam_faillock.so.*preauth.*silent.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*required.*pam_faillock.so.*preauth.*silent.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth required pam_faillock.so preauth is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/i auth        required      pam_faillock.so preauth silent '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    # is auth default pam_faillock.so authfail present?
+    if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*$' "$pam_file" ; then
+        # is the option set?
+        if grep -qE '^\s*auth\s+(\[default=die\])\s+pam_faillock\.so\s+authfail.*'"deny"'=([0-9]*).*$' "$pam_file" ; then
+            # just change the value of option to a correct value
+            sed -i --follow-symlinks 's/\(^auth.*[default=die].*pam_faillock.so.*authfail.*\)\('"deny"' *= *\).*/\1\2'"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        # the option is not set.
+        else
+            # append the option
+            sed -i --follow-symlinks '/^auth.*[default=die].*pam_faillock.so.*authfail.*/ s/$/ '"deny"'='"$var_accounts_passwords_pam_faillock_deny"'/' "$pam_file"
+        fi
+    # auth default pam_faillock.so authfail is not present, insert the whole line
+    else
+        sed -i --follow-symlinks '/^auth.*sufficient.*pam_unix.so.*/a auth        [default=die] pam_faillock.so authfail '"deny"'='"$var_accounts_passwords_pam_faillock_deny" "$pam_file"
+    fi
+    if ! grep -qE '^\s*account\s+required\s+pam_faillock\.so.*$' "$pam_file" ; then
+        sed -E -i --follow-symlinks '/^\s*account\s*required\s*pam_unix.so/i account     required      pam_faillock.so' "$pam_file"
+    fi
 done
 # END fix for 'accounts_passwords_pam_faillock_deny'
 
 ###############################################################################
-# BEGIN fix (45 / 196) for 'accounts_password_pam_minlen'
+# BEGIN fix (40 / 196) for 'accounts_password_pam_minlen'
 ###############################################################################
-(>&2 echo "Remediating rule 45/196: 'accounts_password_pam_minlen'")
+(>&2 echo "Remediating rule 40/196: 'accounts_password_pam_minlen'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_minlen' IS MISSING!")
 # END fix for 'accounts_password_pam_minlen'
 
 ###############################################################################
-# BEGIN fix (46 / 196) for 'accounts_password_pam_maxclassrepeat'
+# BEGIN fix (41 / 196) for 'accounts_password_pam_maxclassrepeat'
 ###############################################################################
-(>&2 echo "Remediating rule 46/196: 'accounts_password_pam_maxclassrepeat'")
+(>&2 echo "Remediating rule 41/196: 'accounts_password_pam_maxclassrepeat'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_maxclassrepeat' IS MISSING!")
 # END fix for 'accounts_password_pam_maxclassrepeat'
 
 ###############################################################################
-# BEGIN fix (47 / 196) for 'accounts_password_pam_maxrepeat'
+# BEGIN fix (42 / 196) for 'accounts_password_pam_maxrepeat'
 ###############################################################################
-(>&2 echo "Remediating rule 47/196: 'accounts_password_pam_maxrepeat'")
+(>&2 echo "Remediating rule 42/196: 'accounts_password_pam_maxrepeat'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_maxrepeat' IS MISSING!")
 # END fix for 'accounts_password_pam_maxrepeat'
 
 ###############################################################################
-# BEGIN fix (48 / 196) for 'accounts_password_pam_dcredit'
+# BEGIN fix (43 / 196) for 'accounts_password_pam_dcredit'
 ###############################################################################
-(>&2 echo "Remediating rule 48/196: 'accounts_password_pam_dcredit'")
+(>&2 echo "Remediating rule 43/196: 'accounts_password_pam_dcredit'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_dcredit' IS MISSING!")
 # END fix for 'accounts_password_pam_dcredit'
 
 ###############################################################################
-# BEGIN fix (49 / 196) for 'accounts_password_pam_minclass'
+# BEGIN fix (44 / 196) for 'accounts_password_pam_minclass'
 ###############################################################################
-(>&2 echo "Remediating rule 49/196: 'accounts_password_pam_minclass'")
+(>&2 echo "Remediating rule 44/196: 'accounts_password_pam_minclass'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_minclass' IS MISSING!")
 # END fix for 'accounts_password_pam_minclass'
 
 ###############################################################################
-# BEGIN fix (50 / 196) for 'accounts_password_pam_difok'
+# BEGIN fix (45 / 196) for 'accounts_password_pam_difok'
 ###############################################################################
-(>&2 echo "Remediating rule 50/196: 'accounts_password_pam_difok'")
+(>&2 echo "Remediating rule 45/196: 'accounts_password_pam_difok'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_difok' IS MISSING!")
 # END fix for 'accounts_password_pam_difok'
 
 ###############################################################################
-# BEGIN fix (51 / 196) for 'accounts_password_pam_ocredit'
+# BEGIN fix (46 / 196) for 'accounts_password_pam_ocredit'
 ###############################################################################
-(>&2 echo "Remediating rule 51/196: 'accounts_password_pam_ocredit'")
+(>&2 echo "Remediating rule 46/196: 'accounts_password_pam_ocredit'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_ocredit' IS MISSING!")
 # END fix for 'accounts_password_pam_ocredit'
 
 ###############################################################################
-# BEGIN fix (52 / 196) for 'accounts_password_pam_lcredit'
+# BEGIN fix (47 / 196) for 'accounts_password_pam_lcredit'
 ###############################################################################
-(>&2 echo "Remediating rule 52/196: 'accounts_password_pam_lcredit'")
+(>&2 echo "Remediating rule 47/196: 'accounts_password_pam_lcredit'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_lcredit' IS MISSING!")
 # END fix for 'accounts_password_pam_lcredit'
 
 ###############################################################################
-# BEGIN fix (53 / 196) for 'accounts_password_pam_ucredit'
+# BEGIN fix (48 / 196) for 'accounts_password_pam_ucredit'
 ###############################################################################
-(>&2 echo "Remediating rule 53/196: 'accounts_password_pam_ucredit'")
+(>&2 echo "Remediating rule 48/196: 'accounts_password_pam_ucredit'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_password_pam_ucredit' IS MISSING!")
 # END fix for 'accounts_password_pam_ucredit'
 
 ###############################################################################
-# BEGIN fix (54 / 196) for 'accounts_password_pam_retry'
+# BEGIN fix (49 / 196) for 'accounts_password_pam_retry'
 ###############################################################################
-(>&2 echo "Remediating rule 54/196: 'accounts_password_pam_retry'")
+(>&2 echo "Remediating rule 49/196: 'accounts_password_pam_retry'")
 
 var_password_pam_retry="3"
 
@@ -1113,16 +967,16 @@ fi
 # END fix for 'accounts_password_pam_retry'
 
 ###############################################################################
-# BEGIN fix (55 / 196) for 'disable_ctrlaltdel_reboot'
+# BEGIN fix (50 / 196) for 'disable_ctrlaltdel_reboot'
 ###############################################################################
-(>&2 echo "Remediating rule 55/196: 'disable_ctrlaltdel_reboot'")
+(>&2 echo "Remediating rule 50/196: 'disable_ctrlaltdel_reboot'")
 systemctl mask ctrl-alt-del.target
 # END fix for 'disable_ctrlaltdel_reboot'
 
 ###############################################################################
-# BEGIN fix (56 / 196) for 'require_singleuser_auth'
+# BEGIN fix (51 / 196) for 'require_singleuser_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 56/196: 'require_singleuser_auth'")
+(>&2 echo "Remediating rule 51/196: 'require_singleuser_auth'")
 
 service_file="/usr/lib/systemd/system/rescue.service"
 
@@ -1136,16 +990,42 @@ fi
 # END fix for 'require_singleuser_auth'
 
 ###############################################################################
-# BEGIN fix (57 / 196) for 'package_screen_installed'
+# BEGIN fix (52 / 196) for 'package_screen_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 57/196: 'package_screen_installed'")
+(>&2 echo "Remediating rule 52/196: 'package_screen_installed'")
 (>&2 echo "FIX FOR THIS RULE 'package_screen_installed' IS MISSING!")
 # END fix for 'package_screen_installed'
 
 ###############################################################################
-# BEGIN fix (58 / 196) for 'accounts_tmout'
+# BEGIN fix (53 / 196) for 'banner_etc_issue'
 ###############################################################################
-(>&2 echo "Remediating rule 58/196: 'accounts_tmout'")
+(>&2 echo "Remediating rule 53/196: 'banner_etc_issue'")
+
+login_banner_text="^Use[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+constitutes[\s\n]+consent[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times\.[\s\n]+This[\s\n]+is[\s\n]+a[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system\.[\s\n]+All[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+and[\s\n]+related[\s\n]+equipment[\s\n]+are[\s\n]+intended[\s\n]+for[\s\n]+the[\s\n]+communication\,[\s\n]+transmission\,[\s\n]+processing\,[\s\n]+and[\s\n]+storage[\s\n]+of[\s\n]+official[\s\n]+U\.S\.[\s\n]+Government[\s\n]+or[\s\n]+other[\s\n]+authorized[\s\n]+information[\s\n]+only\.[\s\n]+All[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times[\s\n]+to[\s\n]+ensure[\s\n]+proper[\s\n]+functioning[\s\n]+of[\s\n]+equipment[\s\n]+and[\s\n]+systems[\s\n]+including[\s\n]+security[\s\n]+devices[\s\n]+and[\s\n]+systems\,[\s\n]+to[\s\n]+prevent[\s\n]+unauthorized[\s\n]+use[\s\n]+and[\s\n]+violations[\s\n]+of[\s\n]+statutes[\s\n]+and[\s\n]+security[\s\n]+regulations\,[\s\n]+to[\s\n]+deter[\s\n]+criminal[\s\n]+activity\,[\s\n]+and[\s\n]+for[\s\n]+other[\s\n]+similar[\s\n]+purposes\.[\s\n]+Any[\s\n]+user[\s\n]+of[\s\n]+a[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+should[\s\n]+be[\s\n]+aware[\s\n]+that[\s\n]+any[\s\n]+information[\s\n]+placed[\s\n]+in[\s\n]+the[\s\n]+system[\s\n]+is[\s\n]+subject[\s\n]+to[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+not[\s\n]+subject[\s\n]+to[\s\n]+any[\s\n]+expectation[\s\n]+of[\s\n]+privacy\.[\s\n]+If[\s\n]+monitoring[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+violation[\s\n]+of[\s\n]+criminal[\s\n]+statutes\,[\s\n]+this[\s\n]+evidence[\s\n]+and[\s\n]+any[\s\n]+other[\s\n]+related[\s\n]+information\,[\s\n]+including[\s\n]+identification[\s\n]+information[\s\n]+about[\s\n]+the[\s\n]+user\,[\s\n]+may[\s\n]+be[\s\n]+provided[\s\n]+to[\s\n]+law[\s\n]+enforcement[\s\n]+officials\.[\s\n]+If[\s\n]+monitoring[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+reveals[\s\n]+violations[\s\n]+of[\s\n]+security[\s\n]+regulations[\s\n]+or[\s\n]+unauthorized[\s\n]+use\,[\s\n]+employees[\s\n]+who[\s\n]+violate[\s\n]+security[\s\n]+regulations[\s\n]+or[\s\n]+make[\s\n]+unauthorized[\s\n]+use[\s\n]+of[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+appropriate[\s\n]+disciplinary[\s\n]+action\.[\s\n]+Use[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+constitutes[\s\n]+consent[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times\.$"
+
+# Multiple regexes transform the banner regex into a usable banner
+# 0 - Remove anchors around the banner text
+login_banner_text=$(echo "$login_banner_text" | sed 's/^\^\(.*\)\$$/\1/g')
+# 1 - Keep only the first banners if there are multiple
+#    (dod_banners contains the long and short banner)
+login_banner_text=$(echo "$login_banner_text" | sed 's/^(\(.*\)|.*)$/\1/g')
+# 2 - Add spaces ' '. (Transforms regex for "space or newline" into a " ")
+login_banner_text=$(echo "$login_banner_text" | sed 's/\[\\s\\n\]+/ /g')
+# 3 - Adds newlines. (Transforms "(?:\[\\n\]+|(?:\\n)+)" into "\n")
+login_banner_text=$(echo "$login_banner_text" | sed 's/(?:\[\\n\]+|(?:\\n)+)/\n/g')
+# 4 - Remove any leftover backslash. (From any parethesis in the banner, for example).
+login_banner_text=$(echo "$login_banner_text" | sed 's/\\//g')
+formatted=$(echo "$login_banner_text" | fold -sw 80)
+
+cat <<EOF >/etc/issue
+$formatted
+EOF
+# END fix for 'banner_etc_issue'
+
+###############################################################################
+# BEGIN fix (54 / 196) for 'accounts_tmout'
+###############################################################################
+(>&2 echo "Remediating rule 54/196: 'accounts_tmout'")
 
 var_accounts_tmout="600"
 
@@ -1158,37 +1038,37 @@ fi
 # END fix for 'accounts_tmout'
 
 ###############################################################################
-# BEGIN fix (59 / 196) for 'accounts_user_dot_group_ownership'
+# BEGIN fix (55 / 196) for 'accounts_user_dot_group_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 59/196: 'accounts_user_dot_group_ownership'")
+(>&2 echo "Remediating rule 55/196: 'accounts_user_dot_group_ownership'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_user_dot_group_ownership' IS MISSING!")
 # END fix for 'accounts_user_dot_group_ownership'
 
 ###############################################################################
-# BEGIN fix (60 / 196) for 'accounts_user_dot_user_ownership'
+# BEGIN fix (56 / 196) for 'accounts_user_dot_user_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 60/196: 'accounts_user_dot_user_ownership'")
+(>&2 echo "Remediating rule 56/196: 'accounts_user_dot_user_ownership'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_user_dot_user_ownership' IS MISSING!")
 # END fix for 'accounts_user_dot_user_ownership'
 
 ###############################################################################
-# BEGIN fix (61 / 196) for 'accounts_user_interactive_home_directory_exists'
+# BEGIN fix (57 / 196) for 'accounts_user_interactive_home_directory_exists'
 ###############################################################################
-(>&2 echo "Remediating rule 61/196: 'accounts_user_interactive_home_directory_exists'")
+(>&2 echo "Remediating rule 57/196: 'accounts_user_interactive_home_directory_exists'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_user_interactive_home_directory_exists' IS MISSING!")
 # END fix for 'accounts_user_interactive_home_directory_exists'
 
 ###############################################################################
-# BEGIN fix (62 / 196) for 'accounts_user_dot_no_world_writable_programs'
+# BEGIN fix (58 / 196) for 'accounts_user_dot_no_world_writable_programs'
 ###############################################################################
-(>&2 echo "Remediating rule 62/196: 'accounts_user_dot_no_world_writable_programs'")
+(>&2 echo "Remediating rule 58/196: 'accounts_user_dot_no_world_writable_programs'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_user_dot_no_world_writable_programs' IS MISSING!")
 # END fix for 'accounts_user_dot_no_world_writable_programs'
 
 ###############################################################################
-# BEGIN fix (63 / 196) for 'accounts_have_homedir_login_defs'
+# BEGIN fix (59 / 196) for 'accounts_have_homedir_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 63/196: 'accounts_have_homedir_login_defs'")
+(>&2 echo "Remediating rule 59/196: 'accounts_have_homedir_login_defs'")
 
 if ! grep -q ^CREATE_HOME /etc/login.defs; then
 	echo "CREATE_HOME     yes" >> /etc/login.defs
@@ -1198,9 +1078,16 @@ fi
 # END fix for 'accounts_have_homedir_login_defs'
 
 ###############################################################################
-# BEGIN fix (64 / 196) for 'accounts_logon_fail_delay'
+# BEGIN fix (60 / 196) for 'accounts_users_home_files_groupownership'
 ###############################################################################
-(>&2 echo "Remediating rule 64/196: 'accounts_logon_fail_delay'")
+(>&2 echo "Remediating rule 60/196: 'accounts_users_home_files_groupownership'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_users_home_files_groupownership' IS MISSING!")
+# END fix for 'accounts_users_home_files_groupownership'
+
+###############################################################################
+# BEGIN fix (61 / 196) for 'accounts_logon_fail_delay'
+###############################################################################
+(>&2 echo "Remediating rule 61/196: 'accounts_logon_fail_delay'")
 
 
 # Set variables
@@ -1286,30 +1173,9 @@ replace_or_append '/etc/login.defs' '^FAIL_DELAY' "$var_accounts_fail_delay" '' 
 # END fix for 'accounts_logon_fail_delay'
 
 ###############################################################################
-# BEGIN fix (65 / 196) for 'accounts_users_home_files_groupownership'
+# BEGIN fix (62 / 196) for 'accounts_max_concurrent_login_sessions'
 ###############################################################################
-(>&2 echo "Remediating rule 65/196: 'accounts_users_home_files_groupownership'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_users_home_files_groupownership' IS MISSING!")
-# END fix for 'accounts_users_home_files_groupownership'
-
-###############################################################################
-# BEGIN fix (66 / 196) for 'accounts_user_home_paths_only'
-###############################################################################
-(>&2 echo "Remediating rule 66/196: 'accounts_user_home_paths_only'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_user_home_paths_only' IS MISSING!")
-# END fix for 'accounts_user_home_paths_only'
-
-###############################################################################
-# BEGIN fix (67 / 196) for 'accounts_users_home_files_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 67/196: 'accounts_users_home_files_permissions'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_users_home_files_permissions' IS MISSING!")
-# END fix for 'accounts_users_home_files_permissions'
-
-###############################################################################
-# BEGIN fix (68 / 196) for 'accounts_max_concurrent_login_sessions'
-###############################################################################
-(>&2 echo "Remediating rule 68/196: 'accounts_max_concurrent_login_sessions'")
+(>&2 echo "Remediating rule 62/196: 'accounts_max_concurrent_login_sessions'")
 
 var_accounts_max_concurrent_login_sessions="10"
 
@@ -1323,58 +1189,72 @@ fi
 # END fix for 'accounts_max_concurrent_login_sessions'
 
 ###############################################################################
-# BEGIN fix (69 / 196) for 'file_groupownership_home_directories'
+# BEGIN fix (63 / 196) for 'accounts_users_home_files_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 69/196: 'file_groupownership_home_directories'")
+(>&2 echo "Remediating rule 63/196: 'accounts_users_home_files_permissions'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_users_home_files_permissions' IS MISSING!")
+# END fix for 'accounts_users_home_files_permissions'
+
+###############################################################################
+# BEGIN fix (64 / 196) for 'accounts_user_home_paths_only'
+###############################################################################
+(>&2 echo "Remediating rule 64/196: 'accounts_user_home_paths_only'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_user_home_paths_only' IS MISSING!")
+# END fix for 'accounts_user_home_paths_only'
+
+###############################################################################
+# BEGIN fix (65 / 196) for 'file_groupownership_home_directories'
+###############################################################################
+(>&2 echo "Remediating rule 65/196: 'file_groupownership_home_directories'")
 (>&2 echo "FIX FOR THIS RULE 'file_groupownership_home_directories' IS MISSING!")
 # END fix for 'file_groupownership_home_directories'
 
 ###############################################################################
-# BEGIN fix (70 / 196) for 'file_permission_user_init_files'
+# BEGIN fix (66 / 196) for 'accounts_user_interactive_home_directory_defined'
 ###############################################################################
-(>&2 echo "Remediating rule 70/196: 'file_permission_user_init_files'")
-(>&2 echo "FIX FOR THIS RULE 'file_permission_user_init_files' IS MISSING!")
-# END fix for 'file_permission_user_init_files'
-
-###############################################################################
-# BEGIN fix (71 / 196) for 'accounts_user_interactive_home_directory_defined'
-###############################################################################
-(>&2 echo "Remediating rule 71/196: 'accounts_user_interactive_home_directory_defined'")
+(>&2 echo "Remediating rule 66/196: 'accounts_user_interactive_home_directory_defined'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_user_interactive_home_directory_defined' IS MISSING!")
 # END fix for 'accounts_user_interactive_home_directory_defined'
 
 ###############################################################################
-# BEGIN fix (72 / 196) for 'accounts_users_home_files_ownership'
+# BEGIN fix (67 / 196) for 'file_permission_user_init_files'
 ###############################################################################
-(>&2 echo "Remediating rule 72/196: 'accounts_users_home_files_ownership'")
+(>&2 echo "Remediating rule 67/196: 'file_permission_user_init_files'")
+(>&2 echo "FIX FOR THIS RULE 'file_permission_user_init_files' IS MISSING!")
+# END fix for 'file_permission_user_init_files'
+
+###############################################################################
+# BEGIN fix (68 / 196) for 'accounts_users_home_files_ownership'
+###############################################################################
+(>&2 echo "Remediating rule 68/196: 'accounts_users_home_files_ownership'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_users_home_files_ownership' IS MISSING!")
 # END fix for 'accounts_users_home_files_ownership'
 
 ###############################################################################
-# BEGIN fix (73 / 196) for 'file_ownership_home_directories'
+# BEGIN fix (69 / 196) for 'file_ownership_home_directories'
 ###############################################################################
-(>&2 echo "Remediating rule 73/196: 'file_ownership_home_directories'")
+(>&2 echo "Remediating rule 69/196: 'file_ownership_home_directories'")
 (>&2 echo "FIX FOR THIS RULE 'file_ownership_home_directories' IS MISSING!")
 # END fix for 'file_ownership_home_directories'
 
 ###############################################################################
-# BEGIN fix (74 / 196) for 'file_permissions_home_directories'
+# BEGIN fix (70 / 196) for 'file_permissions_home_directories'
 ###############################################################################
-(>&2 echo "Remediating rule 74/196: 'file_permissions_home_directories'")
+(>&2 echo "Remediating rule 70/196: 'file_permissions_home_directories'")
 (>&2 echo "FIX FOR THIS RULE 'file_permissions_home_directories' IS MISSING!")
 # END fix for 'file_permissions_home_directories'
 
 ###############################################################################
-# BEGIN fix (75 / 196) for 'accounts_umask_interactive_users'
+# BEGIN fix (71 / 196) for 'accounts_umask_interactive_users'
 ###############################################################################
-(>&2 echo "Remediating rule 75/196: 'accounts_umask_interactive_users'")
+(>&2 echo "Remediating rule 71/196: 'accounts_umask_interactive_users'")
 (>&2 echo "FIX FOR THIS RULE 'accounts_umask_interactive_users' IS MISSING!")
 # END fix for 'accounts_umask_interactive_users'
 
 ###############################################################################
-# BEGIN fix (76 / 196) for 'accounts_umask_etc_login_defs'
+# BEGIN fix (72 / 196) for 'accounts_umask_etc_login_defs'
 ###############################################################################
-(>&2 echo "Remediating rule 76/196: 'accounts_umask_etc_login_defs'")
+(>&2 echo "Remediating rule 72/196: 'accounts_umask_etc_login_defs'")
 
 var_accounts_user_umask="027"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -1458,184 +1338,237 @@ replace_or_append '/etc/login.defs' '^UMASK' "$var_accounts_user_umask" '' '%s %
 # END fix for 'accounts_umask_etc_login_defs'
 
 ###############################################################################
-# BEGIN fix (77 / 196) for 'banner_etc_issue'
+# BEGIN fix (73 / 196) for 'file_permissions_ungroupowned'
 ###############################################################################
-(>&2 echo "Remediating rule 77/196: 'banner_etc_issue'")
-
-login_banner_text="Use[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+constitutes[\s\n]+consent[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times.[\s\n]+This[\s\n]+is[\s\n]+a[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system.[\s\n]+All[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+and[\s\n]+related[\s\n]+equipment[\s\n]+are[\s\n]+intended[\s\n]+for[\s\n]+the[\s\n]+communication,[\s\n]+transmission,[\s\n]+processing,[\s\n]+and[\s\n]+storage[\s\n]+of[\s\n]+official[\s\n]+U.S.[\s\n]+Government[\s\n]+or[\s\n]+other[\s\n]+authorized[\s\n]+information[\s\n]+only.[\s\n]+All[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times[\s\n]+to[\s\n]+ensure[\s\n]+proper[\s\n]+functioning[\s\n]+of[\s\n]+equipment[\s\n]+and[\s\n]+systems[\s\n]+including[\s\n]+security[\s\n]+devices[\s\n]+and[\s\n]+systems,[\s\n]+to[\s\n]+prevent[\s\n]+unauthorized[\s\n]+use[\s\n]+and[\s\n]+violations[\s\n]+of[\s\n]+statutes[\s\n]+and[\s\n]+security[\s\n]+regulations,[\s\n]+to[\s\n]+deter[\s\n]+criminal[\s\n]+activity,[\s\n]+and[\s\n]+for[\s\n]+other[\s\n]+similar[\s\n]+purposes.[\s\n]+Any[\s\n]+user[\s\n]+of[\s\n]+a[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+should[\s\n]+be[\s\n]+aware[\s\n]+that[\s\n]+any[\s\n]+information[\s\n]+placed[\s\n]+in[\s\n]+the[\s\n]+system[\s\n]+is[\s\n]+subject[\s\n]+to[\s\n]+monitoring[\s\n]+and[\s\n]+is[\s\n]+not[\s\n]+subject[\s\n]+to[\s\n]+any[\s\n]+expectation[\s\n]+of[\s\n]+privacy.[\s\n]+If[\s\n]+monitoring[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+reveals[\s\n]+possible[\s\n]+evidence[\s\n]+of[\s\n]+violation[\s\n]+of[\s\n]+criminal[\s\n]+statutes,[\s\n]+this[\s\n]+evidence[\s\n]+and[\s\n]+any[\s\n]+other[\s\n]+related[\s\n]+information,[\s\n]+including[\s\n]+identification[\s\n]+information[\s\n]+about[\s\n]+the[\s\n]+user,[\s\n]+may[\s\n]+be[\s\n]+provided[\s\n]+to[\s\n]+law[\s\n]+enforcement[\s\n]+officials.[\s\n]+If[\s\n]+monitoring[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+reveals[\s\n]+violations[\s\n]+of[\s\n]+security[\s\n]+regulations[\s\n]+or[\s\n]+unauthorized[\s\n]+use,[\s\n]+employees[\s\n]+who[\s\n]+violate[\s\n]+security[\s\n]+regulations[\s\n]+or[\s\n]+make[\s\n]+unauthorized[\s\n]+use[\s\n]+of[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+systems[\s\n]+are[\s\n]+subject[\s\n]+to[\s\n]+appropriate[\s\n]+disciplinary[\s\n]+action.[\s\n]+Use[\s\n]+of[\s\n]+this[\s\n]+or[\s\n]+any[\s\n]+other[\s\n]+DoD[\s\n]+interest[\s\n]+computer[\s\n]+system[\s\n]+constitutes[\s\n]+consent[\s\n]+to[\s\n]+monitoring[\s\n]+at[\s\n]+all[\s\n]+times."
-
-# There was a regular-expression matching various banners, needs to be expanded
-expanded=$(echo "$login_banner_text" | sed 's/(\\\\\x27)\*/\\\x27/g;s/(\\\x27)\*//g;s/(\^\(.*\)\$|.*$/\1/g;s/\[\\s\\n\][+*]/ /g;s/\\//g;s/[^-]- /\n\n-/g;s/(n)\**//g')
-formatted=$(echo "$expanded" | fold -sw 80)
-
-cat <<EOF >/etc/issue
-$formatted
-EOF
-
-printf "\n" >> /etc/issue
-# END fix for 'banner_etc_issue'
+(>&2 echo "Remediating rule 73/196: 'file_permissions_ungroupowned'")
+(>&2 echo "FIX FOR THIS RULE 'file_permissions_ungroupowned' IS MISSING!")
+# END fix for 'file_permissions_ungroupowned'
 
 ###############################################################################
-# BEGIN fix (78 / 196) for 'accounts_minimum_age_login_defs'
+# BEGIN fix (74 / 196) for 'dir_perms_world_writable_system_owned'
 ###############################################################################
-(>&2 echo "Remediating rule 78/196: 'accounts_minimum_age_login_defs'")
-
-var_accounts_minimum_age_login_defs="1"
-
-grep -q ^PASS_MIN_DAYS /etc/login.defs && \
-  sed -i "s/PASS_MIN_DAYS.*/PASS_MIN_DAYS     $var_accounts_minimum_age_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]; then
-    echo "PASS_MIN_DAYS      $var_accounts_minimum_age_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_minimum_age_login_defs'
+(>&2 echo "Remediating rule 74/196: 'dir_perms_world_writable_system_owned'")
+(>&2 echo "FIX FOR THIS RULE 'dir_perms_world_writable_system_owned' IS MISSING!")
+# END fix for 'dir_perms_world_writable_system_owned'
 
 ###############################################################################
-# BEGIN fix (79 / 196) for 'accounts_maximum_age_login_defs'
+# BEGIN fix (75 / 196) for 'no_files_unowned_by_user'
 ###############################################################################
-(>&2 echo "Remediating rule 79/196: 'accounts_maximum_age_login_defs'")
-
-var_accounts_maximum_age_login_defs="60"
-
-grep -q ^PASS_MAX_DAYS /etc/login.defs && \
-  sed -i "s/PASS_MAX_DAYS.*/PASS_MAX_DAYS     $var_accounts_maximum_age_login_defs/g" /etc/login.defs
-if ! [ $? -eq 0 ]; then
-    echo "PASS_MAX_DAYS      $var_accounts_maximum_age_login_defs" >> /etc/login.defs
-fi
-# END fix for 'accounts_maximum_age_login_defs'
+(>&2 echo "Remediating rule 75/196: 'no_files_unowned_by_user'")
+(>&2 echo "FIX FOR THIS RULE 'no_files_unowned_by_user' IS MISSING!")
+# END fix for 'no_files_unowned_by_user'
 
 ###############################################################################
-# BEGIN fix (80 / 196) for 'accounts_password_set_min_life_existing'
+# BEGIN fix (76 / 196) for 'service_autofs_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 80/196: 'accounts_password_set_min_life_existing'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_password_set_min_life_existing' IS MISSING!")
-# END fix for 'accounts_password_set_min_life_existing'
-
-###############################################################################
-# BEGIN fix (81 / 196) for 'accounts_password_set_max_life_existing'
-###############################################################################
-(>&2 echo "Remediating rule 81/196: 'accounts_password_set_max_life_existing'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_password_set_max_life_existing' IS MISSING!")
-# END fix for 'accounts_password_set_max_life_existing'
+(>&2 echo "Remediating rule 76/196: 'service_autofs_disabled'")
+(>&2 echo "FIX FOR THIS RULE 'service_autofs_disabled' IS MISSING!")
+# END fix for 'service_autofs_disabled'
 
 ###############################################################################
-# BEGIN fix (82 / 196) for 'accounts_no_uid_except_zero'
+# BEGIN fix (77 / 196) for 'kernel_module_usb-storage_disabled'
 ###############################################################################
-(>&2 echo "Remediating rule 82/196: 'accounts_no_uid_except_zero'")
-awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
-# END fix for 'accounts_no_uid_except_zero'
+(>&2 echo "Remediating rule 77/196: 'kernel_module_usb-storage_disabled'")
+(>&2 echo "FIX FOR THIS RULE 'kernel_module_usb-storage_disabled' IS MISSING!")
+# END fix for 'kernel_module_usb-storage_disabled'
 
 ###############################################################################
-# BEGIN fix (83 / 196) for 'account_disable_post_pw_expiration'
+# BEGIN fix (78 / 196) for 'mount_option_home_nosuid'
 ###############################################################################
-(>&2 echo "Remediating rule 83/196: 'account_disable_post_pw_expiration'")
-
-var_account_disable_post_pw_expiration="0"
-# Function to replace configuration setting in config file or add the configuration setting if
-# it does not exist.
-#
-# Expects arguments:
-#
-# config_file:		Configuration file that will be modified
-# key:			Configuration option to change
-# value:		Value of the configuration option to change
-# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
-# format:		The printf-like format string that will be given stripped key and value as arguments,
-#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
-#
-# Optional arugments:
-#
-# format:		Optional argument to specify the format of how key/value should be
-# 			modified/appended in the configuration file. The default is key = value.
-#
-# Example Call(s):
-#
-#     With default format of 'key = value':
-#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
-#
-#     With custom key/value format:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
-#
-#     With a variable:
-#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
-#
-function replace_or_append {
-  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
-  local config_file=$1
-  local key=$2
-  local value=$3
-  local cce=$4
-  local format=$5
-
-  if [ "$case_insensitive_mode" = yes ]; then
-    sed_case_insensitive_option="i"
-    grep_case_insensitive_option="-i"
-  fi
-  [ -n "$format" ] || format="$default_format"
-  # Check sanity of the input
-  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
-
-  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
-  # Otherwise, regular sed command will do.
-  sed_command=('sed' '-i')
-  if test -L "$config_file"; then
-    sed_command+=('--follow-symlinks')
-  fi
-
-  # Test that the cce arg is not empty or does not equal @CCENUM@.
-  # If @CCENUM@ exists, it means that there is no CCE assigned.
-  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
-    cce="${cce}"
-  else
-    cce="CCE"
-  fi
-
-  # Strip any search characters in the key arg so that the key can be replaced without
-  # adding any search characters to the config file.
-  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
-
-  # shellcheck disable=SC2059
-  printf -v formatted_output "$format" "$stripped_key" "$value"
-
-  # If the key exists, change it. Otherwise, add it to the config_file.
-  # We search for the key string followed by a word boundary (matched by \>),
-  # so if we search for 'setting', 'setting2' won't match.
-  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
-    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
-  else
-    # \n is precaution for case where file ends without trailing newline
-    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
-    printf '%s\n' "$formatted_output" >> "$config_file"
-  fi
+(>&2 echo "Remediating rule 78/196: 'mount_option_home_nosuid'")
+function include_mount_options_functions {
+	:
 }
-replace_or_append '/etc/default/useradd' '^INACTIVE' "$var_account_disable_post_pw_expiration" '' '%s=%s'
-# END fix for 'account_disable_post_pw_expiration'
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab /home || { echo "Not remediating, because there is no record of /home in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "/home" "nosuid" "" ""
+
+	ensure_partition_is_mounted "/home"
+}
+
+perform_remediation
+# END fix for 'mount_option_home_nosuid'
 
 ###############################################################################
-# BEGIN fix (84 / 196) for 'no_empty_passwords'
+# BEGIN fix (79 / 196) for 'mount_option_nosuid_removable_partitions'
 ###############################################################################
-(>&2 echo "Remediating rule 84/196: 'no_empty_passwords'")
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
-# END fix for 'no_empty_passwords'
+(>&2 echo "Remediating rule 79/196: 'mount_option_nosuid_removable_partitions'")
+
+var_removable_partition="/dev/cdrom"
+function include_mount_options_functions {
+	:
+}
+
+# $1: type of filesystem
+# $2: new mount point option
+# $3: filesystem of new mount point (used when adding new entry in fstab)
+# $4: mount type of new mount point (used when adding new entry in fstab)
+function ensure_mount_option_for_vfstype {
+        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
+        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
+
+        for _vfstype_point in "${_vfstype_points[@]}"
+        do
+                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
+        done
+}
+
+# $1: mount point
+# $2: new mount point option
+# $3: device or virtual string (used when adding new entry in fstab)
+# $4: mount type of mount point (used when adding new entry in fstab)
+function ensure_mount_option_in_fstab {
+	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
+	local _mount_point_match_regexp="" _previous_mount_opts=""
+	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
+
+	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
+		# runtime opts without some automatic kernel/userspace-added defaults
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
+					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
+		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
+		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
+	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
+		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
+		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function get_mount_point_regexp {
+		printf "[[:space:]]%s[[:space:]]" "$1"
+}
+
+# $1: mount point
+function assert_mount_point_in_fstab {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	grep "$_mount_point_match_regexp" -q /etc/fstab \
+		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
+}
+
+# $1: mount point
+function remove_defaults_from_fstab_if_overriden {
+	local _mount_point_match_regexp
+	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
+	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
+	then
+		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
+	fi
+}
+
+# $1: mount point
+function ensure_partition_is_mounted {
+	local _mount_point="$1"
+	mkdir -p "$_mount_point" || return 1
+	if mountpoint -q "$_mount_point"; then
+		mount -o remount --target "$_mount_point"
+	else
+		mount --target "$_mount_point"
+	fi
+}
+include_mount_options_functions
+
+function perform_remediation {
+	# test "$mount_has_to_exist" = 'yes'
+	if test "yes" = 'yes'; then
+		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
+	fi
+
+	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
+
+	ensure_partition_is_mounted "$var_removable_partition"
+}
+
+perform_remediation
+# END fix for 'mount_option_nosuid_removable_partitions'
 
 ###############################################################################
-# BEGIN fix (85 / 196) for 'gid_passwd_group_same'
+# BEGIN fix (80 / 196) for 'service_auditd_enabled'
 ###############################################################################
-(>&2 echo "Remediating rule 85/196: 'gid_passwd_group_same'")
-(>&2 echo "FIX FOR THIS RULE 'gid_passwd_group_same' IS MISSING!")
-# END fix for 'gid_passwd_group_same'
-
-###############################################################################
-# BEGIN fix (86 / 196) for 'service_auditd_enabled'
-###############################################################################
-(>&2 echo "Remediating rule 86/196: 'service_auditd_enabled'")
+(>&2 echo "Remediating rule 80/196: 'service_auditd_enabled'")
 (>&2 echo "FIX FOR THIS RULE 'service_auditd_enabled' IS MISSING!")
 # END fix for 'service_auditd_enabled'
 
 ###############################################################################
-# BEGIN fix (87 / 196) for 'auditd_audispd_encrypt_sent_records'
+# BEGIN fix (81 / 196) for 'auditd_audispd_encrypt_sent_records'
 ###############################################################################
-(>&2 echo "Remediating rule 87/196: 'auditd_audispd_encrypt_sent_records'")
+(>&2 echo "Remediating rule 81/196: 'auditd_audispd_encrypt_sent_records'")
 
 
 
@@ -1723,9 +1656,9 @@ replace_or_append $AUDISP_REMOTE_CONFIG "$option" "$value" ""
 # END fix for 'auditd_audispd_encrypt_sent_records'
 
 ###############################################################################
-# BEGIN fix (88 / 196) for 'auditd_audispd_configure_remote_server'
+# BEGIN fix (82 / 196) for 'auditd_audispd_configure_remote_server'
 ###############################################################################
-(>&2 echo "Remediating rule 88/196: 'auditd_audispd_configure_remote_server'")
+(>&2 echo "Remediating rule 82/196: 'auditd_audispd_configure_remote_server'")
 
 var_audispd_remote_server="logcollector"
 
@@ -1812,16 +1745,16 @@ replace_or_append $AUDITCONFIG '^remote_server' "$var_audispd_remote_server" ""
 # END fix for 'auditd_audispd_configure_remote_server'
 
 ###############################################################################
-# BEGIN fix (89 / 196) for 'auditd_audispd_network_failure_action'
+# BEGIN fix (83 / 196) for 'auditd_audispd_network_failure_action'
 ###############################################################################
-(>&2 echo "Remediating rule 89/196: 'auditd_audispd_network_failure_action'")
+(>&2 echo "Remediating rule 83/196: 'auditd_audispd_network_failure_action'")
 (>&2 echo "FIX FOR THIS RULE 'auditd_audispd_network_failure_action' IS MISSING!")
 # END fix for 'auditd_audispd_network_failure_action'
 
 ###############################################################################
-# BEGIN fix (90 / 196) for 'auditd_data_retention_space_left'
+# BEGIN fix (84 / 196) for 'auditd_data_retention_space_left'
 ###############################################################################
-(>&2 echo "Remediating rule 90/196: 'auditd_data_retention_space_left'")
+(>&2 echo "Remediating rule 84/196: 'auditd_data_retention_space_left'")
 
 var_auditd_space_left="100"
 
@@ -1831,9 +1764,9 @@ grep -q "^space_left[[:space:]]*=.*$" /etc/audit/auditd.conf && \
 # END fix for 'auditd_data_retention_space_left'
 
 ###############################################################################
-# BEGIN fix (91 / 196) for 'auditd_data_retention_action_mail_acct'
+# BEGIN fix (85 / 196) for 'auditd_data_retention_action_mail_acct'
 ###############################################################################
-(>&2 echo "Remediating rule 91/196: 'auditd_data_retention_action_mail_acct'")
+(>&2 echo "Remediating rule 85/196: 'auditd_data_retention_action_mail_acct'")
 
 var_auditd_action_mail_acct="root"
 
@@ -1919,9 +1852,9 @@ replace_or_append $AUDITCONFIG '^action_mail_acct' "$var_auditd_action_mail_acct
 # END fix for 'auditd_data_retention_action_mail_acct'
 
 ###############################################################################
-# BEGIN fix (92 / 196) for 'auditd_data_retention_admin_space_left_action'
+# BEGIN fix (86 / 196) for 'auditd_data_retention_admin_space_left_action'
 ###############################################################################
-(>&2 echo "Remediating rule 92/196: 'auditd_data_retention_admin_space_left_action'")
+(>&2 echo "Remediating rule 86/196: 'auditd_data_retention_admin_space_left_action'")
 
 var_auditd_admin_space_left_action="single"
 
@@ -2007,30 +1940,37 @@ replace_or_append $AUDITCONFIG '^admin_space_left_action' "$var_auditd_admin_spa
 # END fix for 'auditd_data_retention_admin_space_left_action'
 
 ###############################################################################
-# BEGIN fix (93 / 196) for 'auditd_audispd_disk_full_action'
+# BEGIN fix (87 / 196) for 'auditd_audispd_disk_full_action'
 ###############################################################################
-(>&2 echo "Remediating rule 93/196: 'auditd_audispd_disk_full_action'")
+(>&2 echo "Remediating rule 87/196: 'auditd_audispd_disk_full_action'")
 (>&2 echo "FIX FOR THIS RULE 'auditd_audispd_disk_full_action' IS MISSING!")
 # END fix for 'auditd_audispd_disk_full_action'
 
 ###############################################################################
-# BEGIN fix (94 / 196) for 'audit_rules_usergroup_modification_shadow'
+# BEGIN fix (88 / 196) for 'audit_rules_usergroup_modification_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 94/196: 'audit_rules_usergroup_modification_shadow'")
+(>&2 echo "Remediating rule 88/196: 'audit_rules_usergroup_modification_shadow'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_shadow' IS MISSING!")
 # END fix for 'audit_rules_usergroup_modification_shadow'
 
 ###############################################################################
-# BEGIN fix (95 / 196) for 'audit_rules_usergroup_modification_passwd'
+# BEGIN fix (89 / 196) for 'audit_rules_usergroup_modification_gshadow'
 ###############################################################################
-(>&2 echo "Remediating rule 95/196: 'audit_rules_usergroup_modification_passwd'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_passwd' IS MISSING!")
-# END fix for 'audit_rules_usergroup_modification_passwd'
+(>&2 echo "Remediating rule 89/196: 'audit_rules_usergroup_modification_gshadow'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_gshadow' IS MISSING!")
+# END fix for 'audit_rules_usergroup_modification_gshadow'
 
 ###############################################################################
-# BEGIN fix (96 / 196) for 'audit_rules_system_shutdown'
+# BEGIN fix (90 / 196) for 'audit_rules_usergroup_modification_group'
 ###############################################################################
-(>&2 echo "Remediating rule 96/196: 'audit_rules_system_shutdown'")
+(>&2 echo "Remediating rule 90/196: 'audit_rules_usergroup_modification_group'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_group' IS MISSING!")
+# END fix for 'audit_rules_usergroup_modification_group'
+
+###############################################################################
+# BEGIN fix (91 / 196) for 'audit_rules_system_shutdown'
+###############################################################################
+(>&2 echo "Remediating rule 91/196: 'audit_rules_system_shutdown'")
 
 # Traverse all of:
 #
@@ -2055,9 +1995,9 @@ done
 # END fix for 'audit_rules_system_shutdown'
 
 ###############################################################################
-# BEGIN fix (97 / 196) for 'audit_rules_sysadmin_actions'
+# BEGIN fix (92 / 196) for 'audit_rules_sysadmin_actions'
 ###############################################################################
-(>&2 echo "Remediating rule 97/196: 'audit_rules_sysadmin_actions'")
+(>&2 echo "Remediating rule 92/196: 'audit_rules_sysadmin_actions'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -2321,14 +2261,14 @@ do
 	fi
 done
 }
-fix_audit_watch_rule "auditctl" "/etc/sudoers.d" "wa" "actions"
-fix_audit_watch_rule "augenrules" "/etc/sudoers.d" "wa" "actions"
+fix_audit_watch_rule "auditctl" "/etc/sudoers.d/" "wa" "actions"
+fix_audit_watch_rule "augenrules" "/etc/sudoers.d/" "wa" "actions"
 # END fix for 'audit_rules_sysadmin_actions'
 
 ###############################################################################
-# BEGIN fix (98 / 196) for 'audit_rules_usergroup_modification'
+# BEGIN fix (93 / 196) for 'audit_rules_usergroup_modification'
 ###############################################################################
-(>&2 echo "Remediating rule 98/196: 'audit_rules_usergroup_modification'")
+(>&2 echo "Remediating rule 93/196: 'audit_rules_usergroup_modification'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -2990,30 +2930,23 @@ fix_audit_watch_rule "augenrules" "/etc/security/opasswd" "wa" "audit_rules_user
 # END fix for 'audit_rules_usergroup_modification'
 
 ###############################################################################
-# BEGIN fix (99 / 196) for 'audit_rules_usergroup_modification_gshadow'
+# BEGIN fix (94 / 196) for 'audit_rules_usergroup_modification_opasswd'
 ###############################################################################
-(>&2 echo "Remediating rule 99/196: 'audit_rules_usergroup_modification_gshadow'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_gshadow' IS MISSING!")
-# END fix for 'audit_rules_usergroup_modification_gshadow'
-
-###############################################################################
-# BEGIN fix (100 / 196) for 'audit_rules_usergroup_modification_opasswd'
-###############################################################################
-(>&2 echo "Remediating rule 100/196: 'audit_rules_usergroup_modification_opasswd'")
+(>&2 echo "Remediating rule 94/196: 'audit_rules_usergroup_modification_opasswd'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_opasswd' IS MISSING!")
 # END fix for 'audit_rules_usergroup_modification_opasswd'
 
 ###############################################################################
-# BEGIN fix (101 / 196) for 'audit_rules_usergroup_modification_group'
+# BEGIN fix (95 / 196) for 'audit_rules_usergroup_modification_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 101/196: 'audit_rules_usergroup_modification_group'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_group' IS MISSING!")
-# END fix for 'audit_rules_usergroup_modification_group'
+(>&2 echo "Remediating rule 95/196: 'audit_rules_usergroup_modification_passwd'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_usergroup_modification_passwd' IS MISSING!")
+# END fix for 'audit_rules_usergroup_modification_passwd'
 
 ###############################################################################
-# BEGIN fix (102 / 196) for 'audit_rules_kernel_module_loading_finit'
+# BEGIN fix (96 / 196) for 'audit_rules_kernel_module_loading_finit'
 ###############################################################################
-(>&2 echo "Remediating rule 102/196: 'audit_rules_kernel_module_loading_finit'")
+(>&2 echo "Remediating rule 96/196: 'audit_rules_kernel_module_loading_finit'")
 
 
 # First perform the remediation of the syscall rule
@@ -3159,7 +3092,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -3256,9 +3189,9 @@ done
 # END fix for 'audit_rules_kernel_module_loading_finit'
 
 ###############################################################################
-# BEGIN fix (103 / 196) for 'audit_rules_kernel_module_loading_init'
+# BEGIN fix (97 / 196) for 'audit_rules_kernel_module_loading_init'
 ###############################################################################
-(>&2 echo "Remediating rule 103/196: 'audit_rules_kernel_module_loading_init'")
+(>&2 echo "Remediating rule 97/196: 'audit_rules_kernel_module_loading_init'")
 
 
 # First perform the remediation of the syscall rule
@@ -3404,7 +3337,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -3501,9 +3434,9 @@ done
 # END fix for 'audit_rules_kernel_module_loading_init'
 
 ###############################################################################
-# BEGIN fix (104 / 196) for 'audit_rules_kernel_module_loading_delete'
+# BEGIN fix (98 / 196) for 'audit_rules_kernel_module_loading_delete'
 ###############################################################################
-(>&2 echo "Remediating rule 104/196: 'audit_rules_kernel_module_loading_delete'")
+(>&2 echo "Remediating rule 98/196: 'audit_rules_kernel_module_loading_delete'")
 
 
 # First perform the remediation of the syscall rule
@@ -3649,7 +3582,7 @@ do
 		if [ "${rule}" != "${full_rule}" ]
 		then
 			# If so, isolate just '(-S \w)+' substring of that rule
-			rule_syscalls=$(echo $rule | grep -o -P '(-S \w+ )+')
+			rule_syscalls=$(echo "$rule" | grep -o -P '(-S \w+ )+')
 			# Check if list of '-S syscall' arguments of that rule is subset
 			# of '-S syscall' list of expected $full_rule
 			if grep -q -- "$rule_syscalls" <<< "$full_rule"
@@ -3746,172 +3679,119 @@ done
 # END fix for 'audit_rules_kernel_module_loading_delete'
 
 ###############################################################################
-# BEGIN fix (105 / 196) for 'audit_rules_login_events_lastlog'
+# BEGIN fix (99 / 196) for 'audit_rules_login_events_lastlog'
 ###############################################################################
-(>&2 echo "Remediating rule 105/196: 'audit_rules_login_events_lastlog'")
+(>&2 echo "Remediating rule 99/196: 'audit_rules_login_events_lastlog'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_login_events_lastlog' IS MISSING!")
 # END fix for 'audit_rules_login_events_lastlog'
 
 ###############################################################################
-# BEGIN fix (106 / 196) for 'audit_rules_login_events_faillock'
+# BEGIN fix (100 / 196) for 'audit_rules_login_events_faillock'
 ###############################################################################
-(>&2 echo "Remediating rule 106/196: 'audit_rules_login_events_faillock'")
+(>&2 echo "Remediating rule 100/196: 'audit_rules_login_events_faillock'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_login_events_faillock' IS MISSING!")
 # END fix for 'audit_rules_login_events_faillock'
 
 ###############################################################################
-# BEGIN fix (107 / 196) for 'audit_rules_dac_modification_fchown'
+# BEGIN fix (101 / 196) for 'audit_rules_dac_modification_fchown'
 ###############################################################################
-(>&2 echo "Remediating rule 107/196: 'audit_rules_dac_modification_fchown'")
+(>&2 echo "Remediating rule 101/196: 'audit_rules_dac_modification_fchown'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fchown' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_fchown'
 
 ###############################################################################
-# BEGIN fix (108 / 196) for 'audit_rules_dac_modification_setxattr'
+# BEGIN fix (102 / 196) for 'audit_rules_dac_modification_setxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 108/196: 'audit_rules_dac_modification_setxattr'")
+(>&2 echo "Remediating rule 102/196: 'audit_rules_dac_modification_setxattr'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_setxattr' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_setxattr'
 
 ###############################################################################
-# BEGIN fix (109 / 196) for 'audit_rules_dac_modification_chown'
+# BEGIN fix (103 / 196) for 'audit_rules_dac_modification_chown'
 ###############################################################################
-(>&2 echo "Remediating rule 109/196: 'audit_rules_dac_modification_chown'")
+(>&2 echo "Remediating rule 103/196: 'audit_rules_dac_modification_chown'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_chown' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_chown'
 
 ###############################################################################
-# BEGIN fix (110 / 196) for 'audit_rules_dac_modification_removexattr'
+# BEGIN fix (104 / 196) for 'audit_rules_dac_modification_fchownat'
 ###############################################################################
-(>&2 echo "Remediating rule 110/196: 'audit_rules_dac_modification_removexattr'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_removexattr' IS MISSING!")
-# END fix for 'audit_rules_dac_modification_removexattr'
-
-###############################################################################
-# BEGIN fix (111 / 196) for 'audit_rules_dac_modification_fchownat'
-###############################################################################
-(>&2 echo "Remediating rule 111/196: 'audit_rules_dac_modification_fchownat'")
+(>&2 echo "Remediating rule 104/196: 'audit_rules_dac_modification_fchownat'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fchownat' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_fchownat'
 
 ###############################################################################
-# BEGIN fix (112 / 196) for 'audit_rules_dac_modification_chmod'
+# BEGIN fix (105 / 196) for 'audit_rules_dac_modification_chmod'
 ###############################################################################
-(>&2 echo "Remediating rule 112/196: 'audit_rules_dac_modification_chmod'")
+(>&2 echo "Remediating rule 105/196: 'audit_rules_dac_modification_chmod'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_chmod' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_chmod'
 
 ###############################################################################
-# BEGIN fix (113 / 196) for 'audit_rules_dac_modification_fsetxattr'
+# BEGIN fix (106 / 196) for 'audit_rules_dac_modification_removexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 113/196: 'audit_rules_dac_modification_fsetxattr'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fsetxattr' IS MISSING!")
-# END fix for 'audit_rules_dac_modification_fsetxattr'
+(>&2 echo "Remediating rule 106/196: 'audit_rules_dac_modification_removexattr'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_removexattr' IS MISSING!")
+# END fix for 'audit_rules_dac_modification_removexattr'
 
 ###############################################################################
-# BEGIN fix (114 / 196) for 'audit_rules_dac_modification_fchmod'
+# BEGIN fix (107 / 196) for 'audit_rules_dac_modification_fchmod'
 ###############################################################################
-(>&2 echo "Remediating rule 114/196: 'audit_rules_dac_modification_fchmod'")
+(>&2 echo "Remediating rule 107/196: 'audit_rules_dac_modification_fchmod'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fchmod' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_fchmod'
 
 ###############################################################################
-# BEGIN fix (115 / 196) for 'audit_rules_dac_modification_lsetxattr'
+# BEGIN fix (108 / 196) for 'audit_rules_dac_modification_lsetxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 115/196: 'audit_rules_dac_modification_lsetxattr'")
+(>&2 echo "Remediating rule 108/196: 'audit_rules_dac_modification_lsetxattr'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_lsetxattr' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_lsetxattr'
 
 ###############################################################################
-# BEGIN fix (116 / 196) for 'audit_rules_dac_modification_fremovexattr'
+# BEGIN fix (109 / 196) for 'audit_rules_dac_modification_fremovexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 116/196: 'audit_rules_dac_modification_fremovexattr'")
+(>&2 echo "Remediating rule 109/196: 'audit_rules_dac_modification_fremovexattr'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fremovexattr' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_fremovexattr'
 
 ###############################################################################
-# BEGIN fix (117 / 196) for 'audit_rules_dac_modification_lchown'
+# BEGIN fix (110 / 196) for 'audit_rules_dac_modification_lchown'
 ###############################################################################
-(>&2 echo "Remediating rule 117/196: 'audit_rules_dac_modification_lchown'")
+(>&2 echo "Remediating rule 110/196: 'audit_rules_dac_modification_lchown'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_lchown' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_lchown'
 
 ###############################################################################
-# BEGIN fix (118 / 196) for 'audit_rules_dac_modification_fchmodat'
+# BEGIN fix (111 / 196) for 'audit_rules_dac_modification_fsetxattr'
 ###############################################################################
-(>&2 echo "Remediating rule 118/196: 'audit_rules_dac_modification_fchmodat'")
+(>&2 echo "Remediating rule 111/196: 'audit_rules_dac_modification_fsetxattr'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fsetxattr' IS MISSING!")
+# END fix for 'audit_rules_dac_modification_fsetxattr'
+
+###############################################################################
+# BEGIN fix (112 / 196) for 'audit_rules_dac_modification_fchmodat'
+###############################################################################
+(>&2 echo "Remediating rule 112/196: 'audit_rules_dac_modification_fchmodat'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_fchmodat' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_fchmodat'
 
 ###############################################################################
-# BEGIN fix (119 / 196) for 'audit_rules_dac_modification_lremovexattr'
+# BEGIN fix (113 / 196) for 'audit_rules_dac_modification_lremovexattr'
 ###############################################################################
-(>&2 echo "Remediating rule 119/196: 'audit_rules_dac_modification_lremovexattr'")
+(>&2 echo "Remediating rule 113/196: 'audit_rules_dac_modification_lremovexattr'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_dac_modification_lremovexattr' IS MISSING!")
 # END fix for 'audit_rules_dac_modification_lremovexattr'
 
 ###############################################################################
-# BEGIN fix (120 / 196) for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
+# BEGIN fix (114 / 196) for 'audit_rules_unsuccessful_file_modification_open'
 ###############################################################################
-(>&2 echo "Remediating rule 120/196: 'audit_rules_unsuccessful_file_modification_open_by_handle_at'")
+(>&2 echo "Remediating rule 114/196: 'audit_rules_unsuccessful_file_modification_open'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
-		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
-
-		## The purpose of these rules is to meet the requirements for Operating
-		## System Protection Profile (OSPP)v4.2. These rules depends on having
-		## 10-base-config.rules, 11-loginuid.rules, and 43-module-load.rules installed.
-
-		## Unsuccessful file creation (open with O_CREAT)
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b32 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-		-a always,exit -F arch=b64 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
-
-		## Unsuccessful file modifications (open for write or truncate)
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
-
-		## Unsuccessful file access (any other opens) This has to go last.
-		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
-	EOF
-}
-create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
-# END fix for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
-
-###############################################################################
-# BEGIN fix (121 / 196) for 'audit_rules_unsuccessful_file_modification_open'
-###############################################################################
-(>&2 echo "Remediating rule 121/196: 'audit_rules_unsuccessful_file_modification_open'")
-function create_audit_remediation_unsuccessful_file_modification_detailed {
-	mkdir -p "$(dirname "$1")"
-	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
-	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -3957,14 +3837,67 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_open'
 
 ###############################################################################
-# BEGIN fix (122 / 196) for 'audit_rules_unsuccessful_file_modification_creat'
+# BEGIN fix (115 / 196) for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
 ###############################################################################
-(>&2 echo "Remediating rule 122/196: 'audit_rules_unsuccessful_file_modification_creat'")
+(>&2 echo "Remediating rule 115/196: 'audit_rules_unsuccessful_file_modification_open_by_handle_at'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
+		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
+
+		## The purpose of these rules is to meet the requirements for Operating
+		## System Protection Profile (OSPP)v4.2. These rules depends on having
+		## 10-base-config.rules, 11-loginuid.rules, and 43-module-load.rules installed.
+
+		## Unsuccessful file creation (open with O_CREAT)
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S open -F a1&0100 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S creat -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b32 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+		-a always,exit -F arch=b64 -S creat -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-create
+
+		## Unsuccessful file modifications (open for write or truncate)
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S openat,open_by_handle_at -F a2&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S open -F a1&01003 -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b32 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+		-a always,exit -F arch=b64 -S truncate,ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-modification
+
+		## Unsuccessful file access (any other opens) This has to go last.
+		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EACCES -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b32 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+		-a always,exit -F arch=b64 -S open,creat,truncate,ftruncate,openat,open_by_handle_at -F exit=-EPERM -F auid>=1000 -F auid!=unset -F key=unsuccesful-access
+	EOF
+}
+create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rules.d/30-ospp-v42-remediation.rules
+# END fix for 'audit_rules_unsuccessful_file_modification_open_by_handle_at'
+
+###############################################################################
+# BEGIN fix (116 / 196) for 'audit_rules_unsuccessful_file_modification_creat'
+###############################################################################
+(>&2 echo "Remediating rule 116/196: 'audit_rules_unsuccessful_file_modification_creat'")
+function create_audit_remediation_unsuccessful_file_modification_detailed {
+	mkdir -p "$(dirname "$1")"
+	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
+	cat <<-EOF > "$1"
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -4010,14 +3943,14 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_creat'
 
 ###############################################################################
-# BEGIN fix (123 / 196) for 'audit_rules_unsuccessful_file_modification_ftruncate'
+# BEGIN fix (117 / 196) for 'audit_rules_unsuccessful_file_modification_ftruncate'
 ###############################################################################
-(>&2 echo "Remediating rule 123/196: 'audit_rules_unsuccessful_file_modification_ftruncate'")
+(>&2 echo "Remediating rule 117/196: 'audit_rules_unsuccessful_file_modification_ftruncate'")
 function create_audit_remediation_unsuccessful_file_modification_detailed {
 	mkdir -p "$(dirname "$1")"
 	# The - option to mark a here document limit string (<<-EOF) suppresses leading tabs (but not spaces) in the output.
 	cat <<-EOF > "$1"
-		## This content is a section of an Audit config snapshot recommended for RHEL8 sytems that target OSPP compliance.
+		## This content is a section of an Audit config snapshot recommended for linux systems that target OSPP compliance.
 		## The following content has been retreived on 2019-03-11 from: https://github.com/linux-audit/audit-userspace/blob/master/rules/30-ospp-v42.rules
 
 		## The purpose of these rules is to meet the requirements for Operating
@@ -4063,114 +3996,107 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # END fix for 'audit_rules_unsuccessful_file_modification_ftruncate'
 
 ###############################################################################
-# BEGIN fix (124 / 196) for 'audit_rules_unsuccessful_file_modification_truncate'
+# BEGIN fix (118 / 196) for 'audit_rules_unsuccessful_file_modification_truncate'
 ###############################################################################
-(>&2 echo "Remediating rule 124/196: 'audit_rules_unsuccessful_file_modification_truncate'")
+(>&2 echo "Remediating rule 118/196: 'audit_rules_unsuccessful_file_modification_truncate'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_unsuccessful_file_modification_truncate' IS MISSING!")
 # END fix for 'audit_rules_unsuccessful_file_modification_truncate'
 
 ###############################################################################
-# BEGIN fix (125 / 196) for 'audit_rules_unsuccessful_file_modification_openat'
+# BEGIN fix (119 / 196) for 'audit_rules_unsuccessful_file_modification_openat'
 ###############################################################################
-(>&2 echo "Remediating rule 125/196: 'audit_rules_unsuccessful_file_modification_openat'")
+(>&2 echo "Remediating rule 119/196: 'audit_rules_unsuccessful_file_modification_openat'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_unsuccessful_file_modification_openat' IS MISSING!")
 # END fix for 'audit_rules_unsuccessful_file_modification_openat'
 
 ###############################################################################
-# BEGIN fix (126 / 196) for 'audit_rules_execution_setsebool'
+# BEGIN fix (120 / 196) for 'audit_rules_execution_setsebool'
 ###############################################################################
-(>&2 echo "Remediating rule 126/196: 'audit_rules_execution_setsebool'")
+(>&2 echo "Remediating rule 120/196: 'audit_rules_execution_setsebool'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_execution_setsebool' IS MISSING!")
 # END fix for 'audit_rules_execution_setsebool'
 
 ###############################################################################
-# BEGIN fix (127 / 196) for 'audit_rules_execution_semanage'
+# BEGIN fix (121 / 196) for 'audit_rules_execution_semanage'
 ###############################################################################
-(>&2 echo "Remediating rule 127/196: 'audit_rules_execution_semanage'")
+(>&2 echo "Remediating rule 121/196: 'audit_rules_execution_semanage'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_execution_semanage' IS MISSING!")
 # END fix for 'audit_rules_execution_semanage'
 
 ###############################################################################
-# BEGIN fix (128 / 196) for 'audit_rules_execution_chcon'
+# BEGIN fix (122 / 196) for 'audit_rules_execution_chcon'
 ###############################################################################
-(>&2 echo "Remediating rule 128/196: 'audit_rules_execution_chcon'")
+(>&2 echo "Remediating rule 122/196: 'audit_rules_execution_chcon'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_execution_chcon' IS MISSING!")
 # END fix for 'audit_rules_execution_chcon'
 
 ###############################################################################
-# BEGIN fix (129 / 196) for 'audit_rules_file_deletion_events_rmdir'
+# BEGIN fix (123 / 196) for 'audit_rules_file_deletion_events_rmdir'
 ###############################################################################
-(>&2 echo "Remediating rule 129/196: 'audit_rules_file_deletion_events_rmdir'")
+(>&2 echo "Remediating rule 123/196: 'audit_rules_file_deletion_events_rmdir'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_file_deletion_events_rmdir' IS MISSING!")
 # END fix for 'audit_rules_file_deletion_events_rmdir'
 
 ###############################################################################
-# BEGIN fix (130 / 196) for 'audit_rules_file_deletion_events_unlinkat'
+# BEGIN fix (124 / 196) for 'audit_rules_file_deletion_events_unlinkat'
 ###############################################################################
-(>&2 echo "Remediating rule 130/196: 'audit_rules_file_deletion_events_unlinkat'")
+(>&2 echo "Remediating rule 124/196: 'audit_rules_file_deletion_events_unlinkat'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_file_deletion_events_unlinkat' IS MISSING!")
 # END fix for 'audit_rules_file_deletion_events_unlinkat'
 
 ###############################################################################
-# BEGIN fix (131 / 196) for 'audit_rules_file_deletion_events_rename'
+# BEGIN fix (125 / 196) for 'audit_rules_file_deletion_events_rename'
 ###############################################################################
-(>&2 echo "Remediating rule 131/196: 'audit_rules_file_deletion_events_rename'")
+(>&2 echo "Remediating rule 125/196: 'audit_rules_file_deletion_events_rename'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_file_deletion_events_rename' IS MISSING!")
 # END fix for 'audit_rules_file_deletion_events_rename'
 
 ###############################################################################
-# BEGIN fix (132 / 196) for 'audit_rules_file_deletion_events_renameat'
+# BEGIN fix (126 / 196) for 'audit_rules_file_deletion_events_renameat'
 ###############################################################################
-(>&2 echo "Remediating rule 132/196: 'audit_rules_file_deletion_events_renameat'")
+(>&2 echo "Remediating rule 126/196: 'audit_rules_file_deletion_events_renameat'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_file_deletion_events_renameat' IS MISSING!")
 # END fix for 'audit_rules_file_deletion_events_renameat'
 
 ###############################################################################
-# BEGIN fix (133 / 196) for 'audit_rules_file_deletion_events_unlink'
+# BEGIN fix (127 / 196) for 'audit_rules_file_deletion_events_unlink'
 ###############################################################################
-(>&2 echo "Remediating rule 133/196: 'audit_rules_file_deletion_events_unlink'")
+(>&2 echo "Remediating rule 127/196: 'audit_rules_file_deletion_events_unlink'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_file_deletion_events_unlink' IS MISSING!")
 # END fix for 'audit_rules_file_deletion_events_unlink'
 
 ###############################################################################
-# BEGIN fix (134 / 196) for 'audit_rules_privileged_commands_passwd'
+# BEGIN fix (128 / 196) for 'audit_rules_privileged_commands_gpasswd'
 ###############################################################################
-(>&2 echo "Remediating rule 134/196: 'audit_rules_privileged_commands_passwd'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_passwd' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_passwd'
-
-###############################################################################
-# BEGIN fix (135 / 196) for 'audit_rules_privileged_commands_unix_chkpwd'
-###############################################################################
-(>&2 echo "Remediating rule 135/196: 'audit_rules_privileged_commands_unix_chkpwd'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_unix_chkpwd' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_unix_chkpwd'
-
-###############################################################################
-# BEGIN fix (136 / 196) for 'audit_rules_privileged_commands_gpasswd'
-###############################################################################
-(>&2 echo "Remediating rule 136/196: 'audit_rules_privileged_commands_gpasswd'")
+(>&2 echo "Remediating rule 128/196: 'audit_rules_privileged_commands_gpasswd'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_gpasswd' IS MISSING!")
 # END fix for 'audit_rules_privileged_commands_gpasswd'
 
 ###############################################################################
-# BEGIN fix (137 / 196) for 'audit_rules_privileged_commands_postqueue'
+# BEGIN fix (129 / 196) for 'audit_rules_privileged_commands_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 137/196: 'audit_rules_privileged_commands_postqueue'")
+(>&2 echo "Remediating rule 129/196: 'audit_rules_privileged_commands_passwd'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_passwd' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_passwd'
+
+###############################################################################
+# BEGIN fix (130 / 196) for 'audit_rules_privileged_commands_postqueue'
+###############################################################################
+(>&2 echo "Remediating rule 130/196: 'audit_rules_privileged_commands_postqueue'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_postqueue' IS MISSING!")
 # END fix for 'audit_rules_privileged_commands_postqueue'
 
 ###############################################################################
-# BEGIN fix (138 / 196) for 'audit_rules_privileged_commands_chage'
+# BEGIN fix (131 / 196) for 'audit_rules_privileged_commands_unix_chkpwd'
 ###############################################################################
-(>&2 echo "Remediating rule 138/196: 'audit_rules_privileged_commands_chage'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_chage' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_chage'
+(>&2 echo "Remediating rule 131/196: 'audit_rules_privileged_commands_unix_chkpwd'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_unix_chkpwd' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_unix_chkpwd'
 
 ###############################################################################
-# BEGIN fix (139 / 196) for 'audit_rules_privileged_commands'
+# BEGIN fix (132 / 196) for 'audit_rules_privileged_commands'
 ###############################################################################
-(>&2 echo "Remediating rule 139/196: 'audit_rules_privileged_commands'")
+(>&2 echo "Remediating rule 132/196: 'audit_rules_privileged_commands'")
 
 
 # Perform the remediation for both possible tools: 'auditctl' and 'augenrules'
@@ -4182,7 +4108,6 @@ create_audit_remediation_unsuccessful_file_modification_detailed /etc/audit/rule
 # 			One of 'auditctl' or 'augenrules'
 #
 # min_auid		Minimum original ID the user logged in with
-# 			'500' for RHEL-6 and before, '1000' for RHEL-7 and after.
 #
 # Example Call(s):
 #
@@ -4362,281 +4287,335 @@ perform_audit_rules_privileged_commands_remediation "augenrules" "1000"
 # END fix for 'audit_rules_privileged_commands'
 
 ###############################################################################
-# BEGIN fix (140 / 196) for 'audit_rules_privileged_commands_ssh_keysign'
+# BEGIN fix (133 / 196) for 'audit_rules_privileged_commands_umount'
 ###############################################################################
-(>&2 echo "Remediating rule 140/196: 'audit_rules_privileged_commands_ssh_keysign'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_ssh_keysign' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_ssh_keysign'
-
-###############################################################################
-# BEGIN fix (141 / 196) for 'audit_rules_privileged_commands_sudo'
-###############################################################################
-(>&2 echo "Remediating rule 141/196: 'audit_rules_privileged_commands_sudo'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_sudo' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_sudo'
-
-###############################################################################
-# BEGIN fix (142 / 196) for 'audit_rules_privileged_commands_pam_timestamp_check'
-###############################################################################
-(>&2 echo "Remediating rule 142/196: 'audit_rules_privileged_commands_pam_timestamp_check'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_pam_timestamp_check' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_pam_timestamp_check'
-
-###############################################################################
-# BEGIN fix (143 / 196) for 'audit_rules_privileged_commands_su'
-###############################################################################
-(>&2 echo "Remediating rule 143/196: 'audit_rules_privileged_commands_su'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_su' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_su'
-
-###############################################################################
-# BEGIN fix (144 / 196) for 'audit_rules_privileged_commands_crontab'
-###############################################################################
-(>&2 echo "Remediating rule 144/196: 'audit_rules_privileged_commands_crontab'")
-(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_crontab' IS MISSING!")
-# END fix for 'audit_rules_privileged_commands_crontab'
-
-###############################################################################
-# BEGIN fix (145 / 196) for 'audit_rules_privileged_commands_umount'
-###############################################################################
-(>&2 echo "Remediating rule 145/196: 'audit_rules_privileged_commands_umount'")
+(>&2 echo "Remediating rule 133/196: 'audit_rules_privileged_commands_umount'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_umount' IS MISSING!")
 # END fix for 'audit_rules_privileged_commands_umount'
 
 ###############################################################################
-# BEGIN fix (146 / 196) for 'audit_rules_privileged_commands_postdrop'
+# BEGIN fix (134 / 196) for 'audit_rules_privileged_commands_ssh_keysign'
 ###############################################################################
-(>&2 echo "Remediating rule 146/196: 'audit_rules_privileged_commands_postdrop'")
+(>&2 echo "Remediating rule 134/196: 'audit_rules_privileged_commands_ssh_keysign'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_ssh_keysign' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_ssh_keysign'
+
+###############################################################################
+# BEGIN fix (135 / 196) for 'audit_rules_privileged_commands_sudo'
+###############################################################################
+(>&2 echo "Remediating rule 135/196: 'audit_rules_privileged_commands_sudo'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_sudo' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_sudo'
+
+###############################################################################
+# BEGIN fix (136 / 196) for 'audit_rules_privileged_commands_pam_timestamp_check'
+###############################################################################
+(>&2 echo "Remediating rule 136/196: 'audit_rules_privileged_commands_pam_timestamp_check'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_pam_timestamp_check' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_pam_timestamp_check'
+
+###############################################################################
+# BEGIN fix (137 / 196) for 'audit_rules_privileged_commands_su'
+###############################################################################
+(>&2 echo "Remediating rule 137/196: 'audit_rules_privileged_commands_su'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_su' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_su'
+
+###############################################################################
+# BEGIN fix (138 / 196) for 'audit_rules_privileged_commands_crontab'
+###############################################################################
+(>&2 echo "Remediating rule 138/196: 'audit_rules_privileged_commands_crontab'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_crontab' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_crontab'
+
+###############################################################################
+# BEGIN fix (139 / 196) for 'audit_rules_privileged_commands_chage'
+###############################################################################
+(>&2 echo "Remediating rule 139/196: 'audit_rules_privileged_commands_chage'")
+(>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_chage' IS MISSING!")
+# END fix for 'audit_rules_privileged_commands_chage'
+
+###############################################################################
+# BEGIN fix (140 / 196) for 'audit_rules_privileged_commands_postdrop'
+###############################################################################
+(>&2 echo "Remediating rule 140/196: 'audit_rules_privileged_commands_postdrop'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_postdrop' IS MISSING!")
 # END fix for 'audit_rules_privileged_commands_postdrop'
 
 ###############################################################################
-# BEGIN fix (147 / 196) for 'audit_rules_privileged_commands_chsh'
+# BEGIN fix (141 / 196) for 'audit_rules_privileged_commands_chsh'
 ###############################################################################
-(>&2 echo "Remediating rule 147/196: 'audit_rules_privileged_commands_chsh'")
+(>&2 echo "Remediating rule 141/196: 'audit_rules_privileged_commands_chsh'")
 (>&2 echo "FIX FOR THIS RULE 'audit_rules_privileged_commands_chsh' IS MISSING!")
 # END fix for 'audit_rules_privileged_commands_chsh'
 
 ###############################################################################
-# BEGIN fix (148 / 196) for 'file_permissions_ungroupowned'
+# BEGIN fix (142 / 196) for 'partition_for_home'
 ###############################################################################
-(>&2 echo "Remediating rule 148/196: 'file_permissions_ungroupowned'")
-(>&2 echo "FIX FOR THIS RULE 'file_permissions_ungroupowned' IS MISSING!")
-# END fix for 'file_permissions_ungroupowned'
-
-###############################################################################
-# BEGIN fix (149 / 196) for 'dir_perms_world_writable_system_owned'
-###############################################################################
-(>&2 echo "Remediating rule 149/196: 'dir_perms_world_writable_system_owned'")
-(>&2 echo "FIX FOR THIS RULE 'dir_perms_world_writable_system_owned' IS MISSING!")
-# END fix for 'dir_perms_world_writable_system_owned'
+(>&2 echo "Remediating rule 142/196: 'partition_for_home'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_home' IS MISSING!")
+# END fix for 'partition_for_home'
 
 ###############################################################################
-# BEGIN fix (150 / 196) for 'no_files_unowned_by_user'
+# BEGIN fix (143 / 196) for 'partition_for_tmp'
 ###############################################################################
-(>&2 echo "Remediating rule 150/196: 'no_files_unowned_by_user'")
-(>&2 echo "FIX FOR THIS RULE 'no_files_unowned_by_user' IS MISSING!")
-# END fix for 'no_files_unowned_by_user'
-
-###############################################################################
-# BEGIN fix (151 / 196) for 'service_autofs_disabled'
-###############################################################################
-(>&2 echo "Remediating rule 151/196: 'service_autofs_disabled'")
-(>&2 echo "FIX FOR THIS RULE 'service_autofs_disabled' IS MISSING!")
-# END fix for 'service_autofs_disabled'
+(>&2 echo "Remediating rule 143/196: 'partition_for_tmp'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_tmp' IS MISSING!")
+# END fix for 'partition_for_tmp'
 
 ###############################################################################
-# BEGIN fix (152 / 196) for 'kernel_module_usb-storage_disabled'
+# BEGIN fix (144 / 196) for 'partition_for_var'
 ###############################################################################
-(>&2 echo "Remediating rule 152/196: 'kernel_module_usb-storage_disabled'")
-(>&2 echo "FIX FOR THIS RULE 'kernel_module_usb-storage_disabled' IS MISSING!")
-# END fix for 'kernel_module_usb-storage_disabled'
-
-###############################################################################
-# BEGIN fix (153 / 196) for 'mount_option_nosuid_removable_partitions'
-###############################################################################
-(>&2 echo "Remediating rule 153/196: 'mount_option_nosuid_removable_partitions'")
-
-var_removable_partition="/dev/cdrom"
-function include_mount_options_functions {
-	:
-}
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab "$var_removable_partition" || { echo "Not remediating, because there is no record of $var_removable_partition in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "$var_removable_partition" "nosuid" "" ""
-
-	ensure_partition_is_mounted "$var_removable_partition"
-}
-
-perform_remediation
-# END fix for 'mount_option_nosuid_removable_partitions'
+(>&2 echo "Remediating rule 144/196: 'partition_for_var'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var' IS MISSING!")
+# END fix for 'partition_for_var'
 
 ###############################################################################
-# BEGIN fix (154 / 196) for 'mount_option_home_nosuid'
+# BEGIN fix (145 / 196) for 'partition_for_var_log_audit'
 ###############################################################################
-(>&2 echo "Remediating rule 154/196: 'mount_option_home_nosuid'")
-function include_mount_options_functions {
-	:
+(>&2 echo "Remediating rule 145/196: 'partition_for_var_log_audit'")
+(>&2 echo "FIX FOR THIS RULE 'partition_for_var_log_audit' IS MISSING!")
+# END fix for 'partition_for_var_log_audit'
+
+###############################################################################
+# BEGIN fix (146 / 196) for 'sudo_remove_no_authenticate'
+###############################################################################
+(>&2 echo "Remediating rule 146/196: 'sudo_remove_no_authenticate'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_no_authenticate' IS MISSING!")
+# END fix for 'sudo_remove_no_authenticate'
+
+###############################################################################
+# BEGIN fix (147 / 196) for 'sudo_remove_nopasswd'
+###############################################################################
+(>&2 echo "Remediating rule 147/196: 'sudo_remove_nopasswd'")
+(>&2 echo "FIX FOR THIS RULE 'sudo_remove_nopasswd' IS MISSING!")
+# END fix for 'sudo_remove_nopasswd'
+
+###############################################################################
+# BEGIN fix (148 / 196) for 'grub2_enable_fips_mode'
+###############################################################################
+(>&2 echo "Remediating rule 148/196: 'grub2_enable_fips_mode'")
+
+
+# prelink not installed
+if test -e /etc/sysconfig/prelink -o -e /usr/sbin/prelink; then
+    if grep -q ^PRELINKING /etc/sysconfig/prelink
+    then
+        sed -i 's/^PRELINKING[:blank:]*=[:blank:]*[:alpha:]*/PRELINKING=no/' /etc/sysconfig/prelink
+    else
+        printf '\n' >> /etc/sysconfig/prelink
+        printf '%s\n' '# Set PRELINKING=no per security requirements' 'PRELINKING=no' >> /etc/sysconfig/prelink
+    fi
+
+    # Undo previous prelink changes to binaries if prelink is available.
+    if test -x /usr/sbin/prelink; then
+        /usr/sbin/prelink -ua
+    fi
+fi
+
+if grep -q -m1 -o aes /proc/cpuinfo; then
+	if ! rpm -q --quiet "dracut-fips-aesni" ; then
+    yum install -y "dracut-fips-aesni"
+fi
+fi
+if ! rpm -q --quiet "dracut-fips" ; then
+    yum install -y "dracut-fips"
+fi
+
+dracut -f
+
+# Correct the form of default kernel command line in  grub
+if grep -q '^GRUB_CMDLINE_LINUX=.*fips=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a fips= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)fips=[^[:space:]]*\(.*"\)/\1 fips=1 \2/'  /etc/default/grub
+else
+	# no existing fips=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 fips=1"/'  /etc/default/grub
+fi
+
+# Get the UUID of the device mounted at /boot.
+BOOT_UUID=$(findmnt --noheadings --output uuid --target /boot)
+
+if grep -q '^GRUB_CMDLINE_LINUX=".*boot=.*"'  /etc/default/grub; then
+	# modify the GRUB command-line if a boot= arg already exists
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)boot=[^[:space:]]*\(.*"\)/\1 boot=UUID='"${BOOT_UUID} \2/" /etc/default/grub
+else
+	# no existing boot=arg is present, append it
+	sed -i 's/\(^GRUB_CMDLINE_LINUX=".*\)"/\1 boot=UUID='${BOOT_UUID}'"/'  /etc/default/grub
+fi
+
+# Correct the form of kernel command line for each installed kernel in the bootloader
+/sbin/grubby --update-kernel=ALL --args="fips=1 boot=UUID=${BOOT_UUID}"
+# END fix for 'grub2_enable_fips_mode'
+
+###############################################################################
+# BEGIN fix (149 / 196) for 'installed_OS_is_vendor_supported'
+###############################################################################
+(>&2 echo "Remediating rule 149/196: 'installed_OS_is_vendor_supported'")
+(>&2 echo "FIX FOR THIS RULE 'installed_OS_is_vendor_supported' IS MISSING!")
+# END fix for 'installed_OS_is_vendor_supported'
+
+###############################################################################
+# BEGIN fix (150 / 196) for 'rpm_verify_permissions'
+###############################################################################
+(>&2 echo "Remediating rule 150/196: 'rpm_verify_permissions'")
+
+# Declare array to hold set of RPM packages we need to correct permissions for
+declare -A SETPERMS_RPM_DICT
+
+# Create a list of files on the system having permissions different from what
+# is expected by the RPM database
+readarray -t FILES_WITH_INCORRECT_PERMS < <(rpm -Va --nofiledigest | awk '{ if (substr($0,2,1)=="M") print $NF }')
+
+for FILE_PATH in "${FILES_WITH_INCORRECT_PERMS[@]}"
+do
+	RPM_PACKAGE=$(rpm -qf "$FILE_PATH")
+	# Use an associative array to store packages as it's keys, not having to care about duplicates.
+	SETPERMS_RPM_DICT["$RPM_PACKAGE"]=1
+done
+
+# For each of the RPM packages left in the list -- reset its permissions to the
+# correct values
+for RPM_PACKAGE in "${!SETPERMS_RPM_DICT[@]}"
+do
+	rpm --setperms "${RPM_PACKAGE}"
+done
+# END fix for 'rpm_verify_permissions'
+
+###############################################################################
+# BEGIN fix (151 / 196) for 'rpm_verify_hashes'
+###############################################################################
+(>&2 echo "Remediating rule 151/196: 'rpm_verify_hashes'")
+
+# Find which files have incorrect hash (not in /etc, because there are all system related config. files) and then get files names
+files_with_incorrect_hash="$(rpm -Va | grep -E '^..5.* /(bin|sbin|lib|lib64|usr)/' | awk '{print $NF}' )"
+# From files names get package names and change newline to space, because rpm writes each package to new line
+packages_to_reinstall="$(rpm -qf $files_with_incorrect_hash | tr '\n' ' ')"
+
+yum reinstall -y $packages_to_reinstall
+# END fix for 'rpm_verify_hashes'
+
+###############################################################################
+# BEGIN fix (152 / 196) for 'aide_scan_notification'
+###############################################################################
+(>&2 echo "Remediating rule 152/196: 'aide_scan_notification'")
+
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+
+CRONTAB=/etc/crontab
+CRONDIRS='/etc/cron.d /etc/cron.daily /etc/cron.weekly /etc/cron.monthly'
+
+if [ -f /var/spool/cron/root ]; then
+	VARSPOOL=/var/spool/cron/root
+fi
+
+if ! grep -qR '^.*\/usr\/sbin\/aide\s*\-\-check.*|.*\/bin\/mail\s*-s\s*".*"\s*root@.*$' $CRONTAB $VARSPOOL $CRONDIRS; then
+	echo '0 5 * * * root /usr/sbin/aide  --check | /bin/mail -s "$(hostname) - AIDE Integrity Check" root@localhost' >> $CRONTAB
+fi
+# END fix for 'aide_scan_notification'
+
+###############################################################################
+# BEGIN fix (153 / 196) for 'aide_periodic_cron_checking'
+###############################################################################
+(>&2 echo "Remediating rule 153/196: 'aide_periodic_cron_checking'")
+
+if ! rpm -q --quiet "aide" ; then
+    yum install -y "aide"
+fi
+
+if ! grep -q "/usr/sbin/aide --check" /etc/crontab ; then
+    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
+else
+    sed -i '/^.*\/usr\/sbin\/aide --check.*$/d' /etc/crontab
+    echo "05 4 * * * root /usr/sbin/aide --check" >> /etc/crontab
+fi
+# END fix for 'aide_periodic_cron_checking'
+
+###############################################################################
+# BEGIN fix (154 / 196) for 'ensure_gpgcheck_local_packages'
+###############################################################################
+(>&2 echo "Remediating rule 154/196: 'ensure_gpgcheck_local_packages'")
+# Function to replace configuration setting in config file or add the configuration setting if
+# it does not exist.
+#
+# Expects arguments:
+#
+# config_file:		Configuration file that will be modified
+# key:			Configuration option to change
+# value:		Value of the configuration option to change
+# cce:			The CCE identifier or '@CCENUM@' if no CCE identifier exists
+# format:		The printf-like format string that will be given stripped key and value as arguments,
+#			so e.g. '%s=%s' will result in key=value subsitution (i.e. without spaces around =)
+#
+# Optional arugments:
+#
+# format:		Optional argument to specify the format of how key/value should be
+# 			modified/appended in the configuration file. The default is key = value.
+#
+# Example Call(s):
+#
+#     With default format of 'key = value':
+#     replace_or_append '/etc/sysctl.conf' '^kernel.randomize_va_space' '2' '@CCENUM@'
+#
+#     With custom key/value format:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' 'disabled' '@CCENUM@' '%s=%s'
+#
+#     With a variable:
+#     replace_or_append '/etc/sysconfig/selinux' '^SELINUX=' $var_selinux_state '@CCENUM@' '%s=%s'
+#
+function replace_or_append {
+  local default_format='%s = %s' case_insensitive_mode=yes sed_case_insensitive_option='' grep_case_insensitive_option=''
+  local config_file=$1
+  local key=$2
+  local value=$3
+  local cce=$4
+  local format=$5
+
+  if [ "$case_insensitive_mode" = yes ]; then
+    sed_case_insensitive_option="i"
+    grep_case_insensitive_option="-i"
+  fi
+  [ -n "$format" ] || format="$default_format"
+  # Check sanity of the input
+  [ $# -ge "3" ] || { echo "Usage: replace_or_append <config_file_location> <key_to_search> <new_value> [<CCE number or literal '@CCENUM@' if unknown>] [printf-like format, default is '$default_format']" >&2; exit 1; }
+
+  # Test if the config_file is a symbolic link. If so, use --follow-symlinks with sed.
+  # Otherwise, regular sed command will do.
+  sed_command=('sed' '-i')
+  if test -L "$config_file"; then
+    sed_command+=('--follow-symlinks')
+  fi
+
+  # Test that the cce arg is not empty or does not equal @CCENUM@.
+  # If @CCENUM@ exists, it means that there is no CCE assigned.
+  if [ -n "$cce" ] && [ "$cce" != '@CCENUM@' ]; then
+    cce="${cce}"
+  else
+    cce="CCE"
+  fi
+
+  # Strip any search characters in the key arg so that the key can be replaced without
+  # adding any search characters to the config file.
+  stripped_key=$(sed 's/[\^=\$,;+]*//g' <<< "$key")
+
+  # shellcheck disable=SC2059
+  printf -v formatted_output "$format" "$stripped_key" "$value"
+
+  # If the key exists, change it. Otherwise, add it to the config_file.
+  # We search for the key string followed by a word boundary (matched by \>),
+  # so if we search for 'setting', 'setting2' won't match.
+  if LC_ALL=C grep -q -m 1 $grep_case_insensitive_option -e "${key}\\>" "$config_file"; then
+    "${sed_command[@]}" "s/${key}\\>.*/$formatted_output/g$sed_case_insensitive_option" "$config_file"
+  else
+    # \n is precaution for case where file ends without trailing newline
+    printf '\n# Per %s: Set %s in %s\n' "$cce" "$formatted_output" "$config_file" >> "$config_file"
+    printf '%s\n' "$formatted_output" >> "$config_file"
+  fi
 }
-
-# $1: type of filesystem
-# $2: new mount point option
-# $3: filesystem of new mount point (used when adding new entry in fstab)
-# $4: mount type of new mount point (used when adding new entry in fstab)
-function ensure_mount_option_for_vfstype {
-        local _vfstype="$1" _new_opt="$2" _filesystem=$3 _type=$4 _vfstype_points=()
-        readarray -t _vfstype_points < <(grep -E "[[:space:]]${_vfstype}[[:space:]]" /etc/fstab | awk '{print $2}')
-
-        for _vfstype_point in "${_vfstype_points[@]}"
-        do
-                ensure_mount_option_in_fstab "$_vfstype_point" "$_new_opt" "$_filesystem" "$_type"
-        done
-}
-
-# $1: mount point
-# $2: new mount point option
-# $3: device or virtual string (used when adding new entry in fstab)
-# $4: mount type of mount point (used when adding new entry in fstab)
-function ensure_mount_option_in_fstab {
-	local _mount_point="$1" _new_opt="$2" _device=$3 _type=$4
-	local _mount_point_match_regexp="" _previous_mount_opts=""
-	_mount_point_match_regexp="$(get_mount_point_regexp "$_mount_point")"
-
-	if [ "$(grep -c "$_mount_point_match_regexp" /etc/fstab)" -eq 0 ]; then
-		# runtime opts without some automatic kernel/userspace-added defaults
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/mtab | head -1 |  awk '{print $4}' \
-					| sed -E "s/(rw|defaults|seclabel|${_new_opt})(,|$)//g;s/,$//")
-		[ "$_previous_mount_opts" ] && _previous_mount_opts+=","
-		echo "${_device} ${_mount_point} ${_type} defaults,${_previous_mount_opts}${_new_opt} 0 0" >> /etc/fstab
-	elif [ "$(grep "$_mount_point_match_regexp" /etc/fstab | grep -c "$_new_opt")" -eq 0 ]; then
-		_previous_mount_opts=$(grep "$_mount_point_match_regexp" /etc/fstab | awk '{print $4}')
-		sed -i "s|\(${_mount_point_match_regexp}.*${_previous_mount_opts}\)|\1,${_new_opt}|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function get_mount_point_regexp {
-		printf "[[:space:]]%s[[:space:]]" "$1"
-}
-
-# $1: mount point
-function assert_mount_point_in_fstab {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	grep "$_mount_point_match_regexp" -q /etc/fstab \
-		|| { echo "The mount point '$1' is not even in /etc/fstab, so we can't set up mount options" >&2; return 1; }
-}
-
-# $1: mount point
-function remove_defaults_from_fstab_if_overriden {
-	local _mount_point_match_regexp
-	_mount_point_match_regexp="$(get_mount_point_regexp "$1")"
-	if grep "$_mount_point_match_regexp" /etc/fstab | grep -q "defaults,"
-	then
-		sed -i "s|\(${_mount_point_match_regexp}.*\)defaults,|\1|" /etc/fstab
-	fi
-}
-
-# $1: mount point
-function ensure_partition_is_mounted {
-	local _mount_point="$1"
-	mkdir -p "$_mount_point" || return 1
-	if mountpoint -q "$_mount_point"; then
-		mount -o remount --target "$_mount_point"
-	else
-		mount --target "$_mount_point"
-	fi
-}
-include_mount_options_functions
-
-function perform_remediation {
-	# test "$mount_has_to_exist" = 'yes'
-	if test "yes" = 'yes'; then
-		assert_mount_point_in_fstab /home || { echo "Not remediating, because there is no record of /home in /etc/fstab" >&2; return 1; }
-	fi
-
-	ensure_mount_option_in_fstab "/home" "nosuid" "" ""
-
-	ensure_partition_is_mounted "/home"
-}
-
-perform_remediation
-# END fix for 'mount_option_home_nosuid'
+replace_or_append '/etc/yum.conf' '^localpkg_gpgcheck' '1' ''
+# END fix for 'ensure_gpgcheck_local_packages'
 
 ###############################################################################
 # BEGIN fix (155 / 196) for 'package_rsh-server_removed'
@@ -4964,7 +4943,7 @@ function ensure_partition_is_mounted {
 }
 include_mount_options_functions
 
-ensure_mount_option_for_vfstype "nfs[4]?" "sec=krb5:krb5i:krb5p"
+ensure_mount_option_for_vfstype "nfs[4]?" "sec=krb5:krb5i:krb5p" "" "nfs4"
 # END fix for 'mount_option_krb_sec_remote_filesystems'
 
 ###############################################################################
@@ -5271,11 +5250,9 @@ replace_or_append '/etc/ssh/sshd_config' '^ClientAliveCountMax' "$var_sshd_set_k
 # END fix for 'sshd_set_keepalive'
 
 ###############################################################################
-# BEGIN fix (181 / 196) for 'sshd_set_idle_timeout'
+# BEGIN fix (181 / 196) for 'sshd_disable_rhosts_rsa'
 ###############################################################################
-(>&2 echo "Remediating rule 181/196: 'sshd_set_idle_timeout'")
-
-sshd_idle_timeout_value="300"
+(>&2 echo "Remediating rule 181/196: 'sshd_disable_rhosts_rsa'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -5353,8 +5330,8 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeout_value '' '%s %s'
-# END fix for 'sshd_set_idle_timeout'
+replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' '' '%s %s'
+# END fix for 'sshd_disable_rhosts_rsa'
 
 ###############################################################################
 # BEGIN fix (182 / 196) for 'sshd_enable_warning_banner'
@@ -5468,34 +5445,9 @@ replace_or_append '/etc/ssh/sshd_config' '^MACs' "$sshd_approved_macs" '' '%s %s
 # END fix for 'sshd_use_approved_macs'
 
 ###############################################################################
-# BEGIN fix (184 / 196) for 'sshd_do_not_permit_user_env'
+# BEGIN fix (184 / 196) for 'sshd_disable_kerb_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 184/196: 'sshd_do_not_permit_user_env'")
-if [ -e "/etc/ssh/sshd_config" ] ; then
-    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
-else
-    touch "/etc/ssh/sshd_config"
-fi
-cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
-# Insert before the line matching the regex '^Match'.
-line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
-if [ -z "$line_number" ]; then
-    # There was no match of '^Match', insert at
-    # the end of the file.
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
-else
-    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
-    printf '%s\n' "PermitUserEnvironment yes" >> "/etc/ssh/sshd_config"
-    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
-fi
-# Clean up after ourselves.
-rm "/etc/ssh/sshd_config.bak"
-# END fix for 'sshd_do_not_permit_user_env'
-
-###############################################################################
-# BEGIN fix (185 / 196) for 'sshd_disable_kerb_auth'
-###############################################################################
-(>&2 echo "Remediating rule 185/196: 'sshd_disable_kerb_auth'")
+(>&2 echo "Remediating rule 184/196: 'sshd_disable_kerb_auth'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*KerberosAuthentication\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -5518,9 +5470,9 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_disable_kerb_auth'
 
 ###############################################################################
-# BEGIN fix (186 / 196) for 'sshd_allow_only_protocol2'
+# BEGIN fix (185 / 196) for 'sshd_allow_only_protocol2'
 ###############################################################################
-(>&2 echo "Remediating rule 186/196: 'sshd_allow_only_protocol2'")
+(>&2 echo "Remediating rule 185/196: 'sshd_allow_only_protocol2'")
 if [ -e "/etc/ssh/sshd_config" ] ; then
     LC_ALL=C sed -i "/^\s*Protocol\s\+/Id" "/etc/ssh/sshd_config"
 else
@@ -5543,9 +5495,11 @@ rm "/etc/ssh/sshd_config.bak"
 # END fix for 'sshd_allow_only_protocol2'
 
 ###############################################################################
-# BEGIN fix (187 / 196) for 'sshd_disable_rhosts_rsa'
+# BEGIN fix (186 / 196) for 'sshd_set_idle_timeout'
 ###############################################################################
-(>&2 echo "Remediating rule 187/196: 'sshd_disable_rhosts_rsa'")
+(>&2 echo "Remediating rule 186/196: 'sshd_set_idle_timeout'")
+
+sshd_idle_timeout_value="300"
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -5623,8 +5577,33 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/ssh/sshd_config' '^RhostsRSAAuthentication' 'no' '' '%s %s'
-# END fix for 'sshd_disable_rhosts_rsa'
+replace_or_append '/etc/ssh/sshd_config' '^ClientAliveInterval' $sshd_idle_timeout_value '' '%s %s'
+# END fix for 'sshd_set_idle_timeout'
+
+###############################################################################
+# BEGIN fix (187 / 196) for 'sshd_do_not_permit_user_env'
+###############################################################################
+(>&2 echo "Remediating rule 187/196: 'sshd_do_not_permit_user_env'")
+if [ -e "/etc/ssh/sshd_config" ] ; then
+    LC_ALL=C sed -i "/^\s*PermitUserEnvironment\s\+/Id" "/etc/ssh/sshd_config"
+else
+    touch "/etc/ssh/sshd_config"
+fi
+cp "/etc/ssh/sshd_config" "/etc/ssh/sshd_config.bak"
+# Insert before the line matching the regex '^Match'.
+line_number="$(LC_ALL=C grep -n "^Match" "/etc/ssh/sshd_config.bak" | LC_ALL=C sed 's/:.*//g')"
+if [ -z "$line_number" ]; then
+    # There was no match of '^Match', insert at
+    # the end of the file.
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
+else
+    head -n "$(( line_number - 1 ))" "/etc/ssh/sshd_config.bak" > "/etc/ssh/sshd_config"
+    printf '%s\n' "PermitUserEnvironment no" >> "/etc/ssh/sshd_config"
+    tail -n "+$(( line_number ))" "/etc/ssh/sshd_config.bak" >> "/etc/ssh/sshd_config"
+fi
+# Clean up after ourselves.
+rm "/etc/ssh/sshd_config.bak"
+# END fix for 'sshd_do_not_permit_user_env'
 
 ###############################################################################
 # BEGIN fix (188 / 196) for 'sshd_enable_x11_forwarding'
@@ -5655,6 +5634,8 @@ rm "/etc/ssh/sshd_config.bak"
 # BEGIN fix (189 / 196) for 'sshd_use_approved_ciphers'
 ###############################################################################
 (>&2 echo "Remediating rule 189/196: 'sshd_use_approved_ciphers'")
+
+sshd_approved_ciphers="aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc,rijndael-cbc@lysator.liu.se"
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -5732,7 +5713,7 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/ssh/sshd_config' '^Ciphers' 'aes128-ctr,aes192-ctr,aes256-ctr,aes128-cbc,3des-cbc,aes192-cbc,aes256-cbc' '' '%s %s'
+replace_or_append '/etc/ssh/sshd_config' '^Ciphers' "$sshd_approved_ciphers" '' '%s %s'
 # END fix for 'sshd_use_approved_ciphers'
 
 ###############################################################################

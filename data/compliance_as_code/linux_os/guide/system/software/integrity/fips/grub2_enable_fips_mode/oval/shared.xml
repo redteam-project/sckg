@@ -2,13 +2,8 @@
   <definition class="compliance" id="grub2_enable_fips_mode" version="1">
     <metadata>
       <title>Enable FIPS Mode in GRUB2</title>
-      <affected family="unix">
-        <platform>multi_platform_wrlinux</platform>
-        <platform>Red Hat Enterprise Linux 7</platform>
-        <platform>multi_platform_rhv</platform>
-        <platform>Oracle Linux 7</platform>
-      </affected>
-      <description>Look for argument fips=1 in the kernel line in /etc/default/grub.</description>
+      {{{- oval_affected(products) }}}
+      <description>Ensure fips=1 is configured in the kernel line in /etc/default/grub.</description>
     </metadata>
     <criteria operator="AND">
       <extend_definition comment="Installed OS is FIPS certified" definition_ref="installed_OS_is_FIPS_certified" />

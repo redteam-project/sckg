@@ -17,7 +17,7 @@
 # upstream project homepage is https://www.open-scap.org/security-policies/scap-security-guide/.
 #
 # Benchmark ID:  FIREFOX
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -37,60 +37,61 @@
 ###############################################################################
 (>&2 echo "Remediating rule 1/28: 'firefox_preferences-ssl_protocol_tls'")
 
-firefox_cfg="stig.cfg"
-  key="security.enable_tls"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("security.enable_tls", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("security.enable_tls".*/lockPref("security.enable_tls", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("security.enable_tls", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-ssl_protocol_tls'
 
 ###############################################################################
 # BEGIN fix (2 / 28) for 'firefox_preferences-home_page'
 ###############################################################################
 (>&2 echo "Remediating rule 2/28: 'firefox_preferences-home_page'")
-populate var_default_home_page
+
+var_default_home_page="about:blank"
+
 
 firefox_cfg="stig.cfg"
-  key="browser.startup.homepage"
-  value=""${var_default_home_page}""
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+value="\"${var_default_home_page}\""
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("browser.startup.homepage", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("browser.startup.homepage".*/lockPref("browser.startup.homepage", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("browser.startup.homepage", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-home_page'
 
 ###############################################################################
@@ -98,29 +99,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 3/28: 'firefox_preferences-shell_protocol'")
 
-firefox_cfg="stig.cfg"
-  key="network.protocol-handler.external.shell"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("network.protocol-handler.external.shell", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("network.protocol-handler.external.shell".*/lockPref("network.protocol-handler.external.shell", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("network.protocol-handler.external.shell", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-shell_protocol'
 
 ###############################################################################
@@ -128,29 +129,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 4/28: 'firefox_preferences-auto-download_actions'")
 
-firefox_cfg="stig.cfg"
-  key="browser.helperApps.alwaysAsk.force"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("browser.helperApps.alwaysAsk.force", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("browser.helperApps.alwaysAsk.force".*/lockPref("browser.helperApps.alwaysAsk.force", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("browser.helperApps.alwaysAsk.force", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-auto-download_actions'
 
 ###############################################################################
@@ -158,29 +159,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 5/28: 'firefox_preferences-search_update'")
 
-firefox_cfg="stig.cfg"
-  key="browser.search.update"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("browser.search.update", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("browser.search.update".*/lockPref("browser.search.update", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("browser.search.update", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-search_update'
 
 ###############################################################################
@@ -188,60 +189,61 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 6/28: 'firefox_preferences-addons_plugin_updates'")
 
-firefox_cfg="stig.cfg"
-  key="extensions.update.enabled"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("extensions.update.enabled", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("extensions.update.enabled".*/lockPref("extensions.update.enabled", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("extensions.update.enabled", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-addons_plugin_updates'
 
 ###############################################################################
 # BEGIN fix (7 / 28) for 'firefox_preferences-open_confirmation'
 ###############################################################################
 (>&2 echo "Remediating rule 7/28: 'firefox_preferences-open_confirmation'")
-populate var_required_file_types
+
+var_required_file_types="application/pdf,application/doc,application/xls,application/bat,application/ppt,application/mdb,application/mde,application/fdf,application/xfdf,application/lsl,application/lso,appliation/lss,application/iqy,application/rqy,application/xlk,application/pot,application/pps,application/dot,application/wbk,application/ps,application/eps,application/wch,application/wcm,application/wbi,application/wb1,application/wb3,application/rtf,application/wch,application/wcm,application/ad,application/adp,application/xlt,application/dos,application/wks"
+
 
 firefox_cfg="stig.cfg"
-  key="plugin.disable_full_page_plugin_for_types"
-  value=""${var_required_file_types}""
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+value="\"${var_required_file_types}\""
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("plugin.disable_full_page_plugin_for_types", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's|lockPref("plugin.disable_full_page_plugin_for_types".*|lockPref("plugin.disable_full_page_plugin_for_types", '"$value)"';|g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("plugin.disable_full_page_plugin_for_types", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-open_confirmation'
 
 ###############################################################################
@@ -249,29 +251,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 8/28: 'firefox_preferences-javascript_window_resizing'")
 
-firefox_cfg="stig.cfg"
-  key="dom.disable_window_move_resize"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.disable_window_move_resize", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.disable_window_move_resize".*/lockPref("dom.disable_window_move_resize", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.disable_window_move_resize", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-javascript_window_resizing'
 
 ###############################################################################
@@ -279,29 +281,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 9/28: 'firefox_preferences-verification'")
 
-firefox_cfg="stig.cfg"
-  key="security.default_personal_cert"
-  value=""Ask Every Time""
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="\"Ask Every Time\""
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("security.default_personal_cert", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("security.default_personal_cert".*/lockPref("security.default_personal_cert", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("security.default_personal_cert", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-verification'
 
 ###############################################################################
@@ -309,29 +311,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 10/28: 'firefox_preferences-pop-up_windows'")
 
-firefox_cfg="stig.cfg"
-  key="dom.disable_window_open_feature.status"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.disable_window_open_feature.status", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.disable_window_open_feature.status".*/lockPref("dom.disable_window_open_feature.status", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.disable_window_open_feature.status", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-pop-up_windows'
 
 ###############################################################################
@@ -339,29 +341,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 11/28: 'firefox_preferences-ssl_version_2'")
 
-firefox_cfg="stig.cfg"
-  key="security.enable_ssl2"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("security.enable_ssl2", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("security.enable_ssl2".*/lockPref("security.enable_ssl2", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("security.enable_ssl2", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-ssl_version_2'
 
 ###############################################################################
@@ -369,29 +371,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 12/28: 'firefox_preferences-ssl_version_3'")
 
-firefox_cfg="stig.cfg"
-  key="security.enable_ssl3"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("security.enable_ssl3", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("security.enable_ssl3".*/lockPref("security.enable_ssl3", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("security.enable_ssl3", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-ssl_version_3'
 
 ###############################################################################
@@ -399,29 +401,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 13/28: 'firefox_preferences-auto-update_of_firefox'")
 
-firefox_cfg="stig.cfg"
-  key="app.update.enabled"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("app.update.enabled", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("app.update.enabled".*/lockPref("app.update.enabled", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("app.update.enabled", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-auto-update_of_firefox'
 
 ###############################################################################
@@ -429,29 +431,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 14/28: 'firefox_preferences-javascript_window_changes'")
 
-firefox_cfg="stig.cfg"
-  key="dom.disable_window_flip"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.disable_window_flip", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.disable_window_flip".*/lockPref("dom.disable_window_flip", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.disable_window_flip", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-javascript_window_changes'
 
 ###############################################################################
@@ -459,29 +461,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 15/28: 'firefox_preferences-javascript_context_menus'")
 
-firefox_cfg="stig.cfg"
-  key="dom.event.contextmenu.enabled"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.event.contextmenu.enabled", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.event.contextmenu.enabled".*/lockPref("dom.event.contextmenu.enabled", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.event.contextmenu.enabled", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-javascript_context_menus'
 
 ###############################################################################
@@ -489,29 +491,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 16/28: 'firefox_preferences-javascript_status_bar_changes'")
 
-firefox_cfg="stig.cfg"
-  key="dom.disable_window_status_change"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.disable_window_status_change", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.disable_window_status_change".*/lockPref("dom.disable_window_status_change", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.disable_window_status_change", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-javascript_status_bar_changes'
 
 ###############################################################################
@@ -526,29 +528,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 18/28: 'firefox_preferences-autofill_passwords'")
 
-firefox_cfg="stig.cfg"
-  key="signon.prefillForms"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("signon.prefillForms", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("signon.prefillForms".*/lockPref("signon.prefillForms", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("signon.prefillForms", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-autofill_passwords'
 
 ###############################################################################
@@ -556,29 +558,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 19/28: 'firefox_preferences-non-secure_page_warning'")
 
-firefox_cfg="stig.cfg"
-  key="security.warn_leaving_secure"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("security.warn_leaving_secure", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("security.warn_leaving_secure".*/lockPref("security.warn_leaving_secure", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("security.warn_leaving_secure", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-non-secure_page_warning'
 
 ###############################################################################
@@ -586,29 +588,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 20/28: 'firefox_preferences-autofill_forms'")
 
-firefox_cfg="stig.cfg"
-  key="browser.formfill.enable"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("browser.formfill.enable", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("browser.formfill.enable".*/lockPref("browser.formfill.enable", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("browser.formfill.enable", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-autofill_forms'
 
 ###############################################################################
@@ -616,29 +618,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 21/28: 'firefox_preferences-password_store'")
 
-firefox_cfg="stig.cfg"
-  key="signon.rememberSignons"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("signon.rememberSignons", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("signon.rememberSignons".*/lockPref("signon.rememberSignons", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("signon.rememberSignons", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-password_store'
 
 ###############################################################################
@@ -647,29 +649,29 @@ firefox_cfg="stig.cfg"
 (>&2 echo "Remediating rule 22/28: 'firefox_preferences-javascript_status_bar_text'")
 
 
-firefox_cfg="stig.cfg"
-  key="dom.disable_window_open_feature.status"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("dom.disable_window_open_feature.status", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("dom.disable_window_open_feature.status".*/lockPref("dom.disable_window_open_feature.status", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("dom.disable_window_open_feature.status", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-javascript_status_bar_text'
 
 ###############################################################################
@@ -677,29 +679,29 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 23/28: 'firefox_preferences-cookies_user_notice'")
 
-firefox_cfg="stig.cfg"
-  key="privacy.sanitize.promptOnSanitize"
-  value="false"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="false"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("privacy.sanitize.promptOnSanitize", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("privacy.sanitize.promptOnSanitize".*/lockPref("privacy.sanitize.promptOnSanitize", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("privacy.sanitize.promptOnSanitize", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-cookies_user_notice'
 
 ###############################################################################
@@ -707,126 +709,42 @@ firefox_cfg="stig.cfg"
 ###############################################################################
 (>&2 echo "Remediating rule 24/28: 'firefox_preferences-cookies_clear'")
 
-firefox_cfg="stig.cfg"
-  key="privacy.sanitize.sanitizeOnShutdown"
-  value="true"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
 
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
+firefox_cfg="stig.cfg"
+value="true"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
     # If the Firefox directory exists, then Firefox is installed
     if [ -d "${firefox_dir}" ]; then
-      # Make sure the Firefox .cfg file exists and has the appropriate permissions
-      if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
-        touch "${firefox_dir}/${firefox_cfg}"
-        chmod 644 "${firefox_dir}/${firefox_cfg}"
-      fi
+        # Make sure the Firefox .cfg file exists and has the appropriate permissions
+        if ! [ -f "${firefox_dir}/${firefox_cfg}" ] ; then
+            touch "${firefox_dir}/${firefox_cfg}"
+            chmod 644 "${firefox_dir}/${firefox_cfg}"
+        fi
 
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^lockPref(\"${key}\", " "${firefox_dir}/${firefox_cfg}"; then
-        sed -i "s/lockPref(\"${key}\".*/lockPref(\"${key}\", ${value});/g" "${firefox_dir}/${firefox_cfg}"
-      else
-        echo "lockPref(\"${key}\", ${value});" >> "${firefox_dir}/${firefox_cfg}"
-      fi
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^lockPref("privacy.sanitize.sanitizeOnShutdown", ' "${firefox_dir}/${firefox_cfg}"; then
+            sed -i 's/lockPref("privacy.sanitize.sanitizeOnShutdown".*/lockPref("privacy.sanitize.sanitizeOnShutdown", '"$value)"';/g' "${firefox_dir}/${firefox_cfg}"
+        else
+            echo 'lockPref("privacy.sanitize.sanitizeOnShutdown", '"$value"');' >> "${firefox_dir}/${firefox_cfg}"
+        fi
     fi
-  done
+done
 # END fix for 'firefox_preferences-cookies_clear'
 
 ###############################################################################
-# BEGIN fix (25 / 28) for 'firefox_preferences-lock_settings_obscure'
+# BEGIN fix (25 / 28) for 'firefox_preferences-dod_root_certificate_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 25/28: 'firefox_preferences-lock_settings_obscure'")
-
-firefox_js="stig_settings.js"
-  key="general.config.obscure_value"
-  value="0"
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
-  firefox_pref="/defaults/pref"
-  firefox_preferences="/defaults/preferences"
-
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
-    # If the Firefox directory exists, then Firefox is installed
-    if [ -d "${firefox_dir}" ]; then
-      # Different versions of Firefox have different preferences directories, check for them and set the right one
-      if [ -d "${firefox_dir}/${firefox_pref}" ] ; then
-        firefox_pref_dir="${firefox_dir}/${firefox_pref}"
-      elif [ -d "${firefox_dir}/${firefox_preferences}" ] ; then
-        firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
-      else
-        mkdir -m 755 -p "${firefox_dir}/${firefox_preferences}"
-        firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
-      fi
-
-      # Make sure the Firefox .js file exists and has the appropriate permissions
-      if ! [ -f "${firefox_pref_dir}/${firefox_js}" ] ; then
-        touch "${firefox_pref_dir}/${firefox_js}"
-        chmod 644 "${firefox_pref_dir}/${firefox_js}"
-      fi
-
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^pref(\"${key}\", " "${firefox_pref_dir}/${firefox_js}"; then
-        sed -i "s/pref(\"${key}\".*/pref(\"${key}\", ${value});/g" "${firefox_pref_dir}/${firefox_js}"
-      else
-        echo "pref(\"${key}\", ${value});" >> "${firefox_pref_dir}/${firefox_js}"
-      fi
-    fi
-  done
-# END fix for 'firefox_preferences-lock_settings_obscure'
-
-###############################################################################
-# BEGIN fix (26 / 28) for 'firefox_preferences-lock_settings_config_file'
-###############################################################################
-(>&2 echo "Remediating rule 26/28: 'firefox_preferences-lock_settings_config_file'")
-
-firefox_js="stig_settings.js"
-  key="general.config.filename"
-  value=""stig.cfg""
-  firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
-  firefox_pref="/defaults/pref"
-  firefox_preferences="/defaults/preferences"
-
-  # Check the possible Firefox install directories
-  for firefox_dir in ${firefox_dirs}; do
-    # If the Firefox directory exists, then Firefox is installed
-    if [ -d "${firefox_dir}" ]; then
-      # Different versions of Firefox have different preferences directories, check for them and set the right one
-      if [ -d "${firefox_dir}/${firefox_pref}" ] ; then
-        firefox_pref_dir="${firefox_dir}/${firefox_pref}"
-      elif [ -d "${firefox_dir}/${firefox_preferences}" ] ; then
-        firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
-      else
-        mkdir -m 755 -p "${firefox_dir}/${firefox_preferences}"
-        firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
-      fi
-
-      # Make sure the Firefox .js file exists and has the appropriate permissions
-      if ! [ -f "${firefox_pref_dir}/${firefox_js}" ] ; then
-        touch "${firefox_pref_dir}/${firefox_js}"
-        chmod 644 "${firefox_pref_dir}/${firefox_js}"
-      fi
-
-      # If the key exists, change it. Otherwise, add it to the config_file.
-      if LC_ALL=C grep -m 1 -q "^pref(\"${key}\", " "${firefox_pref_dir}/${firefox_js}"; then
-        sed -i "s/pref(\"${key}\".*/pref(\"${key}\", ${value});/g" "${firefox_pref_dir}/${firefox_js}"
-      else
-        echo "pref(\"${key}\", ${value});" >> "${firefox_pref_dir}/${firefox_js}"
-      fi
-    fi
-  done
-# END fix for 'firefox_preferences-lock_settings_config_file'
-
-###############################################################################
-# BEGIN fix (27 / 28) for 'firefox_preferences-dod_root_certificate_installed'
-###############################################################################
-(>&2 echo "Remediating rule 27/28: 'firefox_preferences-dod_root_certificate_installed'")
+(>&2 echo "Remediating rule 25/28: 'firefox_preferences-dod_root_certificate_installed'")
 (>&2 echo "FIX FOR THIS RULE 'firefox_preferences-dod_root_certificate_installed' IS MISSING!")
 # END fix for 'firefox_preferences-dod_root_certificate_installed'
 
 ###############################################################################
-# BEGIN fix (28 / 28) for 'firefox_preferences-enable_ca_trust'
+# BEGIN fix (26 / 28) for 'firefox_preferences-enable_ca_trust'
 ###############################################################################
-(>&2 echo "Remediating rule 28/28: 'firefox_preferences-enable_ca_trust'")
+(>&2 echo "Remediating rule 26/28: 'firefox_preferences-enable_ca_trust'")
 P11=$(readlink /etc/alternatives/libnssckbi.so*)
 P11LIB="/usr/lib/pkcs11/p11-kit-trust.so"
 P11LIB64="/usr/lib64/pkcs11/p11-kit-trust.so"
@@ -835,4 +753,88 @@ if ! [[ ${P11} == "${P11LIB64}" ]] || ! [[ ${P11} == "${P11LIB}" ]] ; then
    /usr/bin/update-ca-trust enable
 fi
 # END fix for 'firefox_preferences-enable_ca_trust'
+
+###############################################################################
+# BEGIN fix (27 / 28) for 'firefox_preferences-lock_settings_obscure'
+###############################################################################
+(>&2 echo "Remediating rule 27/28: 'firefox_preferences-lock_settings_obscure'")
+
+
+value="0"
+firefox_js="stig_settings.js"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+firefox_pref="/defaults/pref"
+firefox_preferences="/defaults/preferences"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
+    # If the Firefox directory exists, then Firefox is installed
+    if [ -d "${firefox_dir}" ]; then
+        # Different versions of Firefox have different preferences directories, check for them and set the right one
+        if [ -d "${firefox_dir}/${firefox_pref}" ] ; then
+            firefox_pref_dir="${firefox_dir}/${firefox_pref}"
+        elif [ -d "${firefox_dir}/${firefox_preferences}" ] ; then
+            firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
+        else
+            mkdir -m 755 -p "${firefox_dir}/${firefox_preferences}"
+            firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
+        fi
+
+        # Make sure the Firefox .js file exists and has the appropriate permissions
+        if ! [ -f "${firefox_pref_dir}/${firefox_js}" ] ; then
+            touch "${firefox_pref_dir}/${firefox_js}"
+            chmod 644 "${firefox_pref_dir}/${firefox_js}"
+        fi
+
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^pref("general.config.obscure_value", ' "${firefox_pref_dir}/${firefox_js}"; then
+            sed -i 's/pref("general.config.obscure_value".*/pref("general.config.obscure_value", '"$value)"';/g' "${firefox_pref_dir}/${firefox_js}"
+        else
+            echo 'pref("general.config.obscure_value", '"$value"');' >> "${firefox_pref_dir}/${firefox_js}"
+        fi
+    fi
+done
+# END fix for 'firefox_preferences-lock_settings_obscure'
+
+###############################################################################
+# BEGIN fix (28 / 28) for 'firefox_preferences-lock_settings_config_file'
+###############################################################################
+(>&2 echo "Remediating rule 28/28: 'firefox_preferences-lock_settings_config_file'")
+
+
+value="\"stig.cfg\""
+firefox_js="stig_settings.js"
+firefox_dirs="/usr/lib/firefox /usr/lib64/firefox /usr/local/lib/firefox /usr/local/lib64/firefox"
+firefox_pref="/defaults/pref"
+firefox_preferences="/defaults/preferences"
+
+# Check the possible Firefox install directories
+for firefox_dir in ${firefox_dirs}; do
+    # If the Firefox directory exists, then Firefox is installed
+    if [ -d "${firefox_dir}" ]; then
+        # Different versions of Firefox have different preferences directories, check for them and set the right one
+        if [ -d "${firefox_dir}/${firefox_pref}" ] ; then
+            firefox_pref_dir="${firefox_dir}/${firefox_pref}"
+        elif [ -d "${firefox_dir}/${firefox_preferences}" ] ; then
+            firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
+        else
+            mkdir -m 755 -p "${firefox_dir}/${firefox_preferences}"
+            firefox_pref_dir="${firefox_dir}/${firefox_preferences}"
+        fi
+
+        # Make sure the Firefox .js file exists and has the appropriate permissions
+        if ! [ -f "${firefox_pref_dir}/${firefox_js}" ] ; then
+            touch "${firefox_pref_dir}/${firefox_js}"
+            chmod 644 "${firefox_pref_dir}/${firefox_js}"
+        fi
+
+        # If the key exists, change it. Otherwise, add it to the config_file.
+        if LC_ALL=C grep -m 1 -q '^pref("general.config.filename", ' "${firefox_pref_dir}/${firefox_js}"; then
+            sed -i 's/pref("general.config.filename".*/pref("general.config.filename", '"$value)"';/g' "${firefox_pref_dir}/${firefox_js}"
+        else
+            echo 'pref("general.config.filename", '"$value"');' >> "${firefox_pref_dir}/${firefox_js}"
+        fi
+    fi
+done
+# END fix for 'firefox_preferences-lock_settings_config_file'
 

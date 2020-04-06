@@ -5,8 +5,8 @@
 # Profile Description:
 # Not available
 #
-# Benchmark ID:  SUSE-12
-# Benchmark Version:  0.1.47
+# Benchmark ID:  SLE-12
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #

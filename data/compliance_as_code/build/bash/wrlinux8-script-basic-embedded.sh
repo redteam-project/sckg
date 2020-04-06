@@ -7,7 +7,7 @@
 # Regardless of your system's deployment objective, all of these checks should pass.
 #
 # Benchmark ID:  WRLINUX
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -23,16 +23,45 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 11) for 'file_permissions_home_dirs'
+# BEGIN fix (1 / 11) for 'accounts_password_all_shadowed'
 ###############################################################################
-(>&2 echo "Remediating rule 1/11: 'file_permissions_home_dirs'")
+(>&2 echo "Remediating rule 1/11: 'accounts_password_all_shadowed'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
+# END fix for 'accounts_password_all_shadowed'
+
+###############################################################################
+# BEGIN fix (2 / 11) for 'no_empty_passwords'
+###############################################################################
+(>&2 echo "Remediating rule 2/11: 'no_empty_passwords'")
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
+sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
+# END fix for 'no_empty_passwords'
+
+###############################################################################
+# BEGIN fix (3 / 11) for 'no_netrc_files'
+###############################################################################
+(>&2 echo "Remediating rule 3/11: 'no_netrc_files'")
+(>&2 echo "FIX FOR THIS RULE 'no_netrc_files' IS MISSING!")
+# END fix for 'no_netrc_files'
+
+###############################################################################
+# BEGIN fix (4 / 11) for 'accounts_no_uid_except_zero'
+###############################################################################
+(>&2 echo "Remediating rule 4/11: 'accounts_no_uid_except_zero'")
+awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
+# END fix for 'accounts_no_uid_except_zero'
+
+###############################################################################
+# BEGIN fix (5 / 11) for 'file_permissions_home_dirs'
+###############################################################################
+(>&2 echo "Remediating rule 5/11: 'file_permissions_home_dirs'")
 (>&2 echo "FIX FOR THIS RULE 'file_permissions_home_dirs' IS MISSING!")
 # END fix for 'file_permissions_home_dirs'
 
 ###############################################################################
-# BEGIN fix (2 / 11) for 'accounts_logon_fail_delay'
+# BEGIN fix (6 / 11) for 'accounts_logon_fail_delay'
 ###############################################################################
-(>&2 echo "Remediating rule 2/11: 'accounts_logon_fail_delay'")
+(>&2 echo "Remediating rule 6/11: 'accounts_logon_fail_delay'")
 
 
 # Set variables
@@ -118,9 +147,9 @@ replace_or_append '/etc/login.defs' '^FAIL_DELAY' "$var_accounts_fail_delay" '' 
 # END fix for 'accounts_logon_fail_delay'
 
 ###############################################################################
-# BEGIN fix (3 / 11) for 'accounts_max_concurrent_login_sessions'
+# BEGIN fix (7 / 11) for 'accounts_max_concurrent_login_sessions'
 ###############################################################################
-(>&2 echo "Remediating rule 3/11: 'accounts_max_concurrent_login_sessions'")
+(>&2 echo "Remediating rule 7/11: 'accounts_max_concurrent_login_sessions'")
 
 var_accounts_max_concurrent_login_sessions="1"
 
@@ -134,9 +163,23 @@ fi
 # END fix for 'accounts_max_concurrent_login_sessions'
 
 ###############################################################################
-# BEGIN fix (4 / 11) for 'accounts_umask_etc_login_defs'
+# BEGIN fix (8 / 11) for 'root_path_no_dot'
 ###############################################################################
-(>&2 echo "Remediating rule 4/11: 'accounts_umask_etc_login_defs'")
+(>&2 echo "Remediating rule 8/11: 'root_path_no_dot'")
+(>&2 echo "FIX FOR THIS RULE 'root_path_no_dot' IS MISSING!")
+# END fix for 'root_path_no_dot'
+
+###############################################################################
+# BEGIN fix (9 / 11) for 'accounts_root_path_dirs_no_write'
+###############################################################################
+(>&2 echo "Remediating rule 9/11: 'accounts_root_path_dirs_no_write'")
+(>&2 echo "FIX FOR THIS RULE 'accounts_root_path_dirs_no_write' IS MISSING!")
+# END fix for 'accounts_root_path_dirs_no_write'
+
+###############################################################################
+# BEGIN fix (10 / 11) for 'accounts_umask_etc_login_defs'
+###############################################################################
+(>&2 echo "Remediating rule 10/11: 'accounts_umask_etc_login_defs'")
 
 var_accounts_user_umask="077"
 # Function to replace configuration setting in config file or add the configuration setting if
@@ -220,9 +263,9 @@ replace_or_append '/etc/login.defs' '^UMASK' "$var_accounts_user_umask" '' '%s %
 # END fix for 'accounts_umask_etc_login_defs'
 
 ###############################################################################
-# BEGIN fix (5 / 11) for 'accounts_umask_etc_profile'
+# BEGIN fix (11 / 11) for 'accounts_umask_etc_profile'
 ###############################################################################
-(>&2 echo "Remediating rule 5/11: 'accounts_umask_etc_profile'")
+(>&2 echo "Remediating rule 11/11: 'accounts_umask_etc_profile'")
 
 var_accounts_user_umask="077"
 
@@ -232,47 +275,4 @@ if ! [ $? -eq 0 ]; then
     echo "umask $var_accounts_user_umask" >> /etc/profile
 fi
 # END fix for 'accounts_umask_etc_profile'
-
-###############################################################################
-# BEGIN fix (6 / 11) for 'root_path_no_dot'
-###############################################################################
-(>&2 echo "Remediating rule 6/11: 'root_path_no_dot'")
-(>&2 echo "FIX FOR THIS RULE 'root_path_no_dot' IS MISSING!")
-# END fix for 'root_path_no_dot'
-
-###############################################################################
-# BEGIN fix (7 / 11) for 'accounts_root_path_dirs_no_write'
-###############################################################################
-(>&2 echo "Remediating rule 7/11: 'accounts_root_path_dirs_no_write'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_root_path_dirs_no_write' IS MISSING!")
-# END fix for 'accounts_root_path_dirs_no_write'
-
-###############################################################################
-# BEGIN fix (8 / 11) for 'accounts_no_uid_except_zero'
-###############################################################################
-(>&2 echo "Remediating rule 8/11: 'accounts_no_uid_except_zero'")
-awk -F: '$3 == 0 && $1 != "root" { print $1 }' /etc/passwd | xargs passwd -l
-# END fix for 'accounts_no_uid_except_zero'
-
-###############################################################################
-# BEGIN fix (9 / 11) for 'no_netrc_files'
-###############################################################################
-(>&2 echo "Remediating rule 9/11: 'no_netrc_files'")
-(>&2 echo "FIX FOR THIS RULE 'no_netrc_files' IS MISSING!")
-# END fix for 'no_netrc_files'
-
-###############################################################################
-# BEGIN fix (10 / 11) for 'no_empty_passwords'
-###############################################################################
-(>&2 echo "Remediating rule 10/11: 'no_empty_passwords'")
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/system-auth
-sed --follow-symlinks -i 's/\<nullok\>//g' /etc/pam.d/password-auth
-# END fix for 'no_empty_passwords'
-
-###############################################################################
-# BEGIN fix (11 / 11) for 'accounts_password_all_shadowed'
-###############################################################################
-(>&2 echo "Remediating rule 11/11: 'accounts_password_all_shadowed'")
-(>&2 echo "FIX FOR THIS RULE 'accounts_password_all_shadowed' IS MISSING!")
-# END fix for 'accounts_password_all_shadowed'
 

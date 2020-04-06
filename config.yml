@@ -139,6 +139,14 @@ regimes:
     etl:
       module: 'sckg.etl.cac.bash'
       class: 'Bash'
+  - name: 'cac_bash_rhel7_cis'
+    description: 'rhel7-script-cis.sh'
+    document:
+      source: 'https://github.com/ComplianceAsCode/content'
+      parsable: 'data/compliance_as_code/build/bash/rhel7-script-cis.sh'
+    etl:
+      module: 'sckg.etl.cac.bash'
+      class: 'Bash'
   - name: 'cac_bash_fedora_pcidss'
     description: 'fedora-script-pci-dss.sh'
     document:

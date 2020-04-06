@@ -139,3 +139,4 @@ private.yml
 sckg/etl/private
 data/regimes/private
 venn.*
+build.cypher

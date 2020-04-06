@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: wrlinux1019,rhel7,rhel8,rhv4
+prodtype: rhel7,rhel8,rhv4,sle15,wrlinux1019
 
 title: 'Ensure Home Directories are Created for New Users'
 
@@ -33,4 +33,4 @@ ocil: |-
     <pre>$ sudo grep create_home /etc/login.defs</pre>
     <br /><br />
 
-platform: shadow-utils
+platform: login_defs

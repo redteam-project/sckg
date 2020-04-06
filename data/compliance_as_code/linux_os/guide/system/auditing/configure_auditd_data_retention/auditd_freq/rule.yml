@@ -17,9 +17,11 @@ severity: medium
 identifiers:
     cce@rhel7: 82358-3
     cce@rhel8: 82258-5
+    cce@ocp4: 82512-5
 
 references:
     ospp: FAU_GEN.1
+    srg: SRG-OS-000051-GPOS-00024
 
 ocil_clause: freq isn't set to 50
 

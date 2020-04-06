@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel7,rhel8,fedora,ol7,ol8
+prodtype: fedora,ocp4,ol7,ol8,rhel7,rhel8
 
 title: 'Ensure auditd Collects Information on the Use of Privileged Commands - pt_chown'
 
@@ -33,11 +33,12 @@ severity: medium
 identifiers:
     cce@rhel7: 80409-6
     cce@rhel8: 80734-7
+    cce@ocp4: 82603-2
 
 references:
     cui: 3.1.7
     disa: 135,172,2884
-    nist: AU-3(1),AU-12(c),AC-6(9)
+    nist: AU-2(d),AU-12(c),AC-6(9),CM-6(a)
     nist-csf: DE.CM-1,DE.CM-3,DE.CM-7,ID.SC-4,PR.PT-1
     srg: SRG-OS-000042-GPOS-00020,SRG-OS-000392-GPOS-00172,SRG-OS-000471-GPOS-00215
     vmmsrg: SRG-OS-000471-VMM-001910

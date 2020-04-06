@@ -6,7 +6,7 @@
 # This profile is for SUSE Enterprise Linux 11 acting as a server.
 #
 # Benchmark ID:  SUSE-11
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,28 +22,28 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 3) for 'file_groupowner_etc_passwd'
+# BEGIN fix (1 / 3) for 'file_owner_etc_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 1/3: 'file_groupowner_etc_passwd'")
-
-
-chgrp 0 /etc/passwd
-# END fix for 'file_groupowner_etc_passwd'
-
-###############################################################################
-# BEGIN fix (2 / 3) for 'file_owner_etc_passwd'
-###############################################################################
-(>&2 echo "Remediating rule 2/3: 'file_owner_etc_passwd'")
+(>&2 echo "Remediating rule 1/3: 'file_owner_etc_passwd'")
 
 
 chown 0 /etc/passwd
 # END fix for 'file_owner_etc_passwd'
 
 ###############################################################################
-# BEGIN fix (3 / 3) for 'file_permissions_etc_passwd'
+# BEGIN fix (2 / 3) for 'file_permissions_etc_passwd'
 ###############################################################################
-(>&2 echo "Remediating rule 3/3: 'file_permissions_etc_passwd'")
+(>&2 echo "Remediating rule 2/3: 'file_permissions_etc_passwd'")
 
 chmod 0644 /etc/passwd
 # END fix for 'file_permissions_etc_passwd'
+
+###############################################################################
+# BEGIN fix (3 / 3) for 'file_groupowner_etc_passwd'
+###############################################################################
+(>&2 echo "Remediating rule 3/3: 'file_groupowner_etc_passwd'")
+
+
+chgrp 0 /etc/passwd
+# END fix for 'file_groupowner_etc_passwd'
 

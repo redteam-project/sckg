@@ -6,7 +6,7 @@
 # Sample profile description.
 #
 # Benchmark ID:  RHEL-13-OSP
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -22,11 +22,11 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 35) for 'keystone_file_ownership'
+# BEGIN fix (1 / 35) for 'keystone_disable_user_account_days_inactive'
 ###############################################################################
-(>&2 echo "Remediating rule 1/35: 'keystone_file_ownership'")
-(>&2 echo "FIX FOR THIS RULE 'keystone_file_ownership' IS MISSING!")
-# END fix for 'keystone_file_ownership'
+(>&2 echo "Remediating rule 1/35: 'keystone_disable_user_account_days_inactive'")
+(>&2 echo "FIX FOR THIS RULE 'keystone_disable_user_account_days_inactive' IS MISSING!")
+# END fix for 'keystone_disable_user_account_days_inactive'
 
 ###############################################################################
 # BEGIN fix (2 / 35) for 'keystone_disable_admin_token'
@@ -50,11 +50,11 @@
 # END fix for 'keystone_lockout_failure_attempts'
 
 ###############################################################################
-# BEGIN fix (5 / 35) for 'keystone_disable_user_account_days_inactive'
+# BEGIN fix (5 / 35) for 'keystone_file_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 5/35: 'keystone_disable_user_account_days_inactive'")
-(>&2 echo "FIX FOR THIS RULE 'keystone_disable_user_account_days_inactive' IS MISSING!")
-# END fix for 'keystone_disable_user_account_days_inactive'
+(>&2 echo "Remediating rule 5/35: 'keystone_file_ownership'")
+(>&2 echo "FIX FOR THIS RULE 'keystone_file_ownership' IS MISSING!")
+# END fix for 'keystone_file_ownership'
 
 ###############################################################################
 # BEGIN fix (6 / 35) for 'keystone_max_request_body_size'
@@ -120,18 +120,18 @@
 # END fix for 'nova_secure_glance'
 
 ###############################################################################
-# BEGIN fix (15 / 35) for 'horizon_password_autocomplete'
+# BEGIN fix (15 / 35) for 'horizon_disable_password_reveal'
 ###############################################################################
-(>&2 echo "Remediating rule 15/35: 'horizon_password_autocomplete'")
-(>&2 echo "FIX FOR THIS RULE 'horizon_password_autocomplete' IS MISSING!")
-# END fix for 'horizon_password_autocomplete'
-
-###############################################################################
-# BEGIN fix (16 / 35) for 'horizon_disable_password_reveal'
-###############################################################################
-(>&2 echo "Remediating rule 16/35: 'horizon_disable_password_reveal'")
+(>&2 echo "Remediating rule 15/35: 'horizon_disable_password_reveal'")
 (>&2 echo "FIX FOR THIS RULE 'horizon_disable_password_reveal' IS MISSING!")
 # END fix for 'horizon_disable_password_reveal'
+
+###############################################################################
+# BEGIN fix (16 / 35) for 'horizon_password_autocomplete'
+###############################################################################
+(>&2 echo "Remediating rule 16/35: 'horizon_password_autocomplete'")
+(>&2 echo "FIX FOR THIS RULE 'horizon_password_autocomplete' IS MISSING!")
+# END fix for 'horizon_password_autocomplete'
 
 ###############################################################################
 # BEGIN fix (17 / 35) for 'horizon_use_ssl'
@@ -204,18 +204,18 @@
 # END fix for 'cinder_glance_tls'
 
 ###############################################################################
-# BEGIN fix (27 / 35) for 'cinder_tls_enabled'
+# BEGIN fix (27 / 35) for 'cinder_file_perms'
 ###############################################################################
-(>&2 echo "Remediating rule 27/35: 'cinder_tls_enabled'")
-(>&2 echo "FIX FOR THIS RULE 'cinder_tls_enabled' IS MISSING!")
-# END fix for 'cinder_tls_enabled'
-
-###############################################################################
-# BEGIN fix (28 / 35) for 'cinder_file_perms'
-###############################################################################
-(>&2 echo "Remediating rule 28/35: 'cinder_file_perms'")
+(>&2 echo "Remediating rule 27/35: 'cinder_file_perms'")
 (>&2 echo "FIX FOR THIS RULE 'cinder_file_perms' IS MISSING!")
 # END fix for 'cinder_file_perms'
+
+###############################################################################
+# BEGIN fix (28 / 35) for 'cinder_tls_enabled'
+###############################################################################
+(>&2 echo "Remediating rule 28/35: 'cinder_tls_enabled'")
+(>&2 echo "FIX FOR THIS RULE 'cinder_tls_enabled' IS MISSING!")
+# END fix for 'cinder_tls_enabled'
 
 ###############################################################################
 # BEGIN fix (29 / 35) for 'cinder_file_ownership'

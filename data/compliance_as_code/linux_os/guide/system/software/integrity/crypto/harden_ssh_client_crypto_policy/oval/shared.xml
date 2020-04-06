@@ -133,13 +133,8 @@
   <definition class="compliance" id="harden_ssh_client_crypto_policy" version="3">
     <metadata>
       <title>Harden SSH client Crypto Policy</title>
-      <affected family="unix">
-        <platform>multi_platform_wrlinux</platform>
-        <platform>multi_platform_rhel</platform>
-        <platform>multi_platform_fedora</platform>
-        <platform>multi_platform_ol</platform>
-      </affected>
-      <description>Look for specific parameters in /etc/ssh/ssh_config.d/02-ospp.conf</description>
+      {{{- oval_affected(products) }}}
+      <description>Ensure the ssh client ciphers are configured correctly in /etc/ssh/ssh_config.d/02-ospp.conf</description>
     </metadata>
     <criteria comment="SSH client is configured correctly"
     operator="AND">

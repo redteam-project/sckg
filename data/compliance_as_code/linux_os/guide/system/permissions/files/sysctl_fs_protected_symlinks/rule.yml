@@ -18,11 +18,13 @@ identifiers:
     cce@rhel6: 81028-3
     cce@rhel7: 81029-1
     cce@rhel8: 81030-9
+    cce@ocp4: 82507-5
 
 references:
     anssi: NT28(R23)
     cis: 1.6.1
-    nist: SI-11
+    nist: CM-6(a),AC-6(1)
+    srg: SRG-OS-000324-GPOS-00125
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="fs.protected_symlinks", value="1") }}}
 
@@ -32,3 +34,5 @@ template:
         sysctlvar: fs.protected_symlinks
         sysctlval: '1'
         datatype: int
+
+platform: machine

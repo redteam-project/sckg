@@ -16,10 +16,12 @@ severity: medium
 identifiers:
     cce@rhel7: 80659-6
     cce@rhel8: 80915-2
+    cce@ocp4: 82498-7
 
 references:
     anssi: NT28(R23)
-    nist: SC-39
+    nist: SC-30,SC-30(2),SC-30(5),CM-6(a)
+    srg: SRG-OS-000132-GPOS-00067
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="kernel.kptr_restrict", value="1") }}}
 

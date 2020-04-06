@@ -7,7 +7,7 @@
 # Regardless of your system's workload all of these checks should pass.
 #
 # Benchmark ID:  OL-7
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -23,9 +23,17 @@
 ###############################################################################
 
 ###############################################################################
-# BEGIN fix (1 / 9) for 'package_uuidd_installed'
+# BEGIN fix (1 / 9) for 'file_permissions_etc_shadow'
 ###############################################################################
-(>&2 echo "Remediating rule 1/9: 'package_uuidd_installed'")
+(>&2 echo "Remediating rule 1/9: 'file_permissions_etc_shadow'")
+
+chmod 0000 /etc/shadow
+# END fix for 'file_permissions_etc_shadow'
+
+###############################################################################
+# BEGIN fix (2 / 9) for 'package_uuidd_installed'
+###############################################################################
+(>&2 echo "Remediating rule 2/9: 'package_uuidd_installed'")
 
 if ! rpm -q --quiet "uuidd" ; then
     yum install -y "uuidd"
@@ -33,9 +41,9 @@ fi
 # END fix for 'package_uuidd_installed'
 
 ###############################################################################
-# BEGIN fix (2 / 9) for 'package_glibc_installed'
+# BEGIN fix (3 / 9) for 'package_glibc_installed'
 ###############################################################################
-(>&2 echo "Remediating rule 2/9: 'package_glibc_installed'")
+(>&2 echo "Remediating rule 3/9: 'package_glibc_installed'")
 
 if ! rpm -q --quiet "glibc" ; then
     yum install -y "glibc"
@@ -43,9 +51,9 @@ fi
 # END fix for 'package_glibc_installed'
 
 ###############################################################################
-# BEGIN fix (3 / 9) for 'accounts_authorized_local_users_sidadm_orasid'
+# BEGIN fix (4 / 9) for 'accounts_authorized_local_users_sidadm_orasid'
 ###############################################################################
-(>&2 echo "Remediating rule 3/9: 'accounts_authorized_local_users_sidadm_orasid'")
+(>&2 echo "Remediating rule 4/9: 'accounts_authorized_local_users_sidadm_orasid'")
 
 var_accounts_authorized_local_users_regex="^(root|bin|daemon|adm|lp|sync|shutdown|halt|mail|operator|games|ftp|nobody|pegasus|systemd-bus-proxy|systemd-network|dbus|polkitd|abrt|unbound|tss|libstoragemgmt|rpc|colord|usbmuxd$|pcp|saslauth|geoclue|setroubleshoot|rtkit|chrony|qemu|radvd|rpcuser|nfsnobody|pulse|gdm|gnome-initial-setup|postfix|avahi|ntp|sshd|tcpdump|oprofile|uuidd)$"
 
@@ -120,14 +128,6 @@ for username in $( sed 's/:.*//' /etc/passwd ) ; do
 	fi
 done
 # END fix for 'accounts_authorized_local_users_sidadm_orasid'
-
-###############################################################################
-# BEGIN fix (4 / 9) for 'file_permissions_etc_shadow'
-###############################################################################
-(>&2 echo "Remediating rule 4/9: 'file_permissions_etc_shadow'")
-
-chmod 0000 /etc/shadow
-# END fix for 'file_permissions_etc_shadow'
 
 ###############################################################################
 # BEGIN fix (5 / 9) for 'service_rlogin_disabled'

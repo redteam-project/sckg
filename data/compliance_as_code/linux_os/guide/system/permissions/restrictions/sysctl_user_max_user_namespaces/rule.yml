@@ -1,6 +1,6 @@
 documentation_complete: true
 
-prodtype: rhel8,fedora,ol8
+prodtype: fedora,ocp4,ol8,rhel8
 
 title: 'Disable the use of user namespaces'
 
@@ -23,10 +23,12 @@ severity: low
 
 identifiers:
     cce@rhel8: 82211-4
+    cce@ocp4: 82503-4
 
 references:
     ospp: FMT_SMF_EXT.1
-    nist: SC-39
+    nist: SC-39,CM-6(a)
+    srg: SRG-OS-000480-GPOS-00227
 
 {{{ complete_ocil_entry_sysctl_option_value(sysctl="user.max_user_namespaces", value="0") }}}
 

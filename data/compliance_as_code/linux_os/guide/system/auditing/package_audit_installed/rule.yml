@@ -12,14 +12,20 @@ identifiers:
     cce@rhel6: 81041-6
     cce@rhel7: 81042-4
     cce@rhel8: 81043-2
+    cce@ocp4: 82669-3
 
 ocil_clause: 'the package is not installed'
 
 references:
-    nist: AU-7(a),AU-7(b),AU-7(1),AU-10
+    nist: AC-7(a),AU-7(1),AU-7(2),AU-14,AU-12(2),AU-2(a),CM-6(a)
     anssi: NT28(R50)
+    srg: SRG-OS-000480-GPOS-00227,SRG-OS-000122-GPOS-00063
+    cis@rhel8: 4.1.1.1
 
 template:
     name: package_installed
     vars:
         pkgname: audit
+        pkgname@ubuntu1404: auditd
+        pkgname@ubuntu1604: auditd
+        pkgname@ubuntu1804: auditd

@@ -8,7 +8,7 @@
 # all of these checks should pass.
 #
 # Benchmark ID:  Jboss-Fuse-6
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -108,11 +108,11 @@
 # END fix for 'jboss_karaf-valid_dod_certificates'
 
 ###############################################################################
-# BEGIN fix (13 / 67) for 'jboss_karaf-deployed_java_network_permissions'
+# BEGIN fix (13 / 67) for 'jboss_karaf-java_aaa_service'
 ###############################################################################
-(>&2 echo "Remediating rule 13/67: 'jboss_karaf-deployed_java_network_permissions'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-deployed_java_network_permissions' IS MISSING!")
-# END fix for 'jboss_karaf-deployed_java_network_permissions'
+(>&2 echo "Remediating rule 13/67: 'jboss_karaf-java_aaa_service'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-java_aaa_service' IS MISSING!")
+# END fix for 'jboss_karaf-java_aaa_service'
 
 ###############################################################################
 # BEGIN fix (14 / 67) for 'jboss_karaf-enable_fips_authentication'
@@ -157,109 +157,109 @@
 # END fix for 'jboss_karaf-enable_encrypted_passwords'
 
 ###############################################################################
-# BEGIN fix (20 / 67) for 'jboss_karaf-remove_default_roles'
+# BEGIN fix (20 / 67) for 'jboss_karaf-deployed_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 20/67: 'jboss_karaf-remove_default_roles'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-remove_default_roles' IS MISSING!")
-# END fix for 'jboss_karaf-remove_default_roles'
-
-###############################################################################
-# BEGIN fix (21 / 67) for 'jboss_karaf-deployed_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 21/67: 'jboss_karaf-deployed_permissions'")
+(>&2 echo "Remediating rule 20/67: 'jboss_karaf-deployed_permissions'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-deployed_permissions' IS MISSING!")
 # END fix for 'jboss_karaf-deployed_permissions'
 
 ###############################################################################
-# BEGIN fix (22 / 67) for 'jboss_karaf-dod_hardware_pki_token'
+# BEGIN fix (21 / 67) for 'jboss_karaf-dod_hardware_pki_token'
 ###############################################################################
-(>&2 echo "Remediating rule 22/67: 'jboss_karaf-dod_hardware_pki_token'")
+(>&2 echo "Remediating rule 21/67: 'jboss_karaf-dod_hardware_pki_token'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-dod_hardware_pki_token' IS MISSING!")
 # END fix for 'jboss_karaf-dod_hardware_pki_token'
 
 ###############################################################################
-# BEGIN fix (23 / 67) for 'jboss_karaf-java_vendor_supported'
+# BEGIN fix (22 / 67) for 'jboss_karaf-java_vendor_supported'
 ###############################################################################
-(>&2 echo "Remediating rule 23/67: 'jboss_karaf-java_vendor_supported'")
+(>&2 echo "Remediating rule 22/67: 'jboss_karaf-java_vendor_supported'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-java_vendor_supported' IS MISSING!")
 # END fix for 'jboss_karaf-java_vendor_supported'
 
 ###############################################################################
-# BEGIN fix (24 / 67) for 'jboss_karaf-deployed_socket_permissions'
+# BEGIN fix (23 / 67) for 'jboss_karaf-deployed_socket_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 24/67: 'jboss_karaf-deployed_socket_permissions'")
+(>&2 echo "Remediating rule 23/67: 'jboss_karaf-deployed_socket_permissions'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-deployed_socket_permissions' IS MISSING!")
 # END fix for 'jboss_karaf-deployed_socket_permissions'
 
 ###############################################################################
-# BEGIN fix (25 / 67) for 'jboss_karaf-enable_ssl'
+# BEGIN fix (24 / 67) for 'jboss_karaf-enable_ssl'
 ###############################################################################
-(>&2 echo "Remediating rule 25/67: 'jboss_karaf-enable_ssl'")
+(>&2 echo "Remediating rule 24/67: 'jboss_karaf-enable_ssl'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_ssl' IS MISSING!")
 # END fix for 'jboss_karaf-enable_ssl'
 
 ###############################################################################
-# BEGIN fix (26 / 67) for 'jboss_karaf-downloaded_software_valid'
+# BEGIN fix (25 / 67) for 'jboss_karaf-downloaded_software_valid'
 ###############################################################################
-(>&2 echo "Remediating rule 26/67: 'jboss_karaf-downloaded_software_valid'")
+(>&2 echo "Remediating rule 25/67: 'jboss_karaf-downloaded_software_valid'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-downloaded_software_valid' IS MISSING!")
 # END fix for 'jboss_karaf-downloaded_software_valid'
 
 ###############################################################################
-# BEGIN fix (27 / 67) for 'jboss_karaf-enable_pki_web_console'
+# BEGIN fix (26 / 67) for 'jboss_karaf-enable_pki_web_console'
 ###############################################################################
-(>&2 echo "Remediating rule 27/67: 'jboss_karaf-enable_pki_web_console'")
+(>&2 echo "Remediating rule 26/67: 'jboss_karaf-enable_pki_web_console'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_pki_web_console' IS MISSING!")
 # END fix for 'jboss_karaf-enable_pki_web_console'
 
 ###############################################################################
-# BEGIN fix (28 / 67) for 'jboss_karaf-disable_hot_deployment'
+# BEGIN fix (27 / 67) for 'jboss_karaf-disable_hot_deployment'
 ###############################################################################
-(>&2 echo "Remediating rule 28/67: 'jboss_karaf-disable_hot_deployment'")
+(>&2 echo "Remediating rule 27/67: 'jboss_karaf-disable_hot_deployment'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-disable_hot_deployment' IS MISSING!")
 # END fix for 'jboss_karaf-disable_hot_deployment'
 
 ###############################################################################
-# BEGIN fix (29 / 67) for 'jboss_karaf-vender_supported_version'
+# BEGIN fix (28 / 67) for 'jboss_karaf-vender_supported_version'
 ###############################################################################
-(>&2 echo "Remediating rule 29/67: 'jboss_karaf-vender_supported_version'")
+(>&2 echo "Remediating rule 28/67: 'jboss_karaf-vender_supported_version'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-vender_supported_version' IS MISSING!")
 # END fix for 'jboss_karaf-vender_supported_version'
 
 ###############################################################################
-# BEGIN fix (30 / 67) for 'jboss_karaf-remove_default_users'
+# BEGIN fix (29 / 67) for 'jboss_karaf-remove_default_users'
 ###############################################################################
-(>&2 echo "Remediating rule 30/67: 'jboss_karaf-remove_default_users'")
+(>&2 echo "Remediating rule 29/67: 'jboss_karaf-remove_default_users'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-remove_default_users' IS MISSING!")
 # END fix for 'jboss_karaf-remove_default_users'
 
 ###############################################################################
-# BEGIN fix (31 / 67) for 'jboss_karaf-files_ownership'
+# BEGIN fix (30 / 67) for 'jboss_karaf-files_ownership'
 ###############################################################################
-(>&2 echo "Remediating rule 31/67: 'jboss_karaf-files_ownership'")
+(>&2 echo "Remediating rule 30/67: 'jboss_karaf-files_ownership'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-files_ownership' IS MISSING!")
 # END fix for 'jboss_karaf-files_ownership'
 
 ###############################################################################
-# BEGIN fix (32 / 67) for 'jboss_karaf-enable_secure_connections'
+# BEGIN fix (31 / 67) for 'jboss_karaf-enable_secure_connections'
 ###############################################################################
-(>&2 echo "Remediating rule 32/67: 'jboss_karaf-enable_secure_connections'")
+(>&2 echo "Remediating rule 31/67: 'jboss_karaf-enable_secure_connections'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_secure_connections' IS MISSING!")
 # END fix for 'jboss_karaf-enable_secure_connections'
 
 ###############################################################################
-# BEGIN fix (33 / 67) for 'jboss_karaf-enable_fips_modules'
+# BEGIN fix (32 / 67) for 'jboss_karaf-enable_fips_modules'
 ###############################################################################
-(>&2 echo "Remediating rule 33/67: 'jboss_karaf-enable_fips_modules'")
+(>&2 echo "Remediating rule 32/67: 'jboss_karaf-enable_fips_modules'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_fips_modules' IS MISSING!")
 # END fix for 'jboss_karaf-enable_fips_modules'
 
 ###############################################################################
-# BEGIN fix (34 / 67) for 'jboss_karaf-disable_services_ports'
+# BEGIN fix (33 / 67) for 'jboss_karaf-remove_default_roles'
 ###############################################################################
-(>&2 echo "Remediating rule 34/67: 'jboss_karaf-disable_services_ports'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-disable_services_ports' IS MISSING!")
-# END fix for 'jboss_karaf-disable_services_ports'
+(>&2 echo "Remediating rule 33/67: 'jboss_karaf-remove_default_roles'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-remove_default_roles' IS MISSING!")
+# END fix for 'jboss_karaf-remove_default_roles'
+
+###############################################################################
+# BEGIN fix (34 / 67) for 'jboss_karaf-logging_access'
+###############################################################################
+(>&2 echo "Remediating rule 34/67: 'jboss_karaf-logging_access'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-logging_access' IS MISSING!")
+# END fix for 'jboss_karaf-logging_access'
 
 ###############################################################################
 # BEGIN fix (35 / 67) for 'jboss_karaf-system_admin_access'
@@ -269,123 +269,123 @@
 # END fix for 'jboss_karaf-system_admin_access'
 
 ###############################################################################
-# BEGIN fix (36 / 67) for 'jboss_karaf-logging_access'
+# BEGIN fix (36 / 67) for 'jboss_karaf-process_owner_console_access'
 ###############################################################################
-(>&2 echo "Remediating rule 36/67: 'jboss_karaf-logging_access'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-logging_access' IS MISSING!")
-# END fix for 'jboss_karaf-logging_access'
-
-###############################################################################
-# BEGIN fix (37 / 67) for 'jboss_karaf-file_permissions'
-###############################################################################
-(>&2 echo "Remediating rule 37/67: 'jboss_karaf-file_permissions'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-file_permissions' IS MISSING!")
-# END fix for 'jboss_karaf-file_permissions'
-
-###############################################################################
-# BEGIN fix (38 / 67) for 'jboss_karaf-secure_remote_access'
-###############################################################################
-(>&2 echo "Remediating rule 38/67: 'jboss_karaf-secure_remote_access'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_remote_access' IS MISSING!")
-# END fix for 'jboss_karaf-secure_remote_access'
-
-###############################################################################
-# BEGIN fix (39 / 67) for 'jboss_karaf-stored_passwords_encrypted'
-###############################################################################
-(>&2 echo "Remediating rule 39/67: 'jboss_karaf-stored_passwords_encrypted'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-stored_passwords_encrypted' IS MISSING!")
-# END fix for 'jboss_karaf-stored_passwords_encrypted'
-
-###############################################################################
-# BEGIN fix (40 / 67) for 'jboss_karaf-process_owner_console_access'
-###############################################################################
-(>&2 echo "Remediating rule 40/67: 'jboss_karaf-process_owner_console_access'")
+(>&2 echo "Remediating rule 36/67: 'jboss_karaf-process_owner_console_access'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-process_owner_console_access' IS MISSING!")
 # END fix for 'jboss_karaf-process_owner_console_access'
 
 ###############################################################################
-# BEGIN fix (41 / 67) for 'jboss_karaf-secure_web_console'
+# BEGIN fix (37 / 67) for 'jboss_karaf-secure_web_console'
 ###############################################################################
-(>&2 echo "Remediating rule 41/67: 'jboss_karaf-secure_web_console'")
+(>&2 echo "Remediating rule 37/67: 'jboss_karaf-secure_web_console'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_web_console' IS MISSING!")
 # END fix for 'jboss_karaf-secure_web_console'
 
 ###############################################################################
-# BEGIN fix (42 / 67) for 'jboss_karaf-non-essential_bundles_features'
+# BEGIN fix (38 / 67) for 'jboss_karaf-disable_services_ports'
 ###############################################################################
-(>&2 echo "Remediating rule 42/67: 'jboss_karaf-non-essential_bundles_features'")
+(>&2 echo "Remediating rule 38/67: 'jboss_karaf-disable_services_ports'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-disable_services_ports' IS MISSING!")
+# END fix for 'jboss_karaf-disable_services_ports'
+
+###############################################################################
+# BEGIN fix (39 / 67) for 'jboss_karaf-deployed_java_network_permissions'
+###############################################################################
+(>&2 echo "Remediating rule 39/67: 'jboss_karaf-deployed_java_network_permissions'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-deployed_java_network_permissions' IS MISSING!")
+# END fix for 'jboss_karaf-deployed_java_network_permissions'
+
+###############################################################################
+# BEGIN fix (40 / 67) for 'jboss_karaf-non-essential_bundles_features'
+###############################################################################
+(>&2 echo "Remediating rule 40/67: 'jboss_karaf-non-essential_bundles_features'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-non-essential_bundles_features' IS MISSING!")
 # END fix for 'jboss_karaf-non-essential_bundles_features'
 
 ###############################################################################
-# BEGIN fix (43 / 67) for 'jboss_karaf-java_aaa_service'
+# BEGIN fix (41 / 67) for 'jboss_karaf-secure_jmx_access'
 ###############################################################################
-(>&2 echo "Remediating rule 43/67: 'jboss_karaf-java_aaa_service'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-java_aaa_service' IS MISSING!")
-# END fix for 'jboss_karaf-java_aaa_service'
-
-###############################################################################
-# BEGIN fix (44 / 67) for 'jboss_karaf-secure_jmx_access'
-###############################################################################
-(>&2 echo "Remediating rule 44/67: 'jboss_karaf-secure_jmx_access'")
+(>&2 echo "Remediating rule 41/67: 'jboss_karaf-secure_jmx_access'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_jmx_access' IS MISSING!")
 # END fix for 'jboss_karaf-secure_jmx_access'
 
 ###############################################################################
-# BEGIN fix (45 / 67) for 'jboss_karaf-secure_java_security_manager'
+# BEGIN fix (42 / 67) for 'jboss_karaf-enable_ldap_ssl'
 ###############################################################################
-(>&2 echo "Remediating rule 45/67: 'jboss_karaf-secure_java_security_manager'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_java_security_manager' IS MISSING!")
-# END fix for 'jboss_karaf-secure_java_security_manager'
+(>&2 echo "Remediating rule 42/67: 'jboss_karaf-enable_ldap_ssl'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_ldap_ssl' IS MISSING!")
+# END fix for 'jboss_karaf-enable_ldap_ssl'
 
 ###############################################################################
-# BEGIN fix (46 / 67) for 'jboss_karaf-deployed_java_file_permissions'
+# BEGIN fix (43 / 67) for 'jboss_karaf-stored_passwords_encrypted'
 ###############################################################################
-(>&2 echo "Remediating rule 46/67: 'jboss_karaf-deployed_java_file_permissions'")
+(>&2 echo "Remediating rule 43/67: 'jboss_karaf-stored_passwords_encrypted'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-stored_passwords_encrypted' IS MISSING!")
+# END fix for 'jboss_karaf-stored_passwords_encrypted'
+
+###############################################################################
+# BEGIN fix (44 / 67) for 'jboss_karaf-deployed_java_file_permissions'
+###############################################################################
+(>&2 echo "Remediating rule 44/67: 'jboss_karaf-deployed_java_file_permissions'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-deployed_java_file_permissions' IS MISSING!")
 # END fix for 'jboss_karaf-deployed_java_file_permissions'
 
 ###############################################################################
-# BEGIN fix (47 / 67) for 'jboss_karaf-reduce_logging'
+# BEGIN fix (45 / 67) for 'jboss_karaf-reduce_logging'
 ###############################################################################
-(>&2 echo "Remediating rule 47/67: 'jboss_karaf-reduce_logging'")
+(>&2 echo "Remediating rule 45/67: 'jboss_karaf-reduce_logging'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-reduce_logging' IS MISSING!")
 # END fix for 'jboss_karaf-reduce_logging'
 
 ###############################################################################
-# BEGIN fix (48 / 67) for 'jboss_karaf-pki_assocation_permission'
+# BEGIN fix (46 / 67) for 'jboss_karaf-secure_java_security_manager'
 ###############################################################################
-(>&2 echo "Remediating rule 48/67: 'jboss_karaf-pki_assocation_permission'")
+(>&2 echo "Remediating rule 46/67: 'jboss_karaf-secure_java_security_manager'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_java_security_manager' IS MISSING!")
+# END fix for 'jboss_karaf-secure_java_security_manager'
+
+###############################################################################
+# BEGIN fix (47 / 67) for 'jboss_karaf-pki_assocation_permission'
+###############################################################################
+(>&2 echo "Remediating rule 47/67: 'jboss_karaf-pki_assocation_permission'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-pki_assocation_permission' IS MISSING!")
 # END fix for 'jboss_karaf-pki_assocation_permission'
 
 ###############################################################################
-# BEGIN fix (49 / 67) for 'jboss_karaf-ldap_securely_fail'
+# BEGIN fix (48 / 67) for 'jboss_karaf-secure_remote_access'
 ###############################################################################
-(>&2 echo "Remediating rule 49/67: 'jboss_karaf-ldap_securely_fail'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-ldap_securely_fail' IS MISSING!")
-# END fix for 'jboss_karaf-ldap_securely_fail'
+(>&2 echo "Remediating rule 48/67: 'jboss_karaf-secure_remote_access'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-secure_remote_access' IS MISSING!")
+# END fix for 'jboss_karaf-secure_remote_access'
 
 ###############################################################################
-# BEGIN fix (50 / 67) for 'jboss_karaf-process_owner_permissions'
+# BEGIN fix (49 / 67) for 'jboss_karaf-process_owner_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 50/67: 'jboss_karaf-process_owner_permissions'")
+(>&2 echo "Remediating rule 49/67: 'jboss_karaf-process_owner_permissions'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-process_owner_permissions' IS MISSING!")
 # END fix for 'jboss_karaf-process_owner_permissions'
 
 ###############################################################################
-# BEGIN fix (51 / 67) for 'jboss_karaf-dod_cns_certificates'
+# BEGIN fix (50 / 67) for 'jboss_karaf-dod_cns_certificates'
 ###############################################################################
-(>&2 echo "Remediating rule 51/67: 'jboss_karaf-dod_cns_certificates'")
+(>&2 echo "Remediating rule 50/67: 'jboss_karaf-dod_cns_certificates'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-dod_cns_certificates' IS MISSING!")
 # END fix for 'jboss_karaf-dod_cns_certificates'
 
 ###############################################################################
-# BEGIN fix (52 / 67) for 'jboss_karaf-enable_ldap_ssl'
+# BEGIN fix (51 / 67) for 'jboss_karaf-file_permissions'
 ###############################################################################
-(>&2 echo "Remediating rule 52/67: 'jboss_karaf-enable_ldap_ssl'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-enable_ldap_ssl' IS MISSING!")
-# END fix for 'jboss_karaf-enable_ldap_ssl'
+(>&2 echo "Remediating rule 51/67: 'jboss_karaf-file_permissions'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-file_permissions' IS MISSING!")
+# END fix for 'jboss_karaf-file_permissions'
+
+###############################################################################
+# BEGIN fix (52 / 67) for 'jboss_karaf-ldap_securely_fail'
+###############################################################################
+(>&2 echo "Remediating rule 52/67: 'jboss_karaf-ldap_securely_fail'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-ldap_securely_fail' IS MISSING!")
+# END fix for 'jboss_karaf-ldap_securely_fail'
 
 ###############################################################################
 # BEGIN fix (53 / 67) for 'jboss_karaf-secure_logging'
@@ -458,18 +458,18 @@
 # END fix for 'jboss_karaf-deployed_apps-java_perm_docs'
 
 ###############################################################################
-# BEGIN fix (63 / 67) for 'jboss_karaf-password_complexity_policy'
+# BEGIN fix (63 / 67) for 'jboss_karaf-backup_schedule'
 ###############################################################################
-(>&2 echo "Remediating rule 63/67: 'jboss_karaf-password_complexity_policy'")
-(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-password_complexity_policy' IS MISSING!")
-# END fix for 'jboss_karaf-password_complexity_policy'
-
-###############################################################################
-# BEGIN fix (64 / 67) for 'jboss_karaf-backup_schedule'
-###############################################################################
-(>&2 echo "Remediating rule 64/67: 'jboss_karaf-backup_schedule'")
+(>&2 echo "Remediating rule 63/67: 'jboss_karaf-backup_schedule'")
 (>&2 echo "FIX FOR THIS RULE 'jboss_karaf-backup_schedule' IS MISSING!")
 # END fix for 'jboss_karaf-backup_schedule'
+
+###############################################################################
+# BEGIN fix (64 / 67) for 'jboss_karaf-password_complexity_policy'
+###############################################################################
+(>&2 echo "Remediating rule 64/67: 'jboss_karaf-password_complexity_policy'")
+(>&2 echo "FIX FOR THIS RULE 'jboss_karaf-password_complexity_policy' IS MISSING!")
+# END fix for 'jboss_karaf-password_complexity_policy'
 
 ###############################################################################
 # BEGIN fix (65 / 67) for 'jboss_karaf-incident_response_exercises'

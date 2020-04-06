@@ -13,7 +13,7 @@
 # baseline.
 #
 # Benchmark ID:  OCP-3
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
@@ -148,9 +148,9 @@
 # END fix for 'controller_rotate_kubelet_server_certs'
 
 ###############################################################################
-# BEGIN fix (18 / 109) for 'etcd_wal_dir'
+# BEGIN fix (18 / 109) for 'etcd_auto_tls'
 ###############################################################################
-(>&2 echo "Remediating rule 18/109: 'etcd_wal_dir'")
+(>&2 echo "Remediating rule 18/109: 'etcd_auto_tls'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -228,8 +228,8 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/etcd/etcd.conf' '^ETCD_WAL_DIR=' '/var/lib/etcd/member/wal' 'CCE-80586-1' '%s=%s'
-# END fix for 'etcd_wal_dir'
+replace_or_append '/etc/etcd/etcd.conf' '^ETCD_AUTO_TLS=' 'false' 'CCE-80573-9' '%s=%s'
+# END fix for 'etcd_auto_tls'
 
 ###############################################################################
 # BEGIN fix (19 / 109) for 'etcd_client_cert_auth'
@@ -904,9 +904,9 @@ replace_or_append '/etc/etcd/etcd.conf' '^ETCD_CERT_FILE=' /etc/etcd/server.crt 
 # END fix for 'etcd_cert_file'
 
 ###############################################################################
-# BEGIN fix (27 / 109) for 'etcd_auto_tls'
+# BEGIN fix (27 / 109) for 'etcd_wal_dir'
 ###############################################################################
-(>&2 echo "Remediating rule 27/109: 'etcd_auto_tls'")
+(>&2 echo "Remediating rule 27/109: 'etcd_wal_dir'")
 # Function to replace configuration setting in config file or add the configuration setting if
 # it does not exist.
 #
@@ -984,8 +984,8 @@ function replace_or_append {
     printf '%s\n' "$formatted_output" >> "$config_file"
   fi
 }
-replace_or_append '/etc/etcd/etcd.conf' '^ETCD_AUTO_TLS=' 'false' 'CCE-80573-9' '%s=%s'
-# END fix for 'etcd_auto_tls'
+replace_or_append '/etc/etcd/etcd.conf' '^ETCD_WAL_DIR=' '/var/lib/etcd/member/wal' 'CCE-80586-1' '%s=%s'
+# END fix for 'etcd_wal_dir'
 
 ###############################################################################
 # BEGIN fix (28 / 109) for 'etcd_key_file'
@@ -1159,56 +1159,58 @@ find /etc/origin/openvswitch/ -regex '^.*$' -exec chmod 0644 {} \;
 # END fix for 'file_permissions_master_openvswitch'
 
 ###############################################################################
-# BEGIN fix (39 / 109) for 'file_permissions_master_cni_conf'
+# BEGIN fix (39 / 109) for 'file_groupowner_master_controller_manager'
 ###############################################################################
-(>&2 echo "Remediating rule 39/109: 'file_permissions_master_cni_conf'")
+(>&2 echo "Remediating rule 39/109: 'file_groupowner_master_controller_manager'")
 
-find /etc/cni/net.d/ -regex '^.*$' -exec chmod 0644 {} \;
-# END fix for 'file_permissions_master_cni_conf'
+
+chgrp 0 /etc/origin/node/pods/controller.yaml
+# END fix for 'file_groupowner_master_controller_manager'
 
 ###############################################################################
-# BEGIN fix (40 / 109) for 'file_groupowner_node_config'
+# BEGIN fix (40 / 109) for 'file_owner_var_lib_etcd'
 ###############################################################################
-(>&2 echo "Remediating rule 40/109: 'file_groupowner_node_config'")
+(>&2 echo "Remediating rule 40/109: 'file_owner_var_lib_etcd'")
+
+
+chown 0 /var/lib/etcd/
+# END fix for 'file_owner_var_lib_etcd'
+
+###############################################################################
+# BEGIN fix (41 / 109) for 'file_groupowner_node_config'
+###############################################################################
+(>&2 echo "Remediating rule 41/109: 'file_groupowner_node_config'")
 
 
 chgrp 0 /etc/origin/node/node-config.yaml
 # END fix for 'file_groupowner_node_config'
 
 ###############################################################################
-# BEGIN fix (41 / 109) for 'file_owner_master_openvswitch'
+# BEGIN fix (42 / 109) for 'file_owner_master_openvswitch'
 ###############################################################################
-(>&2 echo "Remediating rule 41/109: 'file_owner_master_openvswitch'")
+(>&2 echo "Remediating rule 42/109: 'file_owner_master_openvswitch'")
 
 
 find /etc/origin/openvswitch/ -regex '^.*$' -exec chown 0 {} \;
 # END fix for 'file_owner_master_openvswitch'
 
 ###############################################################################
-# BEGIN fix (42 / 109) for 'file_groupowner_openshift_node_client_crt'
+# BEGIN fix (43 / 109) for 'file_groupowner_openshift_node_client_crt'
 ###############################################################################
-(>&2 echo "Remediating rule 42/109: 'file_groupowner_openshift_node_client_crt'")
+(>&2 echo "Remediating rule 43/109: 'file_groupowner_openshift_node_client_crt'")
 
 
 chgrp 0 /etc/origin/node/client-ca.crt
 # END fix for 'file_groupowner_openshift_node_client_crt'
 
 ###############################################################################
-# BEGIN fix (43 / 109) for 'file_owner_master_admin_conf'
+# BEGIN fix (44 / 109) for 'file_owner_master_admin_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 43/109: 'file_owner_master_admin_conf'")
+(>&2 echo "Remediating rule 44/109: 'file_owner_master_admin_conf'")
 
 
 chown 0 /etc/origin/master/admin.kubeconfig
 # END fix for 'file_owner_master_admin_conf'
-
-###############################################################################
-# BEGIN fix (44 / 109) for 'file_permissions_master_controller_manager'
-###############################################################################
-(>&2 echo "Remediating rule 44/109: 'file_permissions_master_controller_manager'")
-
-chmod 0600 /etc/origin/node/pods/controller.yaml
-# END fix for 'file_permissions_master_controller_manager'
 
 ###############################################################################
 # BEGIN fix (45 / 109) for 'file_permissions_master_openshift_kubeconfig'
@@ -1333,13 +1335,12 @@ chown 0 /etc/origin/master/master-config.yaml
 # END fix for 'file_owner_master_openshift_conf'
 
 ###############################################################################
-# BEGIN fix (59 / 109) for 'file_owner_var_lib_etcd'
+# BEGIN fix (59 / 109) for 'file_permissions_master_controller_manager'
 ###############################################################################
-(>&2 echo "Remediating rule 59/109: 'file_owner_var_lib_etcd'")
+(>&2 echo "Remediating rule 59/109: 'file_permissions_master_controller_manager'")
 
-
-chown 0 /var/lib/etcd/
-# END fix for 'file_owner_var_lib_etcd'
+chmod 0600 /etc/origin/node/pods/controller.yaml
+# END fix for 'file_permissions_master_controller_manager'
 
 ###############################################################################
 # BEGIN fix (60 / 109) for 'file_owner_etc_origin'
@@ -1394,13 +1395,12 @@ chgrp 0 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'file_groupowner_master_api_server'
 
 ###############################################################################
-# BEGIN fix (66 / 109) for 'file_groupowner_master_controller_manager'
+# BEGIN fix (66 / 109) for 'file_permissions_master_cni_conf'
 ###############################################################################
-(>&2 echo "Remediating rule 66/109: 'file_groupowner_master_controller_manager'")
+(>&2 echo "Remediating rule 66/109: 'file_permissions_master_cni_conf'")
 
-
-chgrp 0 /etc/origin/node/pods/controller.yaml
-# END fix for 'file_groupowner_master_controller_manager'
+find /etc/cni/net.d/ -regex '^.*$' -exec chmod 0644 {} \;
+# END fix for 'file_permissions_master_cni_conf'
 
 ###############################################################################
 # BEGIN fix (67 / 109) for 'file_permissions_openshift_node_client_crt'
@@ -1436,11 +1436,11 @@ chmod 0600 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'file_permissions_master_api_server'
 
 ###############################################################################
-# BEGIN fix (71 / 109) for 'api_server_kubelet_certificate_authority'
+# BEGIN fix (71 / 109) for 'api_server_insecure_port'
 ###############################################################################
-(>&2 echo "Remediating rule 71/109: 'api_server_kubelet_certificate_authority'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_kubelet_certificate_authority' IS MISSING!")
-# END fix for 'api_server_kubelet_certificate_authority'
+(>&2 echo "Remediating rule 71/109: 'api_server_insecure_port'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_insecure_port' IS MISSING!")
+# END fix for 'api_server_insecure_port'
 
 ###############################################################################
 # BEGIN fix (72 / 109) for 'api_server_tls_private_key'
@@ -1499,39 +1499,39 @@ chmod 0600 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'api_server_audit_log_maxage'
 
 ###############################################################################
-# BEGIN fix (80 / 109) for 'api_server_admission_control_plugin_DenyEscalatingExec'
+# BEGIN fix (80 / 109) for 'api_server_admission_control_plugin_ServiceAccount'
 ###############################################################################
-(>&2 echo "Remediating rule 80/109: 'api_server_admission_control_plugin_DenyEscalatingExec'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_admission_control_plugin_DenyEscalatingExec' IS MISSING!")
-# END fix for 'api_server_admission_control_plugin_DenyEscalatingExec'
-
-###############################################################################
-# BEGIN fix (81 / 109) for 'api_server_admission_control_plugin_ServiceAccount'
-###############################################################################
-(>&2 echo "Remediating rule 81/109: 'api_server_admission_control_plugin_ServiceAccount'")
+(>&2 echo "Remediating rule 80/109: 'api_server_admission_control_plugin_ServiceAccount'")
 (>&2 echo "FIX FOR THIS RULE 'api_server_admission_control_plugin_ServiceAccount' IS MISSING!")
 # END fix for 'api_server_admission_control_plugin_ServiceAccount'
 
 ###############################################################################
-# BEGIN fix (82 / 109) for 'api_server_admission_control_plugin_AlwaysAdmit'
+# BEGIN fix (81 / 109) for 'api_server_admission_control_plugin_AlwaysAdmit'
 ###############################################################################
-(>&2 echo "Remediating rule 82/109: 'api_server_admission_control_plugin_AlwaysAdmit'")
+(>&2 echo "Remediating rule 81/109: 'api_server_admission_control_plugin_AlwaysAdmit'")
 (>&2 echo "FIX FOR THIS RULE 'api_server_admission_control_plugin_AlwaysAdmit' IS MISSING!")
 # END fix for 'api_server_admission_control_plugin_AlwaysAdmit'
 
 ###############################################################################
-# BEGIN fix (83 / 109) for 'api_server_token_auth'
+# BEGIN fix (82 / 109) for 'api_server_kubelet_client_cert'
 ###############################################################################
-(>&2 echo "Remediating rule 83/109: 'api_server_token_auth'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_token_auth' IS MISSING!")
-# END fix for 'api_server_token_auth'
+(>&2 echo "Remediating rule 82/109: 'api_server_kubelet_client_cert'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_kubelet_client_cert' IS MISSING!")
+# END fix for 'api_server_kubelet_client_cert'
 
 ###############################################################################
-# BEGIN fix (84 / 109) for 'api_server_anonymous_auth'
+# BEGIN fix (83 / 109) for 'api_server_anonymous_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 84/109: 'api_server_anonymous_auth'")
+(>&2 echo "Remediating rule 83/109: 'api_server_anonymous_auth'")
 (>&2 echo "FIX FOR THIS RULE 'api_server_anonymous_auth' IS MISSING!")
 # END fix for 'api_server_anonymous_auth'
+
+###############################################################################
+# BEGIN fix (84 / 109) for 'api_server_admission_control_plugin_DenyEscalatingExec'
+###############################################################################
+(>&2 echo "Remediating rule 84/109: 'api_server_admission_control_plugin_DenyEscalatingExec'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_admission_control_plugin_DenyEscalatingExec' IS MISSING!")
+# END fix for 'api_server_admission_control_plugin_DenyEscalatingExec'
 
 ###############################################################################
 # BEGIN fix (85 / 109) for 'api_server_etcd_ca'
@@ -1590,18 +1590,18 @@ chmod 0600 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'api_server_basic_auth'
 
 ###############################################################################
-# BEGIN fix (93 / 109) for 'api_server_service_account_private_key'
+# BEGIN fix (93 / 109) for 'api_server_kubelet_client_key'
 ###############################################################################
-(>&2 echo "Remediating rule 93/109: 'api_server_service_account_private_key'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_service_account_private_key' IS MISSING!")
-# END fix for 'api_server_service_account_private_key'
-
-###############################################################################
-# BEGIN fix (94 / 109) for 'api_server_kubelet_client_key'
-###############################################################################
-(>&2 echo "Remediating rule 94/109: 'api_server_kubelet_client_key'")
+(>&2 echo "Remediating rule 93/109: 'api_server_kubelet_client_key'")
 (>&2 echo "FIX FOR THIS RULE 'api_server_kubelet_client_key' IS MISSING!")
 # END fix for 'api_server_kubelet_client_key'
+
+###############################################################################
+# BEGIN fix (94 / 109) for 'api_server_service_account_private_key'
+###############################################################################
+(>&2 echo "Remediating rule 94/109: 'api_server_service_account_private_key'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_service_account_private_key' IS MISSING!")
+# END fix for 'api_server_service_account_private_key'
 
 ###############################################################################
 # BEGIN fix (95 / 109) for 'api_server_service_account_public_key'
@@ -1632,11 +1632,11 @@ chmod 0600 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'api_server_admission_control_plugin_AlwaysPullImages'
 
 ###############################################################################
-# BEGIN fix (99 / 109) for 'api_server_kubelet_client_cert'
+# BEGIN fix (99 / 109) for 'api_server_token_auth'
 ###############################################################################
-(>&2 echo "Remediating rule 99/109: 'api_server_kubelet_client_cert'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_kubelet_client_cert' IS MISSING!")
-# END fix for 'api_server_kubelet_client_cert'
+(>&2 echo "Remediating rule 99/109: 'api_server_token_auth'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_token_auth' IS MISSING!")
+# END fix for 'api_server_token_auth'
 
 ###############################################################################
 # BEGIN fix (100 / 109) for 'api_server_request_timeout'
@@ -1667,11 +1667,11 @@ chmod 0600 /etc/origin/node/pods/apiserver.yaml
 # END fix for 'api_server_experimental_encryption_provider_config'
 
 ###############################################################################
-# BEGIN fix (104 / 109) for 'api_server_insecure_port'
+# BEGIN fix (104 / 109) for 'api_server_kubelet_certificate_authority'
 ###############################################################################
-(>&2 echo "Remediating rule 104/109: 'api_server_insecure_port'")
-(>&2 echo "FIX FOR THIS RULE 'api_server_insecure_port' IS MISSING!")
-# END fix for 'api_server_insecure_port'
+(>&2 echo "Remediating rule 104/109: 'api_server_kubelet_certificate_authority'")
+(>&2 echo "FIX FOR THIS RULE 'api_server_kubelet_certificate_authority' IS MISSING!")
+# END fix for 'api_server_kubelet_certificate_authority'
 
 ###############################################################################
 # BEGIN fix (105 / 109) for 'api_server_admission_control_plugin_NamespaceLifecycle'

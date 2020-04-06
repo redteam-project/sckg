@@ -6,7 +6,7 @@
 # Not available
 #
 # Benchmark ID:  UBUNTU-BIONIC
-# Benchmark Version:  0.1.47
+# Benchmark Version:  0.1.50
 #
 # XCCDF Version:  1.1
 #
