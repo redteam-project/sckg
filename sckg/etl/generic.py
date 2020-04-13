@@ -280,12 +280,17 @@ class Generic(object):
       if isinstance(d[key], str):
         d[key] = clean(d[key])
       if isinstance(d[key], list):
-        for i in range(len(d[key])):
-          if isinstance(d[key][i], dict):
-            # nested dict, recurse
-            d[key][i] = self.clean_dict(d[key][i])
-          else:
-            d[key][i] = clean(d[key][i])
+        if all(isinstance(x, str) for x in d[key]):
+          # it's a list of strings, flatten it
+          d[key] = clean(str(d[key]))
+        else:
+          # it's a complex list, deal with each element
+          for i in range(len(d[key])):
+            if isinstance(d[key][i], dict):
+              # nested dict, recurse
+              d[key][i] = self.clean_dict(d[key][i])
+            else:
+              d[key][i] = clean(d[key][i])
     return d
 
   # todo: generalize the templates so that these setters can also be generalized

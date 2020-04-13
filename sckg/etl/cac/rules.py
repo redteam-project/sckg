@@ -24,7 +24,10 @@ class Rules(Generic):
         # ComplianceAsCode uses jinja2-like template logic. it's too
         # hard to recreate here, and we don't really care about what
         # it says anyway, go we'll just ditch those substrings.
-        raw = re.sub('{{.*}}', 'DISCARDED_LOGIC', raw)
+        raw = re.sub('{{.*?}}', 'DISCARDED_LOGIC', raw, flags=re.S)
+
+        # TODO: improve the previous regexp so we don't need this hack
+        raw = re.sub('DISCARDED_LOGIC}', 'DISCARDED_LOGIC', raw)
 
         # but now we have to figure out how to properly indent
         # each line
