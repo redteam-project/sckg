@@ -59,7 +59,7 @@ class Neo4j(object):
     """
     with self.driver.session() as session:
       if self.debug:
-        print(stmt)
+        print(stmt + ';')
       result = session.run(stmt)
 
       if count:
