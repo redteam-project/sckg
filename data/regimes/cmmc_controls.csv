@@ -1,0 +1,172 @@
+CONTROL_FAMILY,DOMAIN,LEVEL,MATURITY_LEVEL_DESCRIPTION,PRACTICE_NUMBER,DESCRIPTION
+ACCESS CONTROL,AC,LEVEL 1,PERFORMED,AC.1.001,"Limit information system access to authorized users, processes acting on behalf of authorized users, or devices (including other information systems)."
+ACCESS CONTROL,AC,LEVEL 1,PERFORMED,AC.1.002,Limit information system access to the types of transactions and functions that authorized users are permitted to execute.
+ACCESS CONTROL,AC,LEVEL 1,PERFORMED,AC.1.003,Verify and control/limit connections to and use of external information systems.
+ACCESS CONTROL,AC,LEVEL 1,PERFORMED,AC.1.004,Control information posted or processed on publicly accessible information systems.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.005,Provide privacy and security notices consistent with applicable CUI rules.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.006,Limit use of portable storage devices on external systems.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.007,"Employ the principle of least privilege, including for specific security functions and privileged accounts."
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.008,Use non-privileged accounts or roles when accessing nonsecurity functions.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.009,Limit unsuccessful logon attempts.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.010,Use session lock with pattern-hiding displays to prevent access and viewing of data after a period of inactivity.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.011,Authorize wireless access prior to allowing such connections.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.013,Monitor and control remote access sessions.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.015,Route remote access via managed access control points.
+ACCESS CONTROL,AC,LEVEL 2,DOCUMENTED,AC.2.016,Control the flow of CUI in accordance with approved authorizations.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.012,Protect wireless access using authentication and encryption.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.014,Employ cryptographic mechanisms to protect the confidentiality of remote access sessions.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.017,Separate the duties of individuals to reduce the risk of malevolent activity without collusion.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.018,Prevent non-privileged users from executing privileged functions and capture the execution of such functions in audit logs.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.019,Terminate (automatically) user sessions after a defined condition.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.020,Control connection of mobile devices.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.021,Authorize remote execution of privileged commands and remote access to security-relevant information.
+ACCESS CONTROL,AC,LEVEL 3,MANAGED,AC.3.022,Encrypt CUI on mobile devices and mobile computing platforms.
+ACCESS CONTROL,AC,LEVEL 4,REVIEWED,AC.4.023,Control information flows between security domains on connected systems.
+ACCESS CONTROL,AC,LEVEL 4,REVIEWED,AC.4.025,Periodically review and update CUI program access permissions.
+ACCESS CONTROL,AC,LEVEL 4,REVIEWED,AC.4.032,"Restrict remote network access based on organizationally defined risk factors such as time of day, location of access, physical location, network connection state, and measured properties of the current user and role."
+ACCESS CONTROL,AC,LEVEL 5,OPTIMIZING,AC.5.024,Identify and mitigate risk associated with unidentified wireless access points connected to the network.
+ASSET MANAGEMENT,AM,LEVEL 3,MANAGED,AM.3.036,Define procedures for the handling of CUI data.
+ASSET MANAGEMENT,AM,LEVEL 4,REVIEWED,AM.4.226,"Employ a capability to discover and identify systems with specific component attributes (e.g., firmware level, OS type) within your inventory."
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 2,DOCUMENTED,AU.2.041,Ensure that the actions of individual system users can be uniquely traced to those users so they can be held accountable for their actions.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 2,DOCUMENTED,AU.2.042,"Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity."
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 2,DOCUMENTED,AU.2.043,Provide a system capability that compares and synchronizes internal system clocks with an authoritative source to generate time stamps for audit records.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 2,DOCUMENTED,AU.2.044,Review audit logs.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.045,Review and update logged events.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.046,Alert in the event of an audit logging process failure.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.048,"Collect audit information (e.g., logs) into one or more central repositories."
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.049,"Protect audit information and audit logging tools from unauthorized access, modification, and deletion."
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.050,Limit management of audit logging functionality to a subset of privileged users.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.051,"Correlate audit record review, analysis, and reporting processes for investigation and response to indications of unlawful, unauthorized, suspicious, or unusual activity."
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 3,MANAGED,AU.3.052,Provide audit record reduction and report generation to support on-demand analysis and reporting.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 4,REVIEWED,AU.4.053,Automate analysis of audit logs to identify and act on critical indicators (TTPs) and/or organizationally defined suspicious activity.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 4,REVIEWED,AU.4.054,Review audit information for broad activity in addition to per-machine activity.
+AUDIT AND ACCOUNTABILITY,AU,LEVEL 5,OPTIMIZING,AU.5.055,Identify assets not reporting audit logs and assure appropriate organizationally defined systems are logging.
+AWARENESS AND TRAINING,AT,LEVEL 2,DOCUMENTED,AT.2.056,"Ensure that managers, system administrators, and users of organizational systems are made aware of the security risks associated with their activities and of the applicable policies, standards, and procedures related to the security of those systems."
+AWARENESS AND TRAINING,AT,LEVEL 2,DOCUMENTED,AT.2.057,Ensure that personnel are trained to carry out their assigned information security-related duties and responsibilities.
+AWARENESS AND TRAINING,AT,LEVEL 3,MANAGED,AT.3.058,Provide security awareness training on recognizing and reporting potential indicators of insider threat.
+AWARENESS AND TRAINING,AT,LEVEL 4,MANAGED,AT.4.059,"Provide awareness training focused on recognizing and responding to threats from social engineering, advanced persistent threat actors, breaches, and suspicious behaviors; update the training at least annually or when there are significant changes to the threat."
+AWARENESS AND TRAINING,AT,LEVEL 4,MANAGED,AT.4.060,Include practical exercises in awareness training that are aligned with current threat scenarios and provide feedback to individuals involved in the training.
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.061,"Establish and maintain baseline configurations and inventories of organizational systems (including hardware, software, firmware, and documentation) throughout the respective system development life cycles."
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.062,Employ the principle of least functionality by configuring organizational systems to provide only essential capabilities.
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.063,Control and monitor user-installed software.
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.064,Establish and enforce security configuration settings for information technology products employed in organizational systems.
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.065,"Track, review, approve, or disapprove, and log changes to organizational systems."
+CONFIGURATION MANAGEMENT,CM,LEVEL 2,DOCUMENTED,CM.2.066,Analyze the security impact of changes prior to implementation.
+CONFIGURATION MANAGEMENT,CM,LEVEL 3,DOCUMENTED,CM.3.067,"Define, document, approve, and enforce physical and logical access restrictions associated with changes to organizational systems."
+CONFIGURATION MANAGEMENT,CM,LEVEL 3,DOCUMENTED,CM.3.068,"Restrict, disable, or prevent the use of nonessential programs, functions, ports, protocols, and services."
+CONFIGURATION MANAGEMENT,CM,LEVEL 3,DOCUMENTED,CM.3.069,"Apply deny-by-exception (blacklisting) policy to prevent the use of unauthorized software or deny-all, permit-by-exception (whitelisting) policy to allow the execution of authorized software."
+CONFIGURATION MANAGEMENT,CM,LEVEL 4,DOCUMENTED,CM.4.073,Employ application whitelisting and an application vetting process for systems identified by the organization.
+CONFIGURATION MANAGEMENT,CM,LEVEL 5,DOCUMENTED,CM.5.074,"Verify the integrity and correctness of security critical or essential software as defined by the organization (e.g., roots of trust, formal verification, or cryptographic signatures)."
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 1,PERFORMED,IA.1.076,"Identify information system users, processes acting on behalf of users, or devices."
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 1,DOCUMENTED,IA.1.077,"Authenticate (or verify) the identities of those users, processes, or devices, as a prerequisite to allowing access to organizational information systems."
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 2,DOCUMENTED,IA.2.078,Enforce a minimum password complexity and change of characters when new passwords are created.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 2,DOCUMENTED,IA.2.079,Prohibit password reuse for a specified number of generations.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 2,DOCUMENTED,IA.2.080,Allow temporary password use for system logons with an immediate change to a permanent password.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 2,DOCUMENTED,IA.2.081,Store and transmit only cryptographically-protected passwords.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 2,DOCUMENTED,IA.2.082,Obscure feedback of authentication information.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 3,MANAGED,IA.3.083,Use multifactor authentication for local and network access to privileged accounts and for network access to non-privileged accounts.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 3,MANAGED,IA.3.084,Employ replay-resistant authentication mechanisms for network access to privileged and non-privileged accounts.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 3,MANAGED,IA.3.085,Prevent the reuse of identifiers for a defined period.
+IDENTIFICATION AND AUTHENTICATION,IA,LEVEL 3,MANAGED,IA.3.086,Disable identifiers after a defined period of inactivity.
+INCIDENT RESPONSE,IR,LEVEL 2,DOCUMENTED,IR.2.092,"Establish an operational incident-handling capability for organizational systems that includes preparation, detection, analysis, containment, recovery, and user response activities."
+INCIDENT RESPONSE,IR,LEVEL 2,DOCUMENTED,IR.2.093,Detect and report events.
+INCIDENT RESPONSE,IR,LEVEL 2,DOCUMENTED,IR.2.094,Analyze and triage events to support event resolution and incident declaration.
+INCIDENT RESPONSE,IR,LEVEL 2,DOCUMENTED,IR.2.094,Develop and implement responses to declared incidents according to pre-defined procedures.
+INCIDENT RESPONSE,IR,LEVEL 2,DOCUMENTED,IR.2.097,Perform root cause analysis on incidents to determine underlying causes.
+INCIDENT RESPONSE,IR,LEVEL 3,MANAGED,IR.3.098,"Track, document, and report incidents to designated officials and/or authorities both internal and external to the organization."
+INCIDENT RESPONSE,IR,LEVEL 3,MANAGED,IR.3.099,Test the organizational incident response capability.
+INCIDENT RESPONSE,IR,LEVEL 4,REVIEWED,IR.4.100,"Use knowledge of attacker tactics, techniques, and procedures in incident response planning and execution."
+INCIDENT RESPONSE,IR,LEVEL 4,REVIEWED,IR.4.101,Establish and maintain a security operations center capability that facilitates a 24/7 response capability.
+INCIDENT RESPONSE,IR,LEVEL 5,OPTIMIZING,IR.5.102,"Use a combination of manual and automated, real-time responses to anomalous activities that match incident patterns"
+INCIDENT RESPONSE,IR,LEVEL 5,OPTIMIZING,IR.5.106,"In response to cyber incidents, utilize forensic data gathering across impacted systems, ensuring the secure transfer and protection of forensic data."
+INCIDENT RESPONSE,IR,LEVEL 5,OPTIMIZING,IR.5.108,Establish and maintain a cyber incident response team that can investigate an issue physically or virtually at any location within 24 hours.
+INCIDENT RESPONSE,IR,LEVEL 5,OPTIMIZING,IR.5.110,Perform unannounced operational exercises to demonstrate technical and procedural responses.
+MAINTENANCE,MA,LEVEL 2,DOCUMENTED,MA.2.111,Perform maintenance on organizational systems.
+MAINTENANCE,MA,LEVEL 2,DOCUMENTED,MA.2.112,"Provide controls on the tools, techniques, mechanisms, and personnel used to conduct system maintenance."
+MAINTENANCE,MA,LEVEL 2,DOCUMENTED,MA.2.113,Require multifactor authentication to establish nonlocal maintenance sessions via external network connections and terminate such connections when nonlocal maintenance is complete.
+MAINTENANCE,MA,LEVEL 2,DOCUMENTED,MA.2.114,Supervise the maintenance activities of personnel without required access authorization.
+MAINTENANCE,MA,LEVEL 3,MANAGED,MA.3.115,Ensure equipment removed for off-site maintenance is sanitized of any CUI.
+MAINTENANCE,MA,LEVEL 3,MANAGED,MA.3.116,Check media containing diagnostic and test programs for malicious code before the media are used in organizational systems.
+MEDIA PROTECTION,MP,LEVEL 1,PERFORMED,MP.1.118,Sanitize or destroy information system media containing Federal Contract Information before disposal or release for reuse.
+MEDIA PROTECTION,MP,LEVEL 2,DOCUMENTED,MP.2.119,"Protect (i.e., physically control and securely store) system media containing CUI, both paper and digital."
+MEDIA PROTECTION,MP,LEVEL 2,DOCUMENTED,MP.2.120,Limit access to CUI on system media to authorized users.
+MEDIA PROTECTION,MP,LEVEL 2,DOCUMENTED,MP.2.121,Control the use of removable media on system components.
+MEDIA PROTECTION,MP,LEVEL 3,MANAGED,MP.3.122,Mark media with necessary CUI markings and distribution limitations.
+MEDIA PROTECTION,MP,LEVEL 3,MANAGED,MP.3.123,Prohibit the use of portable storage devices when such devices have no identifiable owner.
+MEDIA PROTECTION,MP,LEVEL 3,MANAGED,MP.3.124,Control access to media containing CUI and maintain accountability for media during transport outside of controlled areas.
+MEDIA PROTECTION,MP,LEVEL 3,MANAGED,MP.3.125,Implement cryptographic mechanisms to protect the confidentiality of CUI stored on digital media during transport unless otherwise protected by alternative physical safeguards.
+PERSONNEL SECURITY,PS,LEVEL 2,DOCUMENTED,PS.2.127,Screen individuals prior to authorizing access to organizational systems containing CUI.
+PERSONNEL SECURITY,PS,LEVEL 2,DOCUMENTED,PS.2.128,Ensure that organizational systems containing CUI are protected during and after personnel actions such as terminations and transfers.
+PHYSICAL PROTECTION,PE,LEVEL 1,PERFORMED,PE.1.131,"Limit physical access to organizational information systems, equipment, and the respective operating environments to authorized individuals."
+PHYSICAL PROTECTION,PE,LEVEL 1,PERFORMED,PE.1.132,Escort visitors and monitor visitor activity.
+PHYSICAL PROTECTION,PE,LEVEL 1,PERFORMED,PE.1.133,Maintain audit logs of physical access.
+PHYSICAL PROTECTION,PE,LEVEL 1,PERFORMED,PE.1.134,Control and manage physical access devices.
+PHYSICAL PROTECTION,PE,LEVEL 2,DOCUMENTED,PE.2.135,Protect and monitor the physical facility and support infrastructure for organizational systems.
+PHYSICAL PROTECTION,PE,LEVEL 3,MANAGED,PE.3.136,Enforce safeguarding measures for CUI at alternate work sites.
+RECOVERY,RE,LEVEL 2,DOCUMENTED,RE.2.137,Regularly perform and test data back-ups.
+RECOVERY,RE,LEVEL 2,DOCUMENTED,RE.2.138,Protect the confidentiality of backup CUI at storage locations.
+RECOVERY,RE,LEVEL 3,MANAGED,RE.3.139,"Regularly perform complete, comprehensive, and resilient data back-ups as organizationally defined."
+RECOVERY,RE,LEVEL 5,OPTIMIZING,RE.5.140,"Ensure information processing facilities meet organizationally defined information security continuity, redundancy, and availability requirements."
+RISK MANAGEMENT,RM,LEVEL 2,DOCUMENTED,RM.2.141,"Periodically assess the risk to organizational operations (including mission, functions, image, or reputation), organizational assets, and individuals, resulting from the operation of organizational systems and the associated processing, storage, or transmission of CUI."
+RISK MANAGEMENT,RM,LEVEL 2,DOCUMENTED,RM.2.142,Scan for vulnerabilities in organizational systems and applications periodically and when new vulnerabilities affecting those systems and applications are identified.
+RISK MANAGEMENT,RM,LEVEL 2,DOCUMENTED,RM.2.143,Remediate vulnerabilities in accordance with risk assessments.
+RISK MANAGEMENT,RM,LEVEL 3,MANAGED,RM.3.144,"Periodically perform risk assessments to identify and prioritize risks according to the defined risk categories, risk sources, and risk measurement criteria."
+RISK MANAGEMENT,RM,LEVEL 3,MANAGED,RM.3.146,Develop and implement risk mitigation plans.
+RISK MANAGEMENT,RM,LEVEL 3,MANAGED,RM.3.147,"Manage non-vendor-supported products (e.g., end of life) separately and restrict as necessary to reduce risk."
+RISK MANAGEMENT,RM,LEVEL 4,REVIEWED,RM.4.148,"Develop and update as required, a plan for managing supply chain risks associated with the IT supply chain."
+RISK MANAGEMENT,RM,LEVEL 4,REVIEWED,RM.4.149,Catalog and periodically update threat profiles and adversary TTPs.
+RISK MANAGEMENT,RM,LEVEL 4,REVIEWED,RM.4.150,"Employ threat intelligence to inform the development of the system and security architectures, selection of security solutions, monitoring, threat hunting, and response and recovery activities."
+RISK MANAGEMENT,RM,LEVEL 4,REVIEWED,RM.4.151,Perform scans for unauthorized ports available across perimeter network boundaries over the organization's Internet network boundaries and other organizationally defined boundaries.
+RISK MANAGEMENT,RM,LEVEL 5,OPTIMIZING,RM.5.152,Utilize an exception process for non-whitelisted software that includes mitigation techniques.
+RISK MANAGEMENT,RM,LEVEL 5,OPTIMIZING,RM.5.155,Analyze the effectiveness of security solutions at least annually to address anticipated risk to the system and the organization based on current and accumulated threat intelligence.
+SECURITY ASSESSMENT,CA,LEVEL 2,DOCUMENTED,CA.2.157,"Develop, document, and periodically update system security plans that describe system boundaries, system environments of operation, how security requirements are implemented, and the relationships with or connections to other systems."
+SECURITY ASSESSMENT,CA,LEVEL 2,DOCUMENTED,CA.2.158,Periodically assess the security controls in organizational systems to determine if the controls are effective in their application.
+SECURITY ASSESSMENT,CA,LEVEL 2,DOCUMENTED,CA.2.159,Develop and implement plans of action designed to correct deficiencies and reduce or eliminate vulnerabilities in organizational systems.
+SECURITY ASSESSMENT,CA,LEVEL 3,MANAGED,CA.3.161,Monitor security controls on an ongoing basis to ensure the continued effectiveness of the controls.
+SECURITY ASSESSMENT,CA,LEVEL 3,MANAGED,CA.3.162,"Employ a security assessment of enterprise software that has been developed internally, for internal use, and that has been organizationally defined as an area of risk."
+SECURITY ASSESSMENT,CA,LEVEL 4,REVIEWED,CA.4.163,"Create, maintain, and leverage a security strategy and roadmap for organizational cybersecurity improvement."
+SECURITY ASSESSMENT,CA,LEVEL 4,REVIEWED,CA.4.164,"Conduct penetration testing periodically, leveraging automated scanning tools and ad hoc tests using human experts."
+SECURITY ASSESSMENT,CA,LEVEL 4,REVIEWED,CA.4.227,Periodically perform red teaming against organizational assets in order to validate defensive capabilities.
+SITUATIONAL AWARENESS,SA,LEVEL 3,MANAGED,SA.3.169,Receive and respond to cyber threat intelligence from information sharing forums and sources and communicate to stakeholders.
+SITUATIONAL AWARENESS,SA,LEVEL 4,REVIEWED,SA.4.171,"Establish and maintain a cyber threat hunting capability to search for indicators of compromise in organizational systems and detect, track, and disrupt threats that evade existing controls."
+SITUATIONAL AWARENESS,SA,LEVEL 4,REVIEWED,SA.4.173,"Design network and system security capabilities to leverage, integrate, and share indicators of compromise."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 1,PERFORMED,SC.1.175,"Monitor, control, and protect organizational communications (i.e., information transmitted or received by organizational information systems) at the external boundaries and key internal boundaries of the information systems."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 1,PERFORMED,SC.1.176,Implement subnetworks for publicly accessible system components that are physically or logically separated from internal networks.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 2,DOCUMENTED,SC.2.178,Prohibit remote activation of collaborative computing devices and provide indication of devices in use to users present at the device.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 2,DOCUMENTED,SC.2.179,Use encrypted sessions for the management of network devices.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.177,Employ FIPS-validated cryptography when used to protect the confidentiality of CUI.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.180,"Employ architectural designs, software development techniques, and systems engineering principles that promote effective information security within organizational systems."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.181,Separate user functionality from system management functionality.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.182,Prevent unauthorized and unintended information transfer via shared system resources.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.183,"Deny network communications traffic by default and allow network communications traffic by exception (i.e., deny all, permit by exception)."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.184,"Prevent remote devices from simultaneously establishing non-remote connections with organizational systems and communicating via some other connection to resources in external networks (i.e., split tunneling)."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.185,Implement cryptographic mechanisms to prevent unauthorized disclosure of CUI during transmission unless otherwise protected by alternative physical safeguards.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.186,Terminate network connections associated with communications sessions at the end of the sessions or after a defined period of inactivity.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.187,Establish and manage cryptographic keys for cryptography employed in organizational systems.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.188,Control and monitor the use of mobile code.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.189,Control and monitor the use of Voice over Internet Protocol (VoIP) technologies.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.190,Protect the authenticity of communications sessions.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.191,Protect the confidentiality of CUI at rest.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.192,Implement Domain Name System (DNS) filtering services.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 3,MANAGED,SC.3.193,"Implement a policy restricting the publication of CUI on externally owned, publicly accessible websites (e.g., forums, LinkedIn, Facebook, Twitter)."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 4,REVIEWED,SC.4.197,Employ physical and logical isolation techniques in the system and security architecture and/or where deemed appropriate by the organization.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 4,REVIEWED,SC.4.199,Utilize threat intelligence to proactively block DNS requests from reaching malicious domains.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 4,REVIEWED,SC.4.202,"Employ mechanisms to analyze executable code and scripts (e.g., sandbox) traversing Internet network boundaries or other organizationally defined boundaries."
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 4,REVIEWED,SC.4.228,Isolate administration of organizationally defined high-value critical network infrastructure components and servers.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 4,REVIEWED,SC.4.229,Utilize a URL categorization service and implement techniques to enforce URL filtering of websites that are not approved by the organization.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 5,OPTIMIZING,SC.5.198,Configure monitoring systems to record packets passing through the organization's Internet network boundaries and other organizationally defined boundaries.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 5,OPTIMIZING,SC.5.208,Employ organizationally defined and tailored boundary protections in addition to commercially available solutions.
+SYSTEM AND COMMUNICATIONS PROTECTION,SC,LEVEL 5,OPTIMIZING,SC.5.230,Enforce port and protocol compliance.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 1,PERFORMED,SI.1.210,"Identify, report, and correct information and information system flaws in a timely manner."
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 1,PERFORMED,SI.1.211,Provide protection from malicious code at appropriate locations within organizational information systems.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 1,PERFORMED,SI.1.212,Update malicious code protection mechanisms when new releases are available.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 1,PERFORMED,SI.1.213,"Perform periodic scans of the information system and real-time scans of files from external sources as files are downloaded, opened, or executed."
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 2,DOCUMENTED,SI.2.214,Monitor system security alerts and advisories and take action in response.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 2,DOCUMENTED,SI.2.216,"Monitor organizational systems, including inbound and outbound communications traffic, to detect attacks and indicators of potential attacks."
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 2,DOCUMENTED,SI.2.217,Identify unauthorized use of organizational systems.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 3,MANAGED,SI.3.218,Employ spam protection mechanisms at information system access entry and exit points.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 3,MANAGED,SI.3.219,Implement email forgery protections.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 3,MANAGED,SI.3.220,Utilize sandboxing to detect or block potentially malicious email.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 4,REVIEWED,SI.4.221,Use threat indicator information relevant to the information and systems being protected and effective mitigations obtained from external organizations to inform intrusion detection and threat hunting.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 5,OPTIMIZING,SI.5.222,Analyze system behavior to detect and mitigate execution of normal system commands and scripts that indicate malicious actions.
+SYSTEM AND INFORMATION INTEGRITY,SI,LEVEL 5,OPTIMIZING,SI.5.223,Monitor individuals and system components on an ongoing basis for anomalous or suspicious behavior.
