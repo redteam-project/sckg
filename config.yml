@@ -37,6 +37,25 @@ regimes:
         SI: 'System and Information Integrity'
         MA: 'Maintenance'
         PM: 'Program Management'
+  - name: '800_53_j'
+    description: 'NIST 800-53 Appendix J'
+    document:
+      source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
+      parsable: 'data/regimes/nist_800-53r4_appendix_j.tsv'
+    etl:
+      module: 'sckg.etl.nist_800_53_j'
+      class: 'NIST80053J'
+    meta:
+      render_related: False
+      families:
+        AP: 'Authority and Purpose'
+        AR: 'Accountability, Audit, and Risk Management'
+        DI: 'Data Quality and Integrity'
+        DM: 'Data Minimization and Retention'
+        IP: 'Individual Participation and Redress'
+        SE: 'Security'
+        TR: 'Transparency'
+        UL: 'Use Limitation'
   - name: 'fedramp_high'
     description: 'FedRAMP High'
     document:
