@@ -70,10 +70,12 @@ class Neo4j(object):
         for r in count_result:
           nodes_created = r[0]
           edges_created = r[1]
-        print('// nodes created: ' + str(max(0, nodes_created - self.node_count)))
+        if self.debug:
+          print('// nodes created: ' + str(max(0, nodes_created - self.node_count)))
         if max(0, nodes_created - self.node_count) > 0:
           self.node_count = nodes_created
-        print('// edges created: ' + str(max(0, edges_created - self.edge_count)))
+        if self.debug:
+          print('// edges created: ' + str(max(0, edges_created - self.edge_count)))
         if max(0, edges_created - self.edge_count) > 0:
           self.edge_count = edges_created
 

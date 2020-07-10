@@ -6,7 +6,7 @@ import yaml
 
 from sckg.neo4j import Neo4j
 
-class TestConfigYaml(unittest.TestCase):
+class TestConfigETL(unittest.TestCase):
 
   def setUp(self) -> None:
     self.config = {}
@@ -54,7 +54,13 @@ class TestConfigYaml(unittest.TestCase):
     name = 'NIST 800-53'
     query = 'MATCH (r:regime {name: "' + name + '"})-[:HAS*]->(c:control) RETURN c'
     r = self.get_regime_lens(name, query)
-    self.assertEquals(r[0], r[1])
+
+    # r[0] has the length of just the 80053 parsable, minus appendix j, so we
+    # have to add that back in now. this is a one-off
+    with open('data/regimes/nist_800-53r4_appendix_j.tsv', 'r') as f:
+      lines = f.readlines()
+    both_lens = r[0] + len(lines) - 1
+    self.assertEquals(both_lens, r[1])
 
   def test_control_count_fedramp_high(self):
     name = 'FedRAMP High'
@@ -74,12 +80,11 @@ class TestConfigYaml(unittest.TestCase):
     r = self.get_regime_lens(name, query)
     self.assertEquals(r[0], r[1])
 
-  # todo: this currently fails, see issue #16
-  # def test_control_count_cnssi_pii(self):
-  #   name = 'CNSSI 1253 Privacy Overlay'
-  #   query = 'MATCH (r:regime {name: "CNSSI 1253"})-[:HAS*]->(b:baseline {name: "Privacy"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
-  #   r = self.get_regime_lens(name, query)
-  #   self.assertEquals(r[0], r[1])
+  def test_control_count_cnssi_pii(self):
+    name = 'CNSSI 1253 Privacy Overlay'
+    query = 'MATCH (r:regime {name: "CNSSI 1253"})-[:HAS*]->(b:baseline {name: "Privacy"}) WITH b MATCH (b)-[:REQUIRES]->(c:control) RETURN c'
+    r = self.get_regime_lens(name, query)
+    self.assertEquals(r[0], r[1])
 
   # todo: add dod srg test case once issue #14 is resolved
 
