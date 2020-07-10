@@ -38,7 +38,7 @@ regimes:
         MA: 'Maintenance'
         PM: 'Program Management'
   - name: '800_53_j'
-    description: 'NIST 800-53 Appendix J'
+    description: 'NIST 800-53'
     document:
       source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r4.pdf'
       parsable: 'data/regimes/nist_800-53r4_appendix_j.tsv'
