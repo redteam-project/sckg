@@ -119,6 +119,31 @@ class DoDSRG(Generic):
                                                    'requirement']
                                                })
           )
+          # add relationship back to impact level baseline
+          if c.get('level_4'):
+            stmts.append(
+                self.create_baseline_control(regime_name,
+                                             'Impact Level 4',
+                                             regime_name,
+                                             c['control'],
+                                             properties={})
+            )
+          if c.get('level_5'):
+            stmts.append(
+                self.create_baseline_control(regime_name,
+                                             'Impact Level 5',
+                                             regime_name,
+                                             c['control'],
+                                             properties={})
+            )
+          if c.get('level_6'):
+            stmts.append(
+                self.create_baseline_control(regime_name,
+                                             'Impact Level 6',
+                                             regime_name,
+                                             c['control'],
+                                             properties={})
+            )
       elif c.get('parameters'):
         pass
 
