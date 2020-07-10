@@ -242,7 +242,7 @@ regimes:
       control_regime: 'DoD CCI'
       control_baseline: '02 Feb 2017'
       uid_key: 'name'
-  - name: 'cwe_41'
+  - name: 'cwe'
     description: 'CWE'
     document:
       source: 'https://cwe.mitre.org/data/xml/cwec_v4.1.xml.zip'

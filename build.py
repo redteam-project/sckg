@@ -38,12 +38,19 @@ class Build(object):
     self.neo4j = Neo4j(self.config)
 
     for regime in self.config['regimes']:
-      # iterate over the regimes, building each one
-      # it's important to keep in mind that the order of the regimes in
-      # config.yml matters because of how the regimes refer to one another,
-      # which is why we do this as a list and not a dict (which would be easier
-      # elsewhere in the program)
-      self.regime_etl(regime)
+      # Note that if the SCKG_ONLY environment variable is set all other
+      # regimes will be ignored. This makes it easier to develop new ETL
+      # classes without having to comment out lines in config.yml
+      if os.environ.get('SCKG_ONLY'):
+          if regime['name'] == os.environ.get('SCKG_ONLY'):
+            self.regime_etl(regime)
+      else:
+        # iterate over the regimes, building each one
+        # it's important to keep in mind that the order of the regimes in
+        # config.yml matters because of how the regimes refer to one another,
+        # which is why we do this as a list and not a dict (which would be easier
+        # elsewhere in the program)
+        self.regime_etl(regime)
 
     self.neo4j.close_driver()
 
