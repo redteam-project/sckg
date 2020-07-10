@@ -1,5 +1,7 @@
 # Security Control Knowledge Graph (sckg)
 
+[![Gitter](https://badges.gitter.im/redteam-project-chat/community.svg)](https://gitter.im/redteam-project-chat/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 ![NIST 800-53](docs/images/80053.png)
 
 This project builds a knowledge graph of security compliance regimes, their controls, and how they relate to each other. For example, in the following graph we can see that NIST 800-53 controls AC-1 and AC-2 are related to PCI DSS control 1.1.
@@ -7,6 +9,10 @@ This project builds a knowledge graph of security compliance regimes, their cont
 ![NIST to PCIDSS](docs/images/nist-to-pci.png)
 
 The goal of this project is not to create yet-another-compliance-regime, but instead to create a meta-regime of all known publicly accessible regimes. In doing so, and by deriving new insights into those regimes and their relationships, we hope to advance the state of IA compliance by making it less onerous and more impactful to functional security.
+
+## Moved to GitLab
+
+Note: this project has been moved to [GitLab](https://gitlab.com/redteam-project/sckg). This repo is deprecated.
 
 ## Getting started
 
