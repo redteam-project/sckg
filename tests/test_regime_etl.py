@@ -5,6 +5,7 @@ import unittest
 import yaml
 
 from sckg.neo4j import Neo4j
+from sckg.etl.generic import Generic
 
 class TestConfigETL(unittest.TestCase):
 
@@ -88,10 +89,35 @@ class TestConfigETL(unittest.TestCase):
 
   # todo: add dod srg test case once issue #14 is resolved
   def test_control_count_dod_srg(self):
-    # placeholder function
     name = 'DoD SRG'
-    query = ''
-    self.assertTrue(True)
+    regime = self.get_regime(name)
+    with open(regime['document']['parsable'], 'r') as f:
+      rows = f.readlines()
+    etl = Generic(self.config)
+    regime_dict = etl.parse_baseline(rows)
+
+    # generate control dicts. it's necessary to do it this way because there's
+    # duplication in control IDs between tables 2 and 3 in the SRG
+    nist_80053_controls = {}
+    srg_controls = {}
+    parameters = {}
+    for control in regime_dict:
+      if control.get('parameters'):
+        parameters[control['control']] = 1
+      if control.get('requirement'):
+        srg_controls[control['control']] = 1
+      if not control.get('requirement') and not control.get('parameters'):
+        nist_80053_controls[control['control']] = 1
+
+    query_80053 = 'MATCH (:regime {name: "NIST 800-53"})-[:HAS*]->(nist:control) WITH nist MATCH (:regime {name: "DoD SRG"})-[:HAS]->(b:baseline) WHERE b.name IN ["Impact Level 4", "Impact Level 5", "Impact Level 6"] WITH nist, b MATCH (b)-[:REQUIRES]->(nist:control) RETURN DISTINCT nist'
+    r = self.get_regime_lens(name, query_80053)
+    self.assertEquals(len(nist_80053_controls.keys()), r[1])
+
+    query_srg = 'MATCH (:regime {name: "DoD SRG"})-[:HAS]->(b:baseline {name: "Sections"}) WITH b MATCH (b)-[:HAS*]->(c:control) RETURN c'
+    r = self.get_regime_lens(name, query_srg)
+    self.assertEquals(len(srg_controls.keys()), r[1])
+
+    # todo: verify control parameters, see issue #22
 
   # todo: this currently fails, see issue #17
   # def test_control_count_cis_csc(self):
