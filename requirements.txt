@@ -7,3 +7,4 @@ neotime==1.7.4
 pytz==2019.3
 PyYAML==5.1.2
 six==1.13.0
+xmltodict==0.12.0

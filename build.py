@@ -27,6 +27,11 @@ class Build(object):
     except FileNotFoundError as e:
       # It's ok if there's no private config
       pass
+    except yaml.YAMLError as e:
+      # We also don't care if it's empty
+      pass
+    except TypeError as e:
+      pass
 
     self.config['cwd'] = os.getcwd()
 
