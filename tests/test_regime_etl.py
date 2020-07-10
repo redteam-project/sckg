@@ -87,6 +87,11 @@ class TestConfigETL(unittest.TestCase):
     self.assertEquals(r[0], r[1])
 
   # todo: add dod srg test case once issue #14 is resolved
+  def test_control_count_dod_srg(self):
+    # placeholder function
+    name = 'DoD SRG'
+    query = ''
+    self.assertTrue(True)
 
   # todo: this currently fails, see issue #17
   # def test_control_count_cis_csc(self):
