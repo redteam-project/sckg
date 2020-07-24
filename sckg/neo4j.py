@@ -28,6 +28,7 @@ class Neo4j(object):
 
     self.driver = GraphDatabase.driver(
         self.neo4j_config['url'],
+        encrypted=False,
         auth=(self.neo4j_config['username'],
               self.neo4j_config['password'])
     )
