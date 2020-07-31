@@ -46,7 +46,7 @@ class TestConfigYaml(unittest.TestCase):
       parsable_document = regime['document']['parsable']
       self.assertTrue(
           os.path.isfile(parsable_document) or
-          os.path.isdir((parsable_document))
+          os.path.isdir(parsable_document)
       )
 
       if os.path.isfile(parsable_document) and regime.get('baseline') and \

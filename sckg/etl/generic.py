@@ -242,6 +242,9 @@ class Generic(object):
 
     return Template(j2t.rstrip()).render(args=args,
                                          names=kwargs.get('names', {}),
+                                         relationship=kwargs.get('relationship', ''),
+                                         lhs=kwargs.get('lhs', {}),
+                                         rhs=kwargs.get('rhs', {}),
                                          properties=p)
 
   def clean_dict(self, d: dict):
@@ -399,5 +402,18 @@ class Generic(object):
   def create_control_control_map(self, **kwargs):
     stmt = self.render_template('control_control_map.j2',
                                 names=kwargs['names'],
+                                properties=kwargs['properties'])
+    return stmt
+
+  def create_control_orphan(self, **kwargs):
+    stmt = self.render_template('control_orphan.j2',
+                                properties=kwargs['properties'])
+    return stmt
+
+  def map_control_orphan(self, **kwargs):
+    stmt = self.render_template('mapping_rich.j2',
+                                lhs=kwargs['lhs'],
+                                rhs=kwargs['rhs'],
+                                relationship=kwargs['relationship'],
                                 properties=kwargs['properties'])
     return stmt

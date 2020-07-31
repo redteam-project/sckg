@@ -250,3 +250,5 @@ regimes:
     etl:
       module: 'sckg.etl.cwe'
       class: 'CWE'
+    meta:
+      cwe_version: '4.1'
