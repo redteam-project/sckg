@@ -18,6 +18,8 @@ class CWE(Generic):
 
   def transform(self, regime, regime_dict):
     regime_name = regime['description']
+    cwe_version = regime['meta']['cwe_version']
+
     stmts = []
     r = {}
     r['weaknesses'] = regime_dict['Weakness_Catalog']['Weaknesses']['Weakness']
@@ -27,15 +29,15 @@ class CWE(Generic):
 
     stmts.append(self.create_regime(regime_name))
     stmts.append(self.create_regime_family(regime_name,
-                                           properties={'name': 'Weaknesses'}))
+                                           properties={'name': 'Weaknesses', 'cwe_meta_version': cwe_version}))
     stmts.append(self.create_regime_family(regime_name,
-                                           properties={'name': 'Categories'}))
+                                           properties={'name': 'Categories', 'cwe_meta_version': cwe_version}))
     stmts.append(self.create_regime_family(regime_name,
-                                           properties={'name': 'Views'}))
+                                           properties={'name': 'Views', 'cwe_meta_version': cwe_version}))
     stmts.append(self.create_regime_family(regime_name,
-                                           properties={'name': 'External References'}))
+                                           properties={'name': 'External References', 'cwe_meta_version': cwe_version}))
     stmts.append(self.create_regime_family(regime_name,
-                                           properties={'name': 'Stakeholders'}))
+                                           properties={'name': 'Stakeholders', 'cwe_meta_version': cwe_version}))
 
     for category in r['categories']:
       stmts.append(self.create_geneirc_control(regime_name,
@@ -90,8 +92,26 @@ class CWE(Generic):
           'likelihood_of_exploit': weakness.get('Likelihood_Of_Exploit', 'not specified')
       }))
 
+    # helper function to map controls
+    def cwe_control(cwe_id, version, this_weakness):
+      return self.map_control_orphan(
+              lhs={
+                  'name': cwe_id,
+                  'cwe_meta_version': version
+              },
+              rhs={
+                  'name': this_weakness['@CWE_ID'],
+                  'cwe_meta_version': version
+              },
+              relationship=str(this_weakness['@Nature']).upper(),
+              properties={
+                  'nature': this_weakness.get('@Nature', 'not specified'),
+                  'view_id': this_weakness.get('@View_ID', 'not specified'),
+                  'ordinal': this_weakness.get('@Ordinal', 'not specified')
+              }
+          )
+
     # now add relationships
-    cwe_version = regime['meta']['cwe_version']
     for weakness_id in weaknesses.keys():
       weakness = weaknesses[weakness_id]
       if weakness.get('Related_Weaknesses'):
@@ -100,42 +120,17 @@ class CWE(Generic):
         if isinstance(related_weakness, OrderedDict):
           # If there's just one related weakness, this object will be an
           # OrderedDict
-          stmts.append(self.map_control_orphan(
-              lhs={
-                  'name': weakness_id,
-                  'cwe_meta_version': cwe_version
-              },
-              rhs={
-                  'name': related_weakness['@CWE_ID'],
-                  'cwe_meta_version': cwe_version
-              },
-              relationship=str(related_weakness['@Nature']).upper(),
-              properties={
-                  'nature': related_weakness.get('@Nature', 'not specified'),
-                    'view_id': related_weakness.get('@View_ID', 'not specified'),
-                    'ordinal': related_weakness.get('@Ordinal', 'not specified')
-              }
-          ))
+          stmts.append(cwe_control(weakness_id, cwe_version, related_weakness))
 
         if isinstance(related_weakness, list):
           # There might be more than one related weakness, in which case this
           # will be a list
           for related in related_weakness:
-            stmts.append(self.map_control_orphan(
-                lhs={
-                    'name': weakness_id,
-                    'cwe_meta_version': cwe_version
-                },
-                rhs={
-                    'name': related['@CWE_ID'],
-                    'cwe_meta_version': cwe_version
-                },
-                relationship=str(related['@Nature']).upper(),
-                properties={
-                    'nature': related.get('@Nature', 'not specified'),
-                    'view_id': related.get('@View_ID', 'not specified'),
-                    'ordinal': related.get('@Ordinal', 'not specified')
-                }
-            ))
+            stmts.append(cwe_control(weakness_id, cwe_version, related))
+
+    # add top level weaknesses to the Weaknesses baseline
+    stmts.append("""MATCH (c:control {cwe_meta_version:'4.1'}) WHERE NOT (c)-[:CHILDOF]->(:control) WITH c
+MATCH (:regime {name: 'CWE'})-[:HAS]->(f:family {name: 'Weaknesses'}) WITH c, f
+MERGE (f)-[:HAS]->(c)""")
 
     return stmts
