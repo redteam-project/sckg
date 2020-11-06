@@ -38,6 +38,8 @@ class CWE(Generic):
                                            properties={'name': 'External References', 'cwe_meta_version': cwe_version}))
     stmts.append(self.create_regime_family(regime_name,
                                            properties={'name': 'Stakeholders', 'cwe_meta_version': cwe_version}))
+    stmts.append(self.create_regime_family(regime_name,
+                                           properties={'name': 'Platforms', 'cwe_meta_version': cwe_version}))
 
     for category in r['categories']:
       stmts.append(self.create_geneirc_control(regime_name,
@@ -112,6 +114,8 @@ class CWE(Generic):
           )
 
     # now add relationships
+
+    # first handle weakness hierarchy
     for weakness_id in weaknesses.keys():
       weakness = weaknesses[weakness_id]
       if weakness.get('Related_Weaknesses'):
@@ -132,5 +136,117 @@ class CWE(Generic):
     stmts.append("""MATCH (c:control {cwe_meta_version:'4.1'}) WHERE NOT (c)-[:CHILDOF]->(:control) WITH c
 MATCH (:regime {name: 'CWE'})-[:HAS]->(f:family {name: 'Weaknesses'}) WITH c, f
 MERGE (f)-[:HAS]->(c)""")
+
+    # now add references
+    for weakness_id in weaknesses.keys():
+      weakness = weaknesses[weakness_id]
+      if weakness.get('References'):
+        if isinstance(weakness['References']['Reference'], list):
+          for reference in weakness['References']['Reference']:
+            stmts.append(self.map_control_orphan(
+                lhs={
+                    'name': weakness_id,
+                    'cwe_meta_version': '4.1'
+                },
+                rhs={
+                    'name': reference['@External_Reference_ID'],
+                    'cwe_meta_version': '4.1'
+                },
+                relationship='REFERSTO',
+                properties={
+                    'section': reference.get('@Section', 'not specified')
+                }
+            ))
+        else:
+          reference = weakness['References']['Reference']
+          stmts.append(self.map_control_orphan(
+              lhs={
+                  'name': weakness_id,
+                  'cwe_meta_version': '4.1'
+              },
+              rhs={
+                  'name': reference['@External_Reference_ID'],
+                  'cwe_meta_version': '4.1'
+              },
+              relationship='REFERSTO',
+              properties={
+                  'section': reference.get('@Section', 'not specified')
+              }
+          ))
+
+      # todo: handle ordanalities
+
+      # add platform mappings
+      def create_platform_control(platform, entry):
+        if entry.get('@Class') and not entry.get('@Name'):
+          platform_name = entry.get('@Class')
+        else:
+          platform_name = entry.get('@Name')
+        stmts.append(self.create_geneirc_control('CWE',
+                                                 'control',
+                                                 platform,
+                                                 properties={
+                                                     'name': platform_name,
+                                                 }))
+        debug_stmt2 = self.create_geneirc_control('CWE',
+                                                 'control',
+                                                 platform,
+                                                 properties={
+                                                     'name': platform_name,
+                                                 })
+        pause = True
+        return platform_name
+
+      for weakness_id in weaknesses.keys():
+        weakness = weaknesses[weakness_id]
+        if weakness.get('Applicable_Platforms'):
+          for platform in weakness['Applicable_Platforms'].keys():
+            stmts.append(self.create_geneirc_control('CWE',
+                                                     'family',
+                                                     'Platforms',
+                                                     properties={
+                                                         'name': platform,
+                                                         'cwe_platform': 'true'
+                                                     }))
+            debug_stmt = self.create_geneirc_control('CWE',
+                                                     'family',
+                                                     'Platforms',
+                                                     properties={
+                                                         'name': platform,
+                                                         'cwe_platform': 'true'
+                                                     })
+            pause = True
+
+            if isinstance(weakness['Applicable_Platforms'][platform], list):
+              for platform_entry in weakness['Applicable_Platforms'][platform]:
+                control_platform_name = create_platform_control(platform, platform_entry)
+                stmts.append(self.map_control_orphan(
+                    lhs={
+                        'name': control_platform_name,
+                        'cve_meta_version': cwe_version,
+                        'cwe_platform': 'true'
+                    },
+                    rhs={
+                        'name': weakness_id,
+                        'cve_meta_version': cwe_version
+                    },
+                    relationship='HAS',
+                    properties={}
+                ))
+            if isinstance(weakness['Applicable_Platforms'][platform], OrderedDict):
+              control_platform_name = create_platform_control(platform, weakness['Applicable_Platforms'][platform])
+              stmts.append(self.map_control_orphan(
+                  lhs={
+                      'name': control_platform_name,
+                      'cve_meta_version': cwe_version,
+                      'cwe_platform': 'true'
+                  },
+                  rhs={
+                      'name': weakness_id,
+                      'cve_meta_version': cwe_version
+                  },
+                  relationship='HAS',
+                  properties={}
+              ))
 
     return stmts
