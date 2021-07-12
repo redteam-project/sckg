@@ -242,8 +242,8 @@ regimes:
       control_regime: 'DoD CCI'
       control_baseline: '02 Feb 2017'
       uid_key: 'name'
-  - name: 'tic3'
-    description: 'TIC 3'
+  - name: 'tic'
+    description: 'Trusted Internet Connection 3'
     document:
       source: 'https://www.cisa.gov/sites/default/files/publications/CISA_TIC%203.0%20Vol.%203%20Security%20Capabilities%20Catalog.pdf'
       parsable: 'data/regimes/tic3.tsv'
@@ -251,7 +251,33 @@ regimes:
       module: 'sckg.etl.tic3'
       class: 'TIC3'
     baseline:
-      regime_name: 'TIC3'
+      regime_name: 'TIC'
       baseline_name: 'NIST CSF'
       control_regime: 'NIST CSF'
+      control_baseline: 'TIC 3'
+    meta:
+      csf_abbreviations:
+        RS.AN: "Analysis (RS.AN): Analysis is conducted to ensure effective response and support recovery activities."
+        DE.AE: "Anomalies and Events (DE.AE): Anomalous activity is detected and the potential impact of events is understood."
+        ID.AM: "Asset Management (ID.AM): The data, personnel, devices, systems, and facilities that enable the organization to achieve business purposes are identified and managed consistent with their relative importance to organizational objectives and the organization’s risk strategy."
+        PR.AT: "Awareness and Training (PR.AT): The organization’s personnel and partners are provided cybersecurity awareness education and are trained to perform their cybersecurity-related duties and responsibilities consistent with related policies, procedures, and agreements."
+        ID.BE: "Business Environment (ID.BE): The organization’s mission, objectives, stakeholders, and activities are understood and prioritized; this information is used to inform cybersecurity roles, responsibilities, and risk management decisions."
+        RC.CO: "Communications (RC.CO): Restoration activities are coordinated with internal and external parties (e.g.  coordinating centers, Internet Service Providers, owners of attacking systems, victims, other CSIRTs, and vendors)."
+        RS.CO: "Communications (RS.CO): Response activities are coordinated with internal and external stakeholders (e.g. external support from law enforcement agencies)."
+        PR.DS: "Data Security (PR.DS): Information and records (data) are managed consistent with the organization’s risk strategy to protect the confidentiality, integrity, and availability of information."
+        DE.DP: "Detection Processes (DE.DP): Detection processes and procedures are maintained and tested to ensure awareness of anomalous events."
+        ID.GV: "Governance (ID.GV): The policies, procedures, and processes to manage and monitor the organization’s regulatory, legal, risk, environmental, and operational requirements are understood and inform the management of cybersecurity risk."
+        PR.AC: "Identity Management, Authentication and Access Control (PR.AC): Access to physical and logical assets and associated facilities is limited to authorized users, processes, and devices, and is managed consistent with the assessed risk of unauthorized access to authorized activities and transactions."
+        RC.IM: "Improvements (RC.IM): Recovery planning and processes are improved by incorporating lessons learned into future activities."
+        RS.IM: "Improvements (RS.IM): Organizational response activities are improved by incorporating lessons learned from current and previous detection/response activities."
+        PR.IP: "Information Protection Processes and Procedures (PR.IP): Security policies (that address purpose, scope, roles, responsibilities, management commitment, and coordination among organizational entities), processes, and procedures are maintained and used to manage protection of information systems and assets."
+        PR.MA: "Maintenance (PR.MA): Maintenance and repairs of industrial control and information system components are performed consistent with policies and procedures."
+        RS.MI: "Mitigation (RS.MI): Activities are performed to prevent expansion of an event, mitigate its effects, and resolve the incident."
+        PR.PT: "Protective Technology (PR.PT): Technical security solutions are managed to ensure the security and resilience of systems and assets, consistent with related policies, procedures, and agreements."
+        RC.RP: "Recovery Planning (RC.RP): Recovery processes and procedures are executed and maintained to ensure restoration of systems or assets affected by cybersecurity incidents."
+        RS.RP: "Response Planning (RS.RP): Response processes and procedures are executed and maintained, to ensure response to detected cybersecurity incidents."
+        ID.RA: "Risk Assessment (ID.RA): The organization understands the cybersecurity risk to organizational operations (including mission, functions, image, or reputation), organizational assets, and individuals."
+        ID.RM: "Risk Management Strategy (ID.RM): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support operational risk decisions."
+        DE.CM: "Security Continuous Monitoring (DE.CM): The information system and assets are monitored to identify cybersecurity events and verify the effectiveness of protective measures."
+        ID.SC: "Supply Chain Risk Management (ID.SC): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support risk decisions associated with managing supply chain risk. The organization has established and implemented the processes to identify, assess and manage supply chain risks."
 

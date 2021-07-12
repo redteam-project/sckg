@@ -1,0 +1,7 @@
+MATCH (mapping_regime:regime {name: '{{ names['mapping_regime'] }}'})-[:HAS*]->(mapping_baseline:baseline {name: '{{ names['mapping_baseline'] }}'})
+WITH mapping_baseline
+MATCH (mapped_regime:regime {name: '{{ names['mapped_regime'] }}'})-[:HAS*]->(mapped_baseline:baseline {name: '{{ names['mapped_baseline'] }}'})
+WITH mapping_baseline, mapped_baseline
+MATCH (mapping_baseline)-[:HAS*]->(mapping_control:control {name: '{{ names['mapping_control'] }}'})
+WITH mapping_control, mapped_baseline
+MERGE (mapping_control)-[:{{ names['relationship'] }}]->(mapped_baseline)
