@@ -402,8 +402,8 @@ class Generic(object):
                                 properties=kwargs['properties'])
     return stmt
 
-  def create_control_baseline_map(self, **kwargs):
-    stmt = self.render_template('control_baseline_map.j2',
+  def create_baseline_baseline_map(self, **kwargs):
+    stmt = self.render_template('baseline_baseline_map.j2',
                                 names=kwargs['names'],
                                 properties=kwargs['properties'])
     return stmt

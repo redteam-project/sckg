@@ -27,18 +27,13 @@ class TIC3(Generic):
           )
       )
       for csf_control in control['controls'].split(', '):
-        stmts.append(
-            self.create_baseline_has_control(regime_name,
-                                             control['name'],
-                                             properties=control)
-        )
         mapped_baseline = regime['meta']['csf_abbreviations'][csf_control]
         stmts.append(
-            self.create_control_baseline_map(
+            self.create_baseline_baseline_map(
               names={
                   'mapping_regime': regime_name,
                   'mapping_baseline': regime['description'],
-                  'mapping_control': control['name'],
+                  'mapping_baseline_control': control['name'],
                   'mapped_regime': regime['baseline']['control_regime'],
                   'mapped_baseline': mapped_baseline,
                   'relationship': 'REFERENCES'
