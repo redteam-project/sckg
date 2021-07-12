@@ -21,6 +21,9 @@ class Build(object):
       with open('private.yml', 'r') as f:
         private_regimes = yaml.safe_load(f.read())
         if self.config.get('regimes'):
+          if os.getenv('SCKG_ONLY_PRIVATE'):
+            self.config['regimes'] = private_regimes['regimes']
+          else:
           self.config['regimes'] += private_regimes['regimes']
         else:
           self.config['regimes'] = private_regimes['regimes']
