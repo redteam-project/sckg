@@ -32,15 +32,24 @@ class Build(object):
 
     self.neo4j = Neo4j(self.config)
 
-    for regime in self.config['regimes']:
-      # iterate over the regimes, building each one
-      # it's important to keep in mind that the order of the regimes in
-      # config.yml matters because of how the regimes refer to one another,
-      # which is why we do this as a list and not a dict (which would be easier
-      # elsewhere in the program)
-      self.regime_etl(regime)
+    if os.getenv('SCKG_ONLY_REGIME'):
+      self.regime_etl(self.get_regime(os.getenv('SCKG_ONLY_REGIME')))
+    else:
+      for regime in self.config['regimes']:
+        # iterate over the regimes, building each one
+        # it's important to keep in mind that the order of the regimes in
+        # config.yml matters because of how the regimes refer to one another,
+        # which is why we do this as a list and not a dict (which would be easier
+        # elsewhere in the program)
+        self.regime_etl(regime)
 
     self.neo4j.close_driver()
+
+  def get_regime(self, regime_name):
+    for regime in self.config['regimes']:
+      if regime['name'] == regime_name:
+        return regime
+    return None
 
   def regime_etl(self, regime):
     """Extract / transform / load function for a regime
