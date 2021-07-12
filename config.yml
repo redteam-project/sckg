@@ -242,3 +242,16 @@ regimes:
       control_regime: 'DoD CCI'
       control_baseline: '02 Feb 2017'
       uid_key: 'name'
+  - name: 'tic3'
+    description: 'TIC 3'
+    document:
+      source: 'https://www.cisa.gov/sites/default/files/publications/CISA_TIC%203.0%20Vol.%203%20Security%20Capabilities%20Catalog.pdf'
+      parsable: 'data/regimes/tic3.tsv'
+    etl:
+      module: 'sckg.etl.tic3'
+      class: 'TIC3'
+    baseline:
+      regime_name: 'TIC3'
+      baseline_name: 'NIST CSF'
+      control_regime: 'NIST CSF'
+
