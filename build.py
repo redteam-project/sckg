@@ -23,8 +23,8 @@ class Build(object):
         if self.config.get('regimes'):
           if os.getenv('SCKG_ONLY_PRIVATE'):
             self.config['regimes'] = private_regimes['regimes']
-          else:
-          self.config['regimes'] += private_regimes['regimes']
+          elif private_regimes is not None:
+            self.config['regimes'] += private_regimes['regimes']
         else:
           self.config['regimes'] = private_regimes['regimes']
     except FileNotFoundError as e:

@@ -180,7 +180,11 @@ class Generic(object):
     # function for generating clean field names
     fields = []
     for field in first_row.rstrip().split('\t'):
-      fields.append(field.lower().replace(' ', '_').replace('-', '_'))
+      fields.append(field.lower().replace(' ', '_')
+                                 .replace('-', '_')
+                                 .replace('(', '')
+                                 .replace(')', '')
+                                 .replace('/', ''))
     return fields
 
   def parse_baseline(self, rows):

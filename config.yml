@@ -56,6 +56,37 @@ regimes:
         SE: 'Security'
         TR: 'Transparency'
         UL: 'Use Limitation'
+  - name: '800_53r5'
+    description: 'NIST 800-53r5'
+    document:
+      source: 'http://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf'
+      parsable: 'data/regimes/nist_800-53r5.tsv'
+    etl:
+      module: 'sckg.etl.nist_800_53r5'
+      class: 'NIST80053r5'
+    meta:
+      render_related: False
+      families:
+        AC: 'Access Control'
+        AT: 'Awareness and Training'
+        AU: 'Audit and Accountability'
+        CA: 'Security Assessment and Authorization'
+        CM: 'Configuration Management'
+        CP: 'Contingency Planning'
+        IA: 'Identification and Authentication'
+        IR: 'Incident Response'
+        MA: 'Maintenance'
+        MP: 'Media Protection'
+        PE: 'Physical and Environmental Protection'
+        PL: 'Planning'
+        PM: 'Program Management'
+        PS: 'Personnel Security'
+        PT: 'Personally Identifiable Information Processing and Transparency'
+        RA: 'Risk Assessment'
+        SA: 'System and Services Acquisition'
+        SC: 'System and Communications Protection'
+        SI: 'System and Information Integrity'
+        SR: 'Supply Chain Risk Management'
   - name: 'fedramp_high'
     description: 'FedRAMP High'
     document:
