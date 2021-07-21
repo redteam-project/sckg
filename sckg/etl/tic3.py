@@ -38,7 +38,9 @@ class TIC3(Generic):
                   'mapped_baseline': mapped_baseline,
                   'relationship': 'REFERENCES'
               },
-              properties={}
+              properties={
+                  'type': 'mapped'
+              }
             )
         )
 

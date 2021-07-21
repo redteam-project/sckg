@@ -68,7 +68,9 @@ class DoDCCI(Generic):
                   'mapped_control': control,
                   'relationship': 'REFERENCES'
                 },
-                properties={}
+                properties={
+                    'type': 'mapped'
+                }
             )
         )
 

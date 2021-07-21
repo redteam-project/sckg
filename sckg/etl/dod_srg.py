@@ -126,7 +126,9 @@ class DoDSRG(Generic):
                                              'Impact Level 4',
                                              regime_name,
                                              c['control'],
-                                             properties={})
+                                             properties={
+                                                 'type': 'mapped'
+                                             })
             )
           if c.get('level_5'):
             stmts.append(
@@ -134,7 +136,9 @@ class DoDSRG(Generic):
                                              'Impact Level 5',
                                              regime_name,
                                              c['control'],
-                                             properties={})
+                                             properties={
+                                                 'type': 'mapped'
+                                             })
             )
           if c.get('level_6'):
             stmts.append(
@@ -142,7 +146,9 @@ class DoDSRG(Generic):
                                              'Impact Level 6',
                                              regime_name,
                                              c['control'],
-                                             properties={})
+                                             properties={
+                                                 'type': 'mapped'
+                                             })
             )
       elif c.get('parameters'):
         pass

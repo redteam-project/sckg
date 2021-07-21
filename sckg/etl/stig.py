@@ -64,7 +64,9 @@ class STIG(Generic):
                 'mapped_control': control['ident'],
                 'relationship': 'REFERENCES'
             },
-            properties={}
+            properties={
+                'type': 'mapped'
+            }
           )
       )
 

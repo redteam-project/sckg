@@ -67,7 +67,9 @@ class NISTCSF(Generic):
                                                 c['subcategory'],
                                                 ref,
                                                 reference,
-                                                properties={})
+                                                properties={
+                                                    'type': 'mapped'
+                                                })
               )
             else:
               stmts.append(

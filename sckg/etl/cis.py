@@ -79,7 +79,9 @@ class CIS(Generic):
                                            c[key],
                                            regime_name,
                                            c['cis_sub_control'],
-                                           properties={})
+                                           properties={
+                                               'type': 'mapped'
+                                           })
           )
 
     return stmts
