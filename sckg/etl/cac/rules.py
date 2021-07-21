@@ -177,7 +177,9 @@ class Rules(Generic):
                       'mapped_control': control,
                       'relationship': 'REFERENCES'
                     },
-                    properties={}
+                    properties={
+                        'type': 'mapping'
+                    }
                 )
             )
 

@@ -76,7 +76,9 @@ class Bash(Generic):
                 'mapped_control': step,
                 'relationship': 'IMPLEMENTS'
               },
-              properties={}
+              properties={
+                  'type': 'mapping'
+              }
           )
       )
 

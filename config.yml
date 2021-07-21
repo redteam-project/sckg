@@ -87,6 +87,14 @@ regimes:
         SC: 'System and Communications Protection'
         SI: 'System and Information Integrity'
         SR: 'Supply Chain Risk Management'
+  - name: '80053r5_to_csf'
+    description: 'Mapping 800-53r5 to NIST CSF'
+    document:
+      source: 'https://csrc.nist.gov/CSRC/media/Publications/sp/800-53/rev-5/final/documents/csf-pf-to-sp800-53r5-mappings.xlsx'
+      parsable: 'data/regimes/800_53r5_to_csf.tsv'
+    etl:
+      module: 'sckg.etl.80053r5CSF'
+      class: 'R5CSF'
   - name: 'fedramp_high'
     description: 'FedRAMP High'
     document:
