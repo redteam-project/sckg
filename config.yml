@@ -319,4 +319,11 @@ regimes:
         ID.RM: "Risk Management Strategy (ID.RM): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support operational risk decisions."
         DE.CM: "Security Continuous Monitoring (DE.CM): The information system and assets are monitored to identify cybersecurity events and verify the effectiveness of protective measures."
         ID.SC: "Supply Chain Risk Management (ID.SC): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support risk decisions associated with managing supply chain risk. The organization has established and implemented the processes to identify, assess and manage supply chain risks."
-
+  - name: 'itsg33'
+    description: 'ITSG-33'
+    document:
+      source: 'https://cyber.gc.ca/sites/default/files/publications/itsg33-overview-apercu-eng.pdf'
+      parsable: 'data/regimes/itsg_33.tsv'
+    etl:
+      module: 'sckg.etl.itsg33'
+      class: 'ITSG33'
