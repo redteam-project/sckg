@@ -107,6 +107,16 @@ regimes:
       baseline_name: 'Moderate'
       control_regime: '800_53'
       uid_key: 'id'
+  - name: 'cnssi_1253_nss'
+    description: 'CNSSI 1253 National Security Controls'
+    document:
+      source: 'http://www.cnss.gov/CNSS/openDoc.cfm?DicUWFWDPKtdtDzjZgB/Tg=='
+      parsable: 'data/regimes/cnssi_1253_nss.tsv'
+    baseline:
+      regime_name: 'CNSSI 1253'
+      baseline_name: 'NSS'
+      control_regime: '800_53'
+      uid_key: 'control'
   - name: 'cnssi_1253_ci'
     description: 'CNSSI 1253 Classified Information Overlay'
     document:
@@ -117,6 +127,9 @@ regimes:
       baseline_name: 'Classified Information'
       control_regime: '800_53'
       uid_key: 'control'
+    etl:
+      module: 'sckg.etl.cnssi_1253_nss'
+      class: 'CNSSI1253NSS'
   - name: 'cnssi_1253_pii'
     description: 'CNSSI 1253 Privacy Overlay'
     document:
@@ -319,11 +332,4 @@ regimes:
         ID.RM: "Risk Management Strategy (ID.RM): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support operational risk decisions."
         DE.CM: "Security Continuous Monitoring (DE.CM): The information system and assets are monitored to identify cybersecurity events and verify the effectiveness of protective measures."
         ID.SC: "Supply Chain Risk Management (ID.SC): The organization’s priorities, constraints, risk tolerances, and assumptions are established and used to support risk decisions associated with managing supply chain risk. The organization has established and implemented the processes to identify, assess and manage supply chain risks."
-  - name: 'itsg33'
-    description: 'ITSG-33'
-    document:
-      source: 'https://cyber.gc.ca/sites/default/files/publications/itsg33-overview-apercu-eng.pdf'
-      parsable: 'data/regimes/itsg_33.tsv'
-    etl:
-      module: 'sckg.etl.itsg33'
-      class: 'ITSG33'
+
