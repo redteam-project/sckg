@@ -1,5 +1,7 @@
 # Security Control Knowledge Graph (sckg)
 
+**Note that this repository has been deprecated. This project is now maintained at [github.com/sckg/sckg](https://github.com/sckg/sckg).**
+
 [![Gitter](https://badges.gitter.im/redteam-project-chat/community.svg)](https://gitter.im/redteam-project-chat/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ![NIST 800-53](docs/images/80053.png)
